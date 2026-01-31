@@ -2,10 +2,6 @@
 const nextConfig = {
   output: "standalone",
 
-  experimental: {
-    trustHostHeader: true,
-  },
-
   images: {
     remotePatterns: [
       {
