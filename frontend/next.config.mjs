@@ -1,20 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
+
+  experimental: {
+    trustHostHeader: true,
+  },
+
   images: {
     remotePatterns: [
       {
         protocol: "http",
-        hostname: "localhost",
+        hostname: "backend",
         port: "5000",
         pathname: "/api/media/**",
       },
     ],
   },
+
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:5000/api/:path*",
+        destination: "http://backend:5000/api/:path*",
       },
     ];
   },
