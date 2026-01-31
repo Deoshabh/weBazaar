@@ -122,7 +122,7 @@ export default function OrdersPage() {
             <h3 className="text-xl font-semibold text-primary-900 mb-2">No orders found</h3>
             <p className="text-primary-600 mb-6">
               {filter === 'all'
-                ? "You haven&apos;t placed any orders yet."
+                ? "You haven't placed any orders yet."
                 : `No ${filter} orders found.`}
             </p>
             <Link href="/products" className="btn btn-primary">
