@@ -181,7 +181,11 @@ export default function ProductDetailPage() {
                     <button
                       key={idx}
                       onClick={() => setSelectedColor(color)}
-                      className={`px-5 py-2.5 border-2 rounded-lg font-medium transition-all capitalize ${\n                        selectedColor === color\n                          ? 'border-brand-brown bg-brand-brown text-white'\n                          : 'border-primary-200 hover:border-brand-brown'\n                      }`}
+                      className={`px-5 py-2.5 border-2 rounded-lg font-medium transition-all capitalize ${
+                        selectedColor === color
+                          ? 'border-brand-brown bg-brand-brown text-white'
+                          : 'border-primary-200 hover:border-brand-brown'
+                      }`}
                     >
                       {color}
                     </button>
