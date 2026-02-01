@@ -1,0 +1,187 @@
+services:
+  # ============================================
+  # TRAEFIK REVERSE PROXY
+  # ============================================
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: unless-stopped
+
+    # Enable API dashboard
+    command:
+      - "--api.insecure=false"
+      - "--api.dashboard=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@radeo.in"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+
+    # Ports: HTTP (80), HTTPS (443), Dashboard (8080)
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+
+    # Volumes
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Network
+    networks:
+      - traefik-network
+
+  # ============================================
+  # BACKEND API SERVICE
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: radeo-backend
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+
+    # Expose port (no need to publish, Traefik will route)
+    expose:
+      - "5000"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Network
+    networks:
+      - traefik-network
+
+    # Traefik labels for routing and middleware
+    labels:
+      # Enable Traefik for this service
+      - "traefik.enable=true"
+
+      # ====== ROUTER: api.radeo.in ======
+      - "traefik.http.routers.backend.rule=Host(`api.radeo.in`)"
+
+      # CRITICAL: Only use websecure (HTTPS) entrypoint
+      - "traefik.http.routers.backend.entrypoints=websecure"
+
+      # Use TLS certificate from Let's Encrypt
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+
+      # Attach CORS middleware to this router
+      - "traefik.http.routers.backend.middlewares=cors-headers"
+
+      # Service configuration (points to port 5000)
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
+
+      # ====== MIDDLEWARE: CORS Headers ======
+      # Allow requests ONLY from https://radeo.in
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+
+      # Allow these HTTP methods (including OPTIONS for preflight)
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
+
+      # Allow these headers
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=Authorization, Content-Type, X-Requested-With"
+
+      # Allow credentials (cookies, authorization headers)
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowcredentials=true"
+
+      # Cache preflight requests for 3600 seconds (1 hour)
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolmaxage=3600"
+
+      # ====== HTTP to HTTPS Redirect (Global - NOT on backend router) ======
+      # This will be handled by global middleware, not per-router
+
+  # ============================================
+  # FRONTEND SERVICE
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: radeo-frontend
+    restart: unless-stopped
+
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+
+    expose:
+      - "3000"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - traefik-network
+
+    labels:
+      # Enable Traefik for this service
+      - "traefik.enable=true"
+
+      # ====== ROUTER: radeo.in ======
+      - "traefik.http.routers.frontend.rule=Host(`radeo.in`, `www.radeo.in`)"
+
+      # Use both HTTP (for redirect) and HTTPS
+      - "traefik.http.routers.frontend.entrypoints=web,websecure"
+
+      # TLS configuration
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+
+      # Service configuration
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+  # ============================================
+  # HTTP to HTTPS REDIRECT MIDDLEWARE (Global)
+  # ============================================
+  # This is applied globally to redirect all HTTP traffic to HTTPS
+  # but NOT applied to the backend API router (to preserve OPTIONS)
+
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  letsencrypt:
+    driver: local
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  traefik-network:
+    driver: bridge

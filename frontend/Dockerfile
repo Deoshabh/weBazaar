@@ -1,0 +1,60 @@
+# ============================================
+# FRONTEND DOCKERFILE
+# ============================================
+# Multi-stage build for Next.js production
+
+# Stage 1: Builder
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build Next.js application
+RUN npm run build
+
+# Stage 2: Runtime
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dumb-init (proper signal handling)
+RUN apk add --no-cache dumb-init
+
+# Copy node modules from builder (only production dependencies)
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy .next build output
+COPY --from=builder /app/.next ./.next
+
+# Copy public assets
+COPY --from=builder /app/public ./public
+
+# Copy package files
+COPY package*.json ./
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start Next.js application
+CMD ["npm", "start"]
