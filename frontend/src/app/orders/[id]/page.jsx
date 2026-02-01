@@ -225,7 +225,7 @@ export default function OrderDetailPage() {
                 {order.items?.map((item, index) => (
                   <div key={index} className="flex items-center gap-4 p-4 border border-primary-200 rounded-lg">
                     <img
-                      src={item.product?.images?.[0] || '/placeholder.jpg'}
+                      src={item.product?.images?.[0]?.url || item.product?.images?.[0] || '/placeholder.jpg'}
                       alt={item.product?.name || 'Product'}
                       className="w-20 h-20 object-cover rounded border border-primary-200"
                     />

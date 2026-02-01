@@ -29,8 +29,8 @@ export default function ProductCard({ product }) {
       return;
     }
 
-    // Add first available size
-    const firstSize = product.sizes[0];
+    // Add first available size - handle both string and object formats
+    const firstSize = typeof product.sizes[0] === 'object' ? product.sizes[0].size : product.sizes[0];
     await addToCart(product._id, firstSize);
   };
 
@@ -55,7 +55,7 @@ export default function ProductCard({ product }) {
         {/* Image Container */}
         <div className="relative aspect-[4/5] overflow-hidden bg-primary-100">
           <img
-            src={product.images?.[0] || '/placeholder.jpg'}
+            src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.jpg'}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />

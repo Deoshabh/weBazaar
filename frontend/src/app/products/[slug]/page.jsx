@@ -21,6 +21,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
 
@@ -39,7 +40,12 @@ export default function ProductDetailPage() {
       const productData = response.data.product || response.data;
       setProduct(productData);
       if (productData.sizes && productData.sizes.length > 0) {
-        setSelectedSize(productData.sizes[0]);
+        // Handle both string sizes and object sizes {size, stock}
+        const firstSize = typeof productData.sizes[0] === 'object' ? productData.sizes[0].size : productData.sizes[0];
+        setSelectedSize(firstSize);
+      }
+      if (productData.colors && productData.colors.length > 0) {
+        setSelectedColor(productData.colors[0]);
       }
     } catch (error) {
       console.error('Failed to fetch product:', error);
@@ -116,7 +122,7 @@ export default function ProductDetailPage() {
             {/* Main Image */}
             <div className="aspect-square bg-white rounded-lg overflow-hidden">
               <img
-                src={product.images[selectedImage] || '/placeholder.jpg'}
+                src={product.images[selectedImage]?.url || product.images[selectedImage] || '/placeholder.jpg'}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -134,7 +140,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={image}
+                      src={image?.url || image || '/placeholder.jpg'}
                       alt={`${product.name} ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -161,7 +167,27 @@ export default function ProductDetailPage() {
 
             {/* Description */}
             <p className="text-primary-700 leading-relaxed">
-              {product.description}
+              {pColor Selection */}
+            {product.colors && product.colors.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-primary-900 mb-3">
+                  Select Color
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map((color, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedColor(color)}
+                      className={`px-5 py-2.5 border-2 rounded-lg font-medium transition-all capitalize ${\n                        selectedColor === color\n                          ? 'border-brand-brown bg-brand-brown text-white'\n                          : 'border-primary-200 hover:border-brand-brown'\n                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* roduct.description}
             </p>
 
             {/* Size Selection */}
@@ -171,19 +197,27 @@ export default function ProductDetailPage() {
                   Select Size (UK)
                 </label>
                 <div className="flex flex-wrap gap-3">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-6 py-3 border-2 rounded-lg font-medium transition-all ${
-                        selectedSize === size
-                          ? 'border-brand-brown bg-brand-brown text-white'
-                          : 'border-primary-200 hover:border-brand-brown'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {product.sizes.map((sizeItem, idx) => {
+                    const sizeValue = typeof sizeItem === 'object' ? sizeItem.size : sizeItem;
+                    const stock = typeof sizeItem === 'object' ? sizeItem.stock : null;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedSize(sizeValue)}
+                        disabled={stock !== null && stock === 0}
+                        className={`px-6 py-3 border-2 rounded-lg font-medium transition-all ${
+                          selectedSize === sizeValue
+                            ? 'border-brand-brown bg-brand-brown text-white'
+                            : stock === 0
+                            ? 'border-primary-200 bg-primary-100 text-primary-400 cursor-not-allowed'
+                            : 'border-primary-200 hover:border-brand-brown'
+                        }`}
+                      >
+                        {sizeValue}
+                        {stock !== null && stock === 0 && ' (Out of Stock)'}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

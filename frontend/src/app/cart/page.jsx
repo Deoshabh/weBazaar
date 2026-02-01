@@ -58,7 +58,7 @@ export default function CartPage() {
               {cart.items.map((item) => (
                 <div key={`${item.product._id}-${item.size}`} className="bg-white rounded-lg p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6">
                   <img
-                    src={item.product.images?.[0] || '/placeholder.jpg'}
+                    src={item.product.images?.[0]?.url || item.product.images?.[0] || '/placeholder.jpg'}
                     alt={item.product.name}
                     className="w-full sm:w-24 md:w-32 h-48 sm:h-24 md:h-32 object-cover rounded-lg"
                   />

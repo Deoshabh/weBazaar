@@ -169,7 +169,7 @@ export default function AdminProductsPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={product.images?.[0] || '/placeholder.jpg'}
+                            src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.jpg'}
                             alt={product.name}
                             className="w-12 h-12 object-cover rounded border border-primary-200"
                           />

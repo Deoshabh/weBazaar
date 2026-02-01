@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { adminAPI, categoryAPI } from '@/utils/api';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { adminAPI, categoryAPI, productAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import AdminLayout from '@/components/AdminLayout';
 import toast from 'react-hot-toast';
@@ -10,12 +10,16 @@ import { FiUpload, FiX, FiPlus, FiMinus } from 'react-icons/fi';
 
 export default function NewProductPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editProductId = searchParams?.get('edit');
   const { user } = useAuth();
   
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -40,7 +44,49 @@ export default function NewProductPage() {
       return;
     }
     fetchCategories();
-  }, [user]);
+    if (editProductId) {
+      setIsEditMode(true);
+      fetchProductData(editProductId);
+    }
+  }, [user, editProductId]);
+
+  const fetchProductData = async (productId) => {
+    try {
+      setLoading(true);
+      const response = await adminAPI.getProductById(productId);
+      const product = response.data.product || response.data;
+      
+      // Populate form with existing data
+      setFormData({
+        name: product.name || '',
+        slug: product.slug || '',
+        description: product.description || '',
+        price: product.price || '',
+        comparePrice: product.comparePrice || '',
+        category: product.category || '',
+        brand: product.brand || '',
+        sku: product.sku || '',
+        stock: product.stock || '',
+        sizes: product.sizes?.map(s => typeof s === 'object' ? s.size : s) || [],
+        colors: product.colors || [],
+        tags: product.tags?.join(', ') || '',
+        isActive: product.isActive !== undefined ? product.isActive : true,
+        isFeatured: product.featured || false,
+      });
+      
+      // Set existing images
+      if (product.images && product.images.length > 0) {
+        setExistingImages(product.images);
+        const previews = product.images.map(img => img.url || img);
+        setImagePreviews(previews);
+      }
+    } catch (error) {
+      console.error('Failed to fetch product:', error);
+      toast.error('Failed to load product data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -91,7 +137,15 @@ export default function NewProductPage() {
   };
 
   const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
+    // Check if it's an existing image or new image
+    if (index < existingImages.length) {
+      // Remove from existing images
+      setExistingImages(existingImages.filter((_, i) => i !== index));
+    } else {
+      // Remove from new images
+      const newImageIndex = index - existingImages.length;
+      setImages(images.filter((_, i) => i !== newImageIndex));
+    }
     setImagePreviews(imagePreviews.filter((_, i) => i !== index));
   };
 
@@ -110,7 +164,13 @@ export default function NewProductPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (images.length === 0) {
+    // For edit mode, allow existing images
+    if (!isEditMode && images.length === 0) {
+      toast.error('Please add at least one product image');
+      return;
+    }
+    
+    if (isEditMode && existingImages.length === 0 && images.length === 0) {
       toast.error('Please add at least one product image');
       return;
     }
@@ -123,64 +183,71 @@ export default function NewProductPage() {
     setLoading(true);
     
     try {
-      // Step 1: Upload images to MinIO
-      toast.loading('Uploading images...', { id: 'upload' });
-      const uploadedImages = [];
+      // Step 1: Upload new images to MinIO (if any)
+      let uploadedImages = [];
       
-      for (let i = 0; i < images.length; i++) {
-        const file = images[i];
-        
-        try {
-          // Get signed upload URL
-          const { data: responseData } = await adminAPI.getUploadUrl({
-            fileName: file.name,
-            fileType: file.type,
-            productSlug: formData.slug,
-          });
+      if (images.length > 0) {
+        toast.loading('Uploading images...', { id: 'upload' });
+      
+        for (let i = 0; i < images.length; i++) {
+          const file = images[i];
           
-          console.log('Upload URL response:', responseData);
-          
-          // Validate response structure
-          // Backend returns: { success: true, data: { signedUrl, publicUrl, key } }
-          const uploadUrlData = responseData?.data || responseData;
-          if (!uploadUrlData?.signedUrl || !uploadUrlData?.publicUrl || !uploadUrlData?.key) {
-            console.error('Invalid response structure:', uploadUrlData);
-            throw new Error(`Invalid upload URL response for ${file.name}. Got: ${JSON.stringify(uploadUrlData)}`);
+          try {
+            // Get signed upload URL
+            const { data: responseData } = await adminAPI.getUploadUrl({
+              fileName: file.name,
+              fileType: file.type,
+              productSlug: formData.slug,
+            });
+            
+            console.log('Upload URL response:', responseData);
+            
+            // Validate response structure
+            const uploadUrlData = responseData?.data || responseData;
+            if (!uploadUrlData?.signedUrl || !uploadUrlData?.publicUrl || !uploadUrlData?.key) {
+              console.error('Invalid response structure:', uploadUrlData);
+              throw new Error(`Invalid upload URL response for ${file.name}`);
+            }
+            
+            console.log('Using upload URL:', uploadUrlData.signedUrl);
+            
+            // Upload image to MinIO
+            const uploadResponse = await fetch(uploadUrlData.signedUrl, {
+              method: 'PUT',
+              body: file,
+              headers: {
+                'Content-Type': file.type,
+              },
+            });
+            
+            if (!uploadResponse.ok) {
+              throw new Error(`Failed to upload ${file.name}: ${uploadResponse.statusText}`);
+            }
+            
+            // Add image metadata
+            uploadedImages.push({
+              url: uploadUrlData.publicUrl,
+              key: uploadUrlData.key,
+              isPrimary: existingImages.length === 0 && i === 0,
+              order: existingImages.length + i,
+            });
+            
+            console.log(`Image ${i + 1} uploaded:`, uploadedImages[i]);
+          } catch (uploadError) {
+            console.error(`Failed to upload image ${i + 1}:`, uploadError);
+            toast.error(`Failed to upload ${file.name}`);
+            throw uploadError;
           }
-          
-          console.log('Using upload URL:', uploadUrlData.signedUrl);
-          
-          // Upload image to MinIO using signed URL
-          const uploadResponse = await fetch(uploadUrlData.signedUrl, {
-            method: 'PUT',
-            body: file,
-            headers: {
-              'Content-Type': file.type,
-            },
-          });
-          
-          if (!uploadResponse.ok) {
-            throw new Error(`Failed to upload ${file.name}: ${uploadResponse.statusText}`);
-          }
-          
-          // Add image metadata
-          uploadedImages.push({
-            url: uploadUrlData.publicUrl,
-            key: uploadUrlData.key,
-            isPrimary: i === 0,
-            order: i,
-          });
-          
-          console.log(`Image ${i + 1} uploaded:`, uploadedImages[i]);
-        } catch (uploadError) {
-          console.error(`Failed to upload image ${i + 1}:`, uploadError);
-          toast.error(`Failed to upload ${file.name}`);
-          throw uploadError;
         }
+        
+        console.log('All new images uploaded:', uploadedImages);
+        toast.success('Images uploaded successfully', { id: 'upload' });
       }
       
-      console.log('All images uploaded:', uploadedImages);
-      toast.success('Images uploaded successfully', { id: 'upload' });
+      // Combine existing and new images
+      const allImages = [...existingImages, ...uploadedImages];
+      // Combine existing and new images
+      const allImages = [...existingImages, ...uploadedImages];
       
       // Step 2: Prepare product data
       const productData = {
@@ -189,7 +256,7 @@ export default function NewProductPage() {
         description: formData.description,
         category: formData.category,
         price: Number(formData.price),
-        images: uploadedImages,
+        images: allImages,
         featured: formData.isFeatured,
       };
       
@@ -229,15 +296,21 @@ export default function NewProductPage() {
       
       console.log('Product data to send:', productData);
       
-      // Step 3: Create product
-      toast.loading('Creating product...', { id: 'create' });
-      await adminAPI.createProduct(productData);
-      toast.success('Product created successfully', { id: 'create' });
+      // Step 3: Create or Update product
+      if (isEditMode) {
+        toast.loading('Updating product...', { id: 'update' });
+        await adminAPI.updateProduct(editProductId, productData);
+        toast.success('Product updated successfully', { id: 'update' });
+      } else {
+        toast.loading('Creating product...', { id: 'create' });
+        await adminAPI.createProduct(productData);
+        toast.success('Product created successfully', { id: 'create' });
+      }
       router.push('/admin/products');
     } catch (error) {
-      console.error('Failed to create product:', error);
+      console.error('Failed to save product:', error);
       console.error('Error details:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Failed to create product');
+      toast.error(error.response?.data?.message || 'Failed to save product');
     } finally {
       setLoading(false);
     }
@@ -248,10 +321,19 @@ export default function NewProductPage() {
     <div className="min-h-screen bg-primary-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Add New Product</h1>
-          <p className="text-sm sm:text-base text-primary-600 mt-1">Create a new product listing</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">
+            {isEditMode ? 'Edit Product' : 'Add New Product'}
+          </h1>
+          <p className="text-sm sm:text-base text-primary-600 mt-1">
+            {isEditMode ? 'Update product information' : 'Create a new product listing'}
+          </p>
         </div>
 
+        {loading && !isEditMode ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="spinner"></div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Product Images */}
           <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
@@ -540,7 +622,7 @@ export default function NewProductPage() {
               disabled={loading}
               className="btn btn-primary flex-1 touch-manipulation"
             >
-              {loading ? 'Creating...' : 'Create Product'}
+              {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Product' : 'Create Product')}
             </button>
             <button
               type="button"
@@ -551,6 +633,7 @@ export default function NewProductPage() {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
     </AdminLayout>

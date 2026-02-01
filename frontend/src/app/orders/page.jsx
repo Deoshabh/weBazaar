@@ -181,7 +181,7 @@ export default function OrdersPage() {
                     {order.items?.slice(0, 3).map((item, index) => (
                       <div key={index} className="flex items-center gap-4">
                         <img
-                          src={item.product?.images?.[0] || '/placeholder.jpg'}
+                          src={item.product?.images?.[0]?.url || item.product?.images?.[0] || '/placeholder.jpg'}
                           alt={item.product?.name || 'Product'}
                           className="w-16 h-16 object-cover rounded border border-primary-200"
                         />

@@ -179,7 +179,7 @@ export default function Navbar() {
                     className="flex items-center gap-4 p-3 hover:bg-primary-50 transition-colors"
                   >
                     <img
-                      src={product.images[0] || '/placeholder.jpg'}
+                      src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.jpg'}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded"
                     />
