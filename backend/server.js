@@ -20,9 +20,8 @@ const { initializeBucket } = require("./utils/minio");
 const app = express();
 
 // ===============================
-// Trust Proxy (Required for Traefik)
+// Trust Proxy (Traefik)
 // ===============================
-// Enable trust proxy to properly handle X-Forwarded-For headers from Traefik
 app.set("trust proxy", 1);
 
 // ===============================
@@ -32,37 +31,22 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
   });
 
 // ===============================
-// MinIO Initialization (non-fatal)
+// CORS (Production safe)
 // ===============================
-initializeBucket()
-  .then(() => console.log("✅ MinIO bucket initialized and ready"))
-  .catch((err) => {
-    console.error("❌ MinIO initialization failed:", err.message);
-    console.warn("⚠️ Image upload features will not work");
-  });
-
-// ===============================
-// Middleware
-// ===============================
-
-// ---- CORS (PRODUCTION SAFE) ----
 const allowedOrigins = ["https://radeo.in", "https://www.radeo.in"];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow server-to-server / curl / health checks
+    origin(origin, callback) {
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-
       return callback(new Error("CORS not allowed"), false);
     },
     credentials: true,
@@ -71,11 +55,12 @@ app.use(
   }),
 );
 
-// ---- Body & Cookies ----
+// ===============================
+// Middleware
+// ===============================
 app.use(express.json());
 app.use(cookieParser());
 
-// ---- Rate Limiting ----
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -88,48 +73,29 @@ app.use(
 // ===============================
 // Routes
 // ===============================
-const authRoutes = require("./routes/authRoutes");
-const productRoutes = require("./routes/productRoutes");
-const cartRoutes = require("./routes/cartRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const adminOrderRoutes = require("./routes/adminOrderRoutes");
-const adminProductRoutes = require("./routes/adminProductRoutes");
-const adminCouponRoutes = require("./routes/adminCouponRoutes");
-const couponRoutes = require("./routes/couponRoutes");
-const adminStatsRoutes = require("./routes/adminStatsRoutes");
-const adminCategoryRoutes = require("./routes/adminCategoryRoutes");
-const adminUserRoutes = require("./routes/adminUserRoutes");
-const adminMediaRoutes = require("./routes/adminMediaRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
-const addressRoutes = require("./routes/addressRoutes");
-const wishlistRoutes = require("./routes/wishlistRoutes");
-const userRoutes = require("./routes/userRoutes");
-const filterRoutes = require("./routes/filterRoutes");
-const adminFilterRoutes = require("./routes/adminFilterRoutes");
+app.use("/api/v1/auth", require("./routes/authRoutes"));
+app.use("/api/v1/products", require("./routes/productRoutes"));
+app.use("/api/v1/cart", require("./routes/cartRoutes"));
+app.use("/api/v1/orders", require("./routes/orderRoutes"));
+app.use("/api/v1/filters", require("./routes/filterRoutes"));
 
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/products", productRoutes);
-app.use("/api/v1/cart", cartRoutes);
-app.use("/api/v1/orders", orderRoutes);
-app.use("/api/v1/filters", filterRoutes);
+app.use("/api/v1/admin/orders", require("./routes/adminOrderRoutes"));
+app.use("/api/v1/admin/products", require("./routes/adminProductRoutes"));
+app.use("/api/v1/admin/coupons", require("./routes/adminCouponRoutes"));
+app.use("/api/v1/admin", require("./routes/adminStatsRoutes"));
+app.use("/api/v1/admin/categories", require("./routes/adminCategoryRoutes"));
+app.use("/api/v1/admin/users", require("./routes/adminUserRoutes"));
+app.use("/api/v1/admin/media", require("./routes/adminMediaRoutes"));
+app.use("/api/v1/admin/filters", require("./routes/adminFilterRoutes"));
 
-app.use("/api/v1/admin/orders", adminOrderRoutes);
-app.use("/api/v1/admin/products", adminProductRoutes);
-app.use("/api/v1/admin/coupons", adminCouponRoutes);
-app.use("/api/v1/admin", adminStatsRoutes);
-app.use("/api/v1/admin/categories", adminCategoryRoutes);
-app.use("/api/v1/admin/users", adminUserRoutes);
-app.use("/api/v1/admin/media", adminMediaRoutes);
-app.use("/api/v1/admin/filters", adminFilterRoutes);
-
-app.use("/api/v1/coupons", couponRoutes);
-app.use("/api/v1/categories", categoryRoutes);
-app.use("/api/v1/addresses", addressRoutes);
-app.use("/api/v1/wishlist", wishlistRoutes);
-app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/coupons", require("./routes/couponRoutes"));
+app.use("/api/v1/categories", require("./routes/categoryRoutes"));
+app.use("/api/v1/addresses", require("./routes/addressRoutes"));
+app.use("/api/v1/wishlist", require("./routes/wishlistRoutes"));
+app.use("/api/v1/user", require("./routes/userRoutes"));
 
 // ===============================
-// Health Check (Traefik)
+// Health Check
 // ===============================
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
@@ -146,11 +112,23 @@ app.use((err, req, res, next) => {
 });
 
 // ===============================
-// Server Start
+// START SERVER (BLOCKING)
 // ===============================
-const PORT = process.env.PORT || 5000;
+async function startServer() {
+  try {
+    // 🔴 CRITICAL: wait for MinIO
+    await initializeBucket();
+    console.log("✅ MinIO initialized — starting server");
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log("📡 CORS allowed origins:", allowedOrigins.join(", "));
-});
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log("📡 CORS allowed origins:", allowedOrigins.join(", "));
+    });
+  } catch (err) {
+    console.error("❌ Fatal startup error:", err.message);
+    process.exit(1);
+  }
+}
+
+startServer();
