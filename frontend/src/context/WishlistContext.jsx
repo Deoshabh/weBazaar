@@ -24,7 +24,9 @@ export const WishlistProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await wishlistAPI.getWishlist();
-      setWishlist(response.data.wishlist?.products || []);
+      // Backend returns wishlist object directly: {_id, user, products: [...]}
+      console.log('📦 Wishlist API response:', response.data);
+      setWishlist(response.data?.products || []);
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
     } finally {
@@ -35,7 +37,8 @@ export const WishlistProvider = ({ children }) => {
   const addToWishlist = async (productId) => {
     try {
       const response = await wishlistAPI.addToWishlist(productId);
-      setWishlist(response.data.wishlist?.products || []);
+      // Backend returns wishlist object directly: {_id, user, products: [...]}
+      setWishlist(response.data?.products || []);
       toast.success('Added to wishlist!');
       return { success: true };
     } catch (error) {
@@ -48,7 +51,8 @@ export const WishlistProvider = ({ children }) => {
   const removeFromWishlist = async (productId) => {
     try {
       const response = await wishlistAPI.removeFromWishlist(productId);
-      setWishlist(response.data.wishlist?.products || []);
+      // Backend returns wishlist object directly: {_id, user, products: [...]}
+      setWishlist(response.data?.products || []);
       toast.success('Removed from wishlist');
       return { success: true };
     } catch (error) {

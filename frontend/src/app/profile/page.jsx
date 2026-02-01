@@ -53,7 +53,10 @@ export default function ProfilePage() {
   const fetchAddresses = async () => {
     try {
       const response = await addressAPI.getAddresses();
-      setAddresses(response.data.addresses || []);
+      // Backend returns array directly, not wrapped
+      console.log('📦 Addresses API response:', response.data);
+      const addressesData = Array.isArray(response.data) ? response.data : (response.data.addresses || []);
+      setAddresses(addressesData);
     } catch (error) {
       console.error('Failed to fetch addresses:', error);
     }

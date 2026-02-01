@@ -32,6 +32,8 @@ export default function AdminUsersPage() {
     try {
       setLoadingUsers(true);
       const response = await adminAPI.getAllUsers();
+      // Backend returns {users: [...]}
+      console.log('📦 Admin Users API response:', response.data);
       setUsers(response.data.users || []);
     } catch (error) {
       toast.error('Failed to fetch users');

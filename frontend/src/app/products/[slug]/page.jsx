@@ -34,9 +34,12 @@ export default function ProductDetailPage() {
     try {
       setLoading(true);
       const response = await productAPI.getProductBySlug(slug);
-      setProduct(response.data.product);
-      if (response.data.product.sizes && response.data.product.sizes.length > 0) {
-        setSelectedSize(response.data.product.sizes[0]);
+      // Backend returns product directly, not wrapped in {product: {...}}
+      console.log('📦 Product detail API response:', response.data);
+      const productData = response.data.product || response.data;
+      setProduct(productData);
+      if (productData.sizes && productData.sizes.length > 0) {
+        setSelectedSize(productData.sizes[0]);
       }
     } catch (error) {
       console.error('Failed to fetch product:', error);

@@ -18,7 +18,11 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await productAPI.getAllProducts({ limit: 8 });
-      setFeaturedProducts(response.data.products || []);
+      console.log('📦 Featured products API response:', response.data);
+      // Backend returns array directly, not wrapped in {products: [...]}
+      const productsData = Array.isArray(response.data) ? response.data : (response.data.products || []);
+      console.log(`✅ Loaded ${productsData.length} featured products`);
+      setFeaturedProducts(productsData);
     } catch (error) {
       console.error('Failed to fetch products:', error);
     } finally {

@@ -75,7 +75,9 @@ export default function Navbar() {
 
       try {
         const response = await productAPI.getAllProducts({ search: searchQuery, limit: 6 });
-        setSearchResults(response.data.products || []);
+        // Backend returns array directly, not wrapped in {products: [...]}
+        const productsData = Array.isArray(response.data) ? response.data : (response.data.products || []);
+        setSearchResults(productsData);
       } catch (error) {
         console.error('Search failed:', error);
       }

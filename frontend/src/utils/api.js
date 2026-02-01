@@ -100,8 +100,12 @@ export const cartAPI = {
 
 export const wishlistAPI = {
   getWishlist: () => api.get("/wishlist"),
-  addToWishlist: (productId) => api.post("/wishlist", { productId }),
-  removeFromWishlist: (productId) => api.delete(`/wishlist/${productId}`),
+  toggleWishlist: (productId) => api.post("/wishlist/toggle", { productId }),
+  // Deprecated but kept for backward compatibility
+  addToWishlist: (productId) => api.post("/wishlist/toggle", { productId }),
+  removeFromWishlist: (productId) =>
+    api.post("/wishlist/toggle", { productId }),
+  clearWishlist: () => api.delete("/wishlist"),
 };
 
 export const orderAPI = {

@@ -43,7 +43,8 @@ function ProductsContent() {
   const fetchCategories = async () => {
     try {
       const response = await productAPI.getCategories();
-      setCategories(response.data.categories || []);
+      console.log('📦 Categories API response:', response.data);
+      setCategories(Array.isArray(response.data) ? response.data : (response.data.categories || []));
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
@@ -89,7 +90,11 @@ function ProductsContent() {
       }
 
       const response = await productAPI.getAllProducts(params);
-      setProducts(response.data.products || []);
+      console.log('📦 Products API response:', response.data);
+      // Backend returns array directly, not wrapped in {products: [...]}
+      const productsData = Array.isArray(response.data) ? response.data : (response.data.products || []);
+      console.log(`✅ Loaded ${productsData.length} products`);
+      setProducts(productsData);
     } catch (error) {
       console.error('Failed to fetch products:', error);
     } finally {

@@ -343,3 +343,28 @@ exports.updateProductStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// @desc    Delete a product
+// @route   DELETE /api/admin/products/:id
+// @access  Private/Admin
+exports.deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Delete product images from MinIO if needed
+    // TODO: Implement image deletion from MinIO using product.images array
+
+    await Product.findByIdAndDelete(id);
+
+    console.log(`✅ Product deleted: ${product.name} (ID: ${id})`);
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Delete product error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

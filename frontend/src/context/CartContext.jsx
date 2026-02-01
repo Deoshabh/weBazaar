@@ -24,7 +24,9 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await cartAPI.getCart();
-      setCart(response.data.cart);
+      // Backend returns {items, totalItems, totalAmount} directly, not wrapped in {cart: {...}}
+      console.log('📦 Cart API response:', response.data);
+      setCart(response.data);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
     } finally {
@@ -35,7 +37,8 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (productId, size, quantity = 1) => {
     try {
       const response = await cartAPI.addToCart({ productId, size, quantity });
-      setCart(response.data.cart);
+      // Backend returns {items, totalItems, totalAmount} directly
+      setCart(response.data);
       toast.success('Added to cart!');
       return { success: true };
     } catch (error) {
@@ -48,7 +51,8 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (productId, size) => {
     try {
       const response = await cartAPI.removeFromCart(productId, size);
-      setCart(response.data.cart);
+      // Backend returns {items, totalItems, totalAmount} directly
+      setCart(response.data);
       toast.success('Removed from cart');
       return { success: true };
     } catch (error) {

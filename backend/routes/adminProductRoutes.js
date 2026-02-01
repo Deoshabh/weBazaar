@@ -8,6 +8,7 @@ const {
   toggleProductStatus,
   toggleProductFeatured,
   updateProductStatus,
+  deleteProduct,
 } = require("../controllers/adminProductController");
 const { authenticate } = require("../middleware/auth");
 const admin = require("../middleware/admin");
@@ -36,5 +37,8 @@ router.patch("/:id/toggle-featured", toggleProductFeatured);
 
 // @route   PATCH /api/admin/products/:id/status
 router.patch("/:id/status", updateProductStatus);
+
+// @route   DELETE /api/admin/products/:id
+router.delete("/:id", deleteProduct);
 
 module.exports = router;

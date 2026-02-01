@@ -32,7 +32,11 @@ export default function AdminProductsPage() {
     try {
       setLoadingProducts(true);
       const response = await adminAPI.getAllProducts();
-      setProducts(response.data.products || []);
+      console.log('📦 Admin Products API response:', response.data);
+      // Backend returns array directly, not wrapped in {products: [...]}
+      const productsData = Array.isArray(response.data) ? response.data : (response.data.products || []);
+      console.log(`✅ Admin loaded ${productsData.length} products`);
+      setProducts(productsData);
     } catch (error) {
       toast.error('Failed to fetch products');
       console.error(error);

@@ -53,7 +53,9 @@ export default function CheckoutPage() {
   const fetchAddresses = async () => {
     try {
       const response = await addressAPI.getAddresses();
-      const addressList = response.data.addresses || [];
+      // Backend returns array directly, not wrapped
+      const addressList = Array.isArray(response.data) ? response.data : (response.data.addresses || []);
+      console.log('📦 Addresses in checkout:', addressList.length);
       setAddresses(addressList);
       const defaultAddr = addressList.find((addr) => addr.isDefault);
       setSelectedAddress(defaultAddr || addressList[0]);

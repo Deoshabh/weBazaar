@@ -42,7 +42,10 @@ export default function CouponsPage() {
     try {
       setLoading(true);
       const response = await adminAPI.getAllCoupons();
-      setCoupons(response.data.coupons || []);
+      // Backend returns array directly, not wrapped
+      console.log('📦 Admin Coupons API response:', response.data);
+      const couponsData = Array.isArray(response.data) ? response.data : (response.data.coupons || []);
+      setCoupons(couponsData);
     } catch (error) {
       console.error('Failed to fetch coupons:', error);
       toast.error('Failed to load coupons');

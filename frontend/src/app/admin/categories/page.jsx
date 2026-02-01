@@ -37,6 +37,8 @@ export default function CategoriesPage() {
     try {
       setLoading(true);
       const response = await adminAPI.getAllCategories();
+      // Backend returns {categories: [...]}
+      console.log('📦 Admin Categories API response:', response.data);
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);

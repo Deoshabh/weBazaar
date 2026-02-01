@@ -33,6 +33,8 @@ export default function AdminOrdersPage() {
     try {
       setLoadingOrders(true);
       const response = await adminAPI.getAllOrders();
+      // Backend returns {success, count, orders: [...]}
+      console.log('📦 Admin Orders API response:', response.data);
       setOrders(response.data.orders || []);
     } catch (error) {
       toast.error('Failed to fetch orders');
