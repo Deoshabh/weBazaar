@@ -214,7 +214,7 @@ export default function AdminProductsPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => router.push(`/admin/products/${product._id}/edit`)}
+                            onClick={() => router.push(`/admin/products/new?edit=${product._id}`)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Edit"
                           >

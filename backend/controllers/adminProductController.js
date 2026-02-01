@@ -84,9 +84,24 @@ exports.createProduct = async (req, res) => {
 
     // Validate required fields
     if (!name || !slug || !description || !category || !price) {
-      return res
-        .status(400)
-        .json({ message: "Please provide all required fields" });
+      console.log("❌ Validation failed - missing required fields:", {
+        name: !!name,
+        slug: !!slug,
+        description: !!description,
+        category: !!category,
+        price: !!price,
+      });
+      return res.status(400).json({
+        message:
+          "Please provide all required fields (name, slug, description, category, price)",
+        missing: {
+          name: !name,
+          slug: !slug,
+          description: !description,
+          category: !category,
+          price: !price,
+        },
+      });
     }
 
     // Check if slug already exists
@@ -202,8 +217,24 @@ exports.createProduct = async (req, res) => {
 
     res.status(201).json(product);
   } catch (error) {
-    console.error("Create product error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Create product error:", error);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    if (error.code === 11000) {
+      return res
+        .status(400)
+        .json({ message: "Product with this slug already exists" });
+    }
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+      details: error.errors
+        ? Object.keys(error.errors).map((key) => ({
+            field: key,
+            message: error.errors[key].message,
+          }))
+        : undefined,
+    });
   }
 };
 
