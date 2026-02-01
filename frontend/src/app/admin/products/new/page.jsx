@@ -44,7 +44,7 @@ export default function NewProductPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await categoryAPI.getCategories();
+      const response = await adminAPI.getAllCategories();
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
