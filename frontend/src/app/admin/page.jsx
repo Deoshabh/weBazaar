@@ -41,8 +41,8 @@ export default function AdminDashboard() {
       console.log('📊 Admin stats:', response.data);
       setStats({
         totalOrders: response.data.totalOrders || 0,
-        totalProducts: 0, // Backend doesn't return this yet
-        totalUsers: 0, // Backend doesn't return this yet
+        totalProducts: response.data.totalProducts || 0,
+        totalUsers: response.data.totalUsers || 0,
         totalRevenue: response.data.totalRevenue || 0,
       });
     } catch (error) {

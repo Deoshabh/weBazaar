@@ -250,24 +250,38 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Action Buttons */}
-            {product.inStock && (
-              <div className="flex gap-4">
-                <button onClick={handleBuyNow} className="flex-1 btn btn-primary text-lg py-4">
-                  Buy Now
-                </button>
-                <button onClick={handleAddToCart} className="flex-1 btn btn-secondary text-lg py-4 flex items-center justify-center gap-2">
-                  <FiShoppingCart />
-                  Add to Cart
-                </button>
-                <button
-                  onClick={handleToggleWishlist}
-                  className={`btn ${inWishlist ? 'bg-red-500 text-white hover:bg-red-600' : 'btn-ghost'} px-6 py-4`}
-                >
-                  <FiHeart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
-                </button>
-              </div>
-            )}
+            {/* Action Buttons - Always Show */}
+            <div className="flex gap-4">
+              <button 
+                onClick={handleBuyNow} 
+                disabled={!product.inStock}
+                className={`flex-1 text-lg py-4 ${
+                  product.inStock 
+                    ? 'btn btn-primary' 
+                    : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
+                }`}
+              >
+                {product.inStock ? 'Buy Now' : 'Out of Stock'}
+              </button>
+              <button 
+                onClick={handleAddToCart}
+                disabled={!product.inStock}
+                className={`flex-1 text-lg py-4 flex items-center justify-center gap-2 ${
+                  product.inStock 
+                    ? 'btn btn-secondary' 
+                    : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
+                }`}
+              >
+                <FiShoppingCart />
+                {product.inStock ? 'Add to Cart' : 'Unavailable'}
+              </button>
+              <button
+                onClick={handleToggleWishlist}
+                className={`btn ${inWishlist ? 'bg-red-500 text-white hover:bg-red-600' : 'btn-ghost'} px-6 py-4`}
+              >
+                <FiHeart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
+              </button>
+            </div>
 
             {/* Trust Badges */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-primary-200">

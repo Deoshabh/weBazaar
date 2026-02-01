@@ -143,34 +143,41 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Bottom Action Buttons - Always Visible */}
-            {product.inStock && (
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddToCart(e).then(() => {
-                      if (typeof window !== 'undefined') {
-                        window.location.href = '/cart';
-                      }
-                    });
-                  }}
-                  className="flex-1 btn btn-primary text-sm py-2"
-                >
-                  Buy Now
-                </button>
-                <button
-                  onClick={handleToggleWishlist}
-                  className={`btn text-sm py-2 px-3 ${
-                    isProductInWishlist
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : 'btn-ghost'
-                  }`}
-                >
-                  <FiHeart className={`w-5 h-5 ${isProductInWishlist ? 'fill-current' : ''}`} />
-                </button>
-              </div>
-            )}
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!product.inStock) {
+                    toast.error('Product currently unavailable');
+                    return;
+                  }
+                  handleAddToCart(e).then(() => {
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/cart';
+                    }
+                  });
+                }}
+                disabled={!product.inStock}
+                className={`flex-1 btn text-sm py-2 ${
+                  product.inStock 
+                    ? 'btn-primary' 
+                    : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
+                }`}
+              >
+                {product.inStock ? 'Buy Now' : 'Out of Stock'}
+              </button>
+              <button
+                onClick={handleToggleWishlist}
+                className={`btn text-sm py-2 px-3 ${
+                  isProductInWishlist
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'btn-ghost'
+                }`}
+              >
+                <FiHeart className={`w-5 h-5 ${isProductInWishlist ? 'fill-current' : ''}`} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
