@@ -65,9 +65,6 @@ app.use(
   }),
 );
 
-// ---- FORCE preflight handling (Traefik-safe) ----
-app.options("*", cors());
-
 // ---- Body & Cookies ----
 app.use(express.json());
 app.use(cookieParser());

@@ -3,6 +3,12 @@ const jwt = require("jsonwebtoken");
 // Authenticate JWT token
 exports.authenticate = async (req, res, next) => {
   try {
+    // ✅ CORS Fix: Bypass OPTIONS preflight requests
+    // Traefik handles preflight at proxy level, auth not needed
+    if (req.method === "OPTIONS") {
+      return next();
+    }
+
     // Get token from header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -45,6 +51,12 @@ exports.authenticate = async (req, res, next) => {
 exports.authorize = (...roles) => {
   return async (req, res, next) => {
     try {
+      // ✅ CORS Fix: Bypass OPTIONS preflight requests
+      // Traefik handles preflight at proxy level, auth not needed
+      if (req.method === "OPTIONS") {
+        return next();
+      }
+
       const User = require("../models/User");
       const user = await User.findById(req.userId);
 
