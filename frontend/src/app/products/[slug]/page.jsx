@@ -167,7 +167,10 @@ export default function ProductDetailPage() {
 
             {/* Description */}
             <p className="text-primary-700 leading-relaxed">
-              {pColor Selection */}
+              {product.description}
+            </p>
+
+            {/* Color Selection */}
             {product.colors && product.colors.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-primary-900 mb-3">

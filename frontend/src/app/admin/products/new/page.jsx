@@ -246,8 +246,6 @@ export default function NewProductPage() {
       
       // Combine existing and new images
       const allImages = [...existingImages, ...uploadedImages];
-      // Combine existing and new images
-      const allImages = [...existingImages, ...uploadedImages];
       
       // Step 2: Prepare product data
       const productData = {
