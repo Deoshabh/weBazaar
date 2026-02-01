@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { adminAPI, categoryAPI, productAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
@@ -8,7 +8,7 @@ import AdminLayout from '@/components/AdminLayout';
 import toast from 'react-hot-toast';
 import { FiUpload, FiX, FiPlus, FiMinus } from 'react-icons/fi';
 
-export default function NewProductPage() {
+function ProductFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editProductId = searchParams?.get('edit');
@@ -635,5 +635,22 @@ export default function NewProductPage() {
       </div>
     </div>
     </AdminLayout>
+  );
+}
+
+export default function NewProductPage() {
+  return (
+    <Suspense fallback={
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-brown mx-auto mb-4"></div>
+            <p className="text-primary-600">Loading...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    }>
+      <ProductFormContent />
+    </Suspense>
   );
 }
