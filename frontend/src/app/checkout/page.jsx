@@ -149,7 +149,7 @@ export default function CheckoutPage() {
           addressLine2: selectedAddress.addressLine2 || '',
           city: selectedAddress.city,
           state: selectedAddress.state,
-          postalCode: selectedAddress.pinCode || selectedAddress.postalCode,
+          postalCode: selectedAddress.postalCode,
         },
         paymentMethod,
         couponCode: appliedCoupon?.code,
@@ -171,11 +171,18 @@ export default function CheckoutPage() {
         const rzpResponse = await orderAPI.createRazorpayOrder(order._id);
         const { razorpayOrderId, amount, currency } = rzpResponse.data;
 
+        // Validate Razorpay key is configured
+        if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+          toast.error('Payment system not configured. Please contact support.');
+          setIsProcessing(false);
+          return;
+        }
+
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RsGRtsJgCpkZEk',
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: amount,
           currency: currency,
-          name: 'Shoes Store',
+          name: 'Radeo',
           description: `Order ${order.orderId}`,
           order_id: razorpayOrderId,
           handler: async (response) => {

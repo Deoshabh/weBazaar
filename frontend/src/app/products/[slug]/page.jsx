@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
+// Note: Dynamic metadata generation requires server component
+// For client components with dynamic data, we update meta tags via useEffect
+// Consider moving to server component for better SEO
 import { useParams, useRouter } from 'next/navigation';
 import { productAPI } from '@/utils/api';
 import { useCart } from '@/context/CartContext';
@@ -174,28 +178,33 @@ export default function ProductDetailPage() {
             {product.colors && product.colors.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-primary-900 mb-3">
-                  Select Color
+                  Select Color: <span className="capitalize text-brand-brown">{selectedColor}</span>
                 </label>
                 <div className="flex flex-wrap gap-3">
-                  {product.colors.map((color, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-5 py-2.5 border-2 rounded-lg font-medium transition-all capitalize ${
-                        selectedColor === color
-                          ? 'border-brand-brown bg-brand-brown text-white'
-                          : 'border-primary-200 hover:border-brand-brown'
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                  {product.colors.map((color, idx) => {
+                    // Parse color - handle hex codes or color names
+                    const colorValue = color.startsWith('#') ? color : color.toLowerCase();
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedColor(color)}
+                        className={`relative w-12 h-12 rounded-full border-3 transition-all ${
+                          selectedColor === color
+                            ? 'border-brand-brown ring-2 ring-brand-brown ring-offset-2 scale-110'
+                            : 'border-primary-300 hover:border-brand-brown hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: colorValue }}
+                        title={color}
+                      >
+                        {selectedColor === color && (
+                          <FiCheck className="w-5 h-5 text-white absolute inset-0 m-auto drop-shadow-lg" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
-
-            {/* roduct.description}
-            </p>
 
             {/* Size Selection */}
             {product.sizes && product.sizes.length > 0 && (

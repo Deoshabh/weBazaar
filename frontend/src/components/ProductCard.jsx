@@ -79,15 +79,32 @@ export default function ProductCard({ product }) {
             </div>
           )}
 
-          {/* Quick Add to Cart */}
+          {/* Action Buttons on Hover */}
           {product.inStock && (
-            <button
-              onClick={handleAddToCart}
-              className="absolute bottom-4 left-4 right-4 btn btn-primary opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <FiShoppingCart className="w-4 h-4" />
-              Quick Add
-            </button>
+            <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddToCart(e).then(() => {
+                    const router = require('next/navigation').useRouter;
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/cart';
+                    }
+                  });
+                }}
+                className="flex-1 btn btn-primary flex items-center justify-center gap-2 text-sm py-2.5"
+              >
+                <FiShoppingCart className="w-4 h-4" />
+                Buy Now
+              </button>
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 btn btn-secondary flex items-center justify-center gap-2 text-sm py-2.5"
+              >
+                Add to Cart
+              </button>
+            </div>
           )}
         </div>
 
@@ -111,16 +128,48 @@ export default function ProductCard({ product }) {
           )}
 
           {/* Price */}
-          <div className="mt-auto flex items-center justify-between">
-            <p className="text-xl font-bold text-primary-800">
-              ₹{product.price?.toLocaleString()}
-            </p>
-            
-            {/* Sizes Available */}
-            {product.sizes && product.sizes.length > 0 && (
-              <p className="text-sm text-primary-600">
-                {product.sizes.length} sizes
+          <div className="mt-auto">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xl font-bold text-primary-800">
+                ₹{product.price?.toLocaleString()}
               </p>
+              
+              {/* Sizes Available */}
+              {product.sizes && product.sizes.length > 0 && (
+                <p className="text-sm text-primary-600">
+                  {product.sizes.length} sizes
+                </p>
+              )}
+            </div>
+
+            {/* Bottom Action Buttons - Always Visible */}
+            {product.inStock && (
+              <div className="flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddToCart(e).then(() => {
+                      if (typeof window !== 'undefined') {
+                        window.location.href = '/cart';
+                      }
+                    });
+                  }}
+                  className="flex-1 btn btn-primary text-sm py-2"
+                >
+                  Buy Now
+                </button>
+                <button
+                  onClick={handleToggleWishlist}
+                  className={`btn text-sm py-2 px-3 ${
+                    isProductInWishlist
+                      ? 'bg-red-500 text-white hover:bg-red-600'
+                      : 'btn-ghost'
+                  }`}
+                >
+                  <FiHeart className={`w-5 h-5 ${isProductInWishlist ? 'fill-current' : ''}`} />
+                </button>
+              </div>
             )}
           </div>
         </div>

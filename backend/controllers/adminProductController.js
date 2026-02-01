@@ -387,15 +387,59 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Delete product images from MinIO if needed
-    // TODO: Implement image deletion from MinIO using product.images array
+    console.log(`🗑️  Deleting product: ${product.name} (${product.slug})`);
 
+    // Delete all product images from MinIO
+    if (product.images && product.images.length > 0) {
+      const { deleteObject } = require("../utils/minio");
+
+      console.log(`📦 Product has ${product.images.length} images to delete`);
+
+      for (const imageUrl of product.images) {
+        try {
+          // Extract object name from URL
+          // URL format: https://minio-api.radeo.in/product-media/products/slug/filename
+          const urlParts = imageUrl.split("/product-media/");
+
+          if (urlParts.length > 1) {
+            const objectName = urlParts[1];
+            console.log(`  Deleting image: ${objectName}`);
+            await deleteObject(objectName);
+            console.log(`  ✅ Deleted: ${objectName}`);
+          } else {
+            console.log(`  ⚠️  Could not parse image URL: ${imageUrl}`);
+          }
+        } catch (imageError) {
+          console.error(
+            `  ❌ Failed to delete image ${imageUrl}:`,
+            imageError.message,
+          );
+          // Continue deleting other images even if one fails
+        }
+      }
+
+      console.log(`✅ Finished deleting images for product: ${product.name}`);
+    } else {
+      console.log(`ℹ️  Product has no images to delete`);
+    }
+
+    // Delete product from database
     await Product.findByIdAndDelete(id);
 
-    console.log(`✅ Product deleted: ${product.name} (ID: ${id})`);
-    res.json({ message: "Product deleted successfully" });
+    console.log(
+      `✅ Product deleted from database: ${product.name} (ID: ${id})`,
+    );
+    res.json({
+      message: "Product and associated images deleted successfully",
+      deletedProduct: {
+        id: product._id,
+        name: product.name,
+        slug: product.slug,
+        imagesDeleted: product.images?.length || 0,
+      },
+    });
   } catch (error) {
     console.error("Delete product error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

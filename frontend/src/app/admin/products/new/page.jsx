@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { adminAPI, categoryAPI, productAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import AdminLayout from '@/components/AdminLayout';
+import ColorPicker from '@/components/ColorPicker';
 import toast from 'react-hot-toast';
 import { FiUpload, FiX, FiPlus, FiMinus } from 'react-icons/fi';
 
@@ -155,9 +156,7 @@ function ProductFormContent() {
     setFormData({ ...formData, sizes });
   };
 
-  const handleColorChange = (e) => {
-    const value = e.target.value;
-    const colors = value.split(',').map(c => c.trim()).filter(Boolean);
+  const handleColorChange = (colors) => {
     setFormData({ ...formData, colors });
   };
 
@@ -532,13 +531,14 @@ function ProductFormContent() {
           <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-primary-900 mb-4">Variants</h2>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-primary-900 mb-2">
                   Sizes (UK)
                 </label>
                 <input
                   type="text"
+                  value={formData.sizes.join(', ')}
                   onChange={handleSizeChange}
                   className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
                   placeholder="e.g., 6, 7, 8, 9, 10"
@@ -549,18 +549,13 @@ function ProductFormContent() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-primary-900 mb-2">
+                <label className="block text-sm font-medium text-primary-900 mb-3">
                   Colors
                 </label>
-                <input
-                  type="text"
+                <ColorPicker 
+                  selectedColors={formData.colors}
                   onChange={handleColorChange}
-                  className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  placeholder="e.g., Black, Brown, Tan"
                 />
-                <p className="text-xs text-primary-500 mt-1">
-                  Separate colors with commas
-                </p>
               </div>
             </div>
           </div>

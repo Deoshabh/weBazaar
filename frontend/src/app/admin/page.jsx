@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { adminAPI } from '@/utils/api';
 import AdminLayout from '@/components/AdminLayout';
 import { FiPackage, FiShoppingBag, FiUsers, FiDollarSign, FiTrendingUp, FiSettings } from 'react-icons/fi';
 
@@ -28,15 +29,33 @@ export default function AdminDashboard() {
       return;
     }
 
-    // You can fetch real stats from your backend here
-    // For now, using placeholder data
-    setStats({
-      totalOrders: 0,
-      totalProducts: 0,
-      totalUsers: 0,
-      totalRevenue: 0,
-    });
+    // Fetch real stats from backend
+    if (isAuthenticated && user?.role === 'admin') {
+      fetchStats();
+    }
   }, [user, isAuthenticated, loading, router]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await adminAPI.getStats();
+      console.log('📊 Admin stats:', response.data);
+      setStats({
+        totalOrders: response.data.totalOrders || 0,
+        totalProducts: 0, // Backend doesn't return this yet
+        totalUsers: 0, // Backend doesn't return this yet
+        totalRevenue: response.data.totalRevenue || 0,
+      });
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+      // Keep placeholder data on error
+      setStats({
+        totalOrders: 0,
+        totalProducts: 0,
+        totalUsers: 0,
+        totalRevenue: 0,
+      });
+    }
+  };
 
   if (loading) {
     return (

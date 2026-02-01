@@ -27,7 +27,7 @@ export default function ProfilePage() {
     addressLine2: '',
     city: '',
     state: '',
-    pinCode: '',
+    postalCode: '',
     isDefault: false,
   });
 
@@ -113,7 +113,7 @@ export default function ProfilePage() {
       addressLine2: address.addressLine2 || '',
       city: address.city,
       state: address.state,
-      pinCode: address.pinCode,
+      postalCode: address.postalCode,
       isDefault: address.isDefault,
     });
     setEditingAddressId(address._id);
@@ -128,7 +128,7 @@ export default function ProfilePage() {
       addressLine2: '',
       city: '',
       state: '',
-      pinCode: '',
+      postalCode: '',
       isDefault: false,
     });
   };

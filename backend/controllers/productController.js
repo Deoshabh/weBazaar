@@ -3,9 +3,21 @@ const Product = require("../models/Product");
 // GET /api/v1/products
 exports.getAllProducts = async (req, res) => {
   try {
-    const { featured, category } = req.query;
+    const { featured, category, search } = req.query;
 
     const query = { isActive: true };
+
+    // Search functionality
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      query.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { brand: searchRegex },
+        { category: searchRegex },
+        { tags: searchRegex },
+      ];
+    }
 
     // Filter by featured if requested
     if (featured === "true") {
@@ -24,6 +36,42 @@ exports.getAllProducts = async (req, res) => {
     res.json(products);
   } catch (error) {
     console.error("Get products error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/v1/products/search
+exports.searchProducts = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({
+        message: "Search query must be at least 2 characters",
+      });
+    }
+
+    const searchRegex = new RegExp(q.trim(), "i");
+
+    const products = await Product.find({
+      isActive: true,
+      $or: [
+        { name: searchRegex },
+        { description: searchRegex },
+        { brand: searchRegex },
+        { category: searchRegex },
+        { tags: searchRegex },
+      ],
+    })
+      .limit(20)
+      .select("name slug image price category brand")
+      .sort({ featured: -1, createdAt: -1 });
+
+    console.log(`🔍 Search for "${q}": found ${products.length} results`);
+
+    res.json(products);
+  } catch (error) {
+    console.error("Search products error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
