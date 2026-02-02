@@ -172,12 +172,12 @@ export default function ShippingPage() {
               </p>
               <ol className="space-y-3 ml-6">
                 <li><strong>1.</strong> Log in to your Radeo account</li>
-                <li><strong>2.</strong> Go to "My Orders"</li>
+                <li><strong>2.</strong> Go to &quot;My Orders&quot;</li>
                 <li><strong>3.</strong> Click on the order you want to track</li>
                 <li><strong>4.</strong> View tracking details and estimated delivery</li>
               </ol>
               <p className="mt-4 text-sm">
-                You'll also receive email and SMS updates at every stage of delivery.
+                You&apos;ll also receive email and SMS updates at every stage of delivery.
               </p>
             </div>
           </section>
@@ -212,14 +212,14 @@ export default function ShippingPage() {
               Delivery Issues
             </h2>
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-              <h4 className="font-semibold text-gray-900 mb-3">What if I'm not home?</h4>
+              <h4 className="font-semibold text-gray-900 mb-3">What if I&apos;m not home?</h4>
               <p className="text-gray-700 mb-4">
                 Our delivery partners will attempt delivery 2-3 times. If unsuccessful, the package will be held at the nearest courier office for 5 days. Contact us if you need to reschedule delivery.
               </p>
               
               <h4 className="font-semibold text-gray-900 mb-3 mt-6">Delayed Delivery?</h4>
               <p className="text-gray-700">
-                If your order hasn't arrived within the expected timeframe, please <Link href="/contact" className="text-primary-600 hover:underline">contact us</Link> with your order number. We'll track it immediately and resolve the issue.
+                If your order hasn&apos;t arrived within the expected timeframe, please <Link href="/contact" className="text-primary-600 hover:underline">contact us</Link> with your order number. We&apos;ll track it immediately and resolve the issue.
               </p>
             </div>
           </section>
@@ -231,7 +231,7 @@ export default function ShippingPage() {
             </h2>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <p className="text-gray-700">
-                Currently, we only ship within India. We're working on expanding to international markets. Stay tuned!
+                Currently, we only ship within India. We&apos;re working on expanding to international markets. Stay tuned!
               </p>
               <p className="text-sm text-gray-600 mt-3">
                 Want to be notified when we start international shipping? <Link href="/contact" className="text-primary-600 hover:underline">Contact us</Link> to join the waitlist.

@@ -53,7 +53,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Have a question or need help? We're here for you!
+            Have a question or need help? We&apos;re here for you!
           </p>
         </div>
 

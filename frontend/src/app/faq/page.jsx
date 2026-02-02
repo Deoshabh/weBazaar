@@ -293,7 +293,7 @@ export default function FAQPage() {
               No results found
             </h3>
             <p className="text-gray-600 mb-6">
-              We couldn't find any FAQs matching "{searchQuery}"
+              We couldn&apos;t find any FAQs matching &quot;{searchQuery}&quot;
             </p>
             <button
               onClick={() => setSearchQuery('')}

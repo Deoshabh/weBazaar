@@ -34,7 +34,7 @@ export default function ReturnsPage() {
               <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span><strong>Free Pickup:</strong> We'll collect the product from your doorstep</span>
+              <span><strong>Free Pickup:</strong> We&apos;ll collect the product from your doorstep</span>
             </li>
             <li className="flex items-start">
               <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@ export default function ReturnsPage() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <p className="text-gray-700 mb-3">The following items cannot be returned:</p>
               <ul className="space-y-2 text-gray-700 ml-6">
-                <li>✗ Products marked as "Final Sale" or "Non-Returnable"</li>
+                <li>✗ Products marked as &quot;Final Sale&quot; or &quot;Non-Returnable&quot;</li>
                 <li>✗ Worn, damaged, or altered products</li>
                 <li>✗ Products without original packaging or tags</li>
                 <li>✗ Products returned after 7 days from delivery</li>
@@ -93,7 +93,7 @@ export default function ReturnsPage() {
                   <span className="text-2xl font-bold text-primary-600">1</span>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Initiate Return</h3>
-                <p className="text-sm text-gray-600">Go to your orders and click "Return" on the product</p>
+                <p className="text-sm text-gray-600">Go to your orders and click &quot;Return&quot; on the product</p>
               </div>
 
               <div className="text-center">
@@ -101,7 +101,7 @@ export default function ReturnsPage() {
                   <span className="text-2xl font-bold text-primary-600">2</span>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Select Reason</h3>
-                <p className="text-sm text-gray-600">Tell us why you're returning the product</p>
+                <p className="text-sm text-gray-600">Tell us why you&apos;re returning the product</p>
               </div>
 
               <div className="text-center">
@@ -175,7 +175,7 @@ export default function ReturnsPage() {
                 <li>📸 Take clear photos of the product and packaging</li>
                 <li>📞 Contact us within <strong>24 hours</strong> of delivery</li>
                 <li>📧 Email photos to <a href="mailto:support@radeo.in" className="text-primary-600 hover:underline">support@radeo.in</a></li>
-                <li>✅ We'll arrange immediate pickup and full refund</li>
+                <li>✅ We&apos;ll arrange immediate pickup and full refund</li>
               </ul>
               <p className="mt-4 text-sm text-gray-600">
                 For damaged products, the 7-day return window does not apply. We accept returns at any reasonable time after you notice the defect.

@@ -31,7 +31,7 @@ export default function AboutPage() {
                 Radeo was born from a simple belief: everyone deserves access to quality footwear that combines style, comfort, and durability. What started as a vision to revolutionize the online shoe shopping experience has grown into a trusted destination for shoe enthusiasts across India.
               </p>
               <p>
-                We understand that shoes are more than just accessories - they're an extension of your personality, a tool for your adventures, and a companion in your daily journey. That's why we've dedicated ourselves to curating a collection that meets the diverse needs of modern lifestyles.
+                We understand that shoes are more than just accessories - they&apos;re an extension of your personality, a tool for your adventures, and a companion in your daily journey. That&apos;s why we&apos;ve dedicated ourselves to curating a collection that meets the diverse needs of modern lifestyles.
               </p>
               <p>
                 Every pair of shoes in our collection is carefully selected to ensure it meets our high standards for quality, comfort, and style. We work directly with trusted manufacturers and brands to bring you authentic products at competitive prices.
@@ -66,7 +66,7 @@ export default function AboutPage() {
               Customer First
             </h3>
             <p className="text-gray-600">
-              Your satisfaction is our priority. We're here to support you every step of the way, from browsing to delivery and beyond.
+              Your satisfaction is our priority. We&apos;re here to support you every step of the way, from browsing to delivery and beyond.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default function AboutPage() {
               Fast Delivery
             </h3>
             <p className="text-gray-600">
-              We know you're excited to wear your new shoes. That's why we ensure quick processing and reliable delivery to your doorstep.
+              We know you&apos;re excited to wear your new shoes. That&apos;s why we ensure quick processing and reliable delivery to your doorstep.
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <h4 className="font-semibold text-lg mb-1">Easy Returns</h4>
-                <p className="text-primary-100">Hassle-free returns within 7 days if you're not completely satisfied</p>
+                <p className="text-primary-100">Hassle-free returns within 7 days if you&apos;re not completely satisfied</p>
               </div>
             </div>
 
