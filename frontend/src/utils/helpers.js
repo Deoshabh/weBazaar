@@ -16,6 +16,21 @@ export const formatCurrency = (amount) => {
 };
 
 /**
+ * Format price with Indian notation (alias for formatCurrency)
+ */
+export const formatPrice = (value) => {
+  if (value < 0) {
+    return `₹${value.toLocaleString("en-IN")}`;
+  }
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+/**
  * Format date to readable string
  */
 export const formatDate = (date, options = {}) => {
@@ -132,7 +147,8 @@ export const isEmpty = (obj) => {
  * Calculate discount percentage
  */
 export const calculateDiscount = (originalPrice, discountedPrice) => {
-  if (!originalPrice || !discountedPrice) return 0;
+  if (originalPrice <= 0) return 0;
+  if (discountedPrice <= 0) return originalPrice;
   const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
   return Math.round(discount);
 };
@@ -174,6 +190,15 @@ export const formatPhoneNumber = (phone) => {
     return `${cleaned.slice(0, 5)} ${cleaned.slice(5)}`;
   }
   return phone;
+};
+
+/**
+ * Validate Indian phone number (10 digits)
+ */
+export const isValidIndianPhone = (phone) => {
+  if (!phone) return false;
+  const phoneRegex = /^[0-9]{10}$/;
+  return phoneRegex.test(phone);
 };
 
 /**

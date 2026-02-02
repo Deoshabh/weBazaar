@@ -8,24 +8,20 @@
  */
 export const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return "Email is required";
-  if (!emailRegex.test(email)) return "Invalid email format";
-  return null;
+  if (!email) return false;
+  return emailRegex.test(email);
 };
 
 /**
  * Validate password strength
  */
 export const validatePassword = (password) => {
-  if (!password) return "Password is required";
-  if (password.length < 8) return "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(password))
-    return "Password must contain at least one uppercase letter";
-  if (!/[a-z]/.test(password))
-    return "Password must contain at least one lowercase letter";
-  if (!/[0-9]/.test(password))
-    return "Password must contain at least one number";
-  return null;
+  if (!password) return false;
+  if (password.length < 8) return false;
+  if (!/[A-Z]/.test(password)) return false;
+  if (!/[a-z]/.test(password)) return false;
+  if (!/[0-9]/.test(password)) return false;
+  return true;
 };
 
 /**
@@ -136,11 +132,17 @@ export const validateAddress = (address) => {
 export const validateLoginForm = (email, password) => {
   const errors = {};
 
-  const emailError = validateEmail(email);
-  if (emailError) errors.email = emailError;
+  if (!email) {
+    errors.email = "Email is required";
+  } else if (!validateEmail(email)) {
+    errors.email = "Invalid email format";
+  }
 
-  const passwordError = validateRequired(password, "Password");
-  if (passwordError) errors.password = passwordError;
+  if (!password) {
+    errors.password = "Password is required";
+  } else if (!validatePassword(password)) {
+    errors.password = "Invalid password";
+  }
 
   return Object.keys(errors).length > 0 ? errors : null;
 };
@@ -154,11 +156,25 @@ export const validateRegisterForm = (formData) => {
   const nameError = validateName(formData.name);
   if (nameError) errors.name = nameError;
 
-  const emailError = validateEmail(formData.email);
-  if (emailError) errors.email = emailError;
+  if (!formData.email) {
+    errors.email = "Email is required";
+  } else if (!validateEmail(formData.email)) {
+    errors.email = "Invalid email format";
+  }
 
-  const passwordError = validatePassword(formData.password);
-  if (passwordError) errors.password = passwordError;
+  if (!formData.password) {
+    errors.password = "Password is required";
+  } else if (!validatePassword(formData.password)) {
+    errors.password =
+      "Password must be at least 8 characters with uppercase, lowercase, and number";
+  }
+
+  if (
+    formData.confirmPassword &&
+    formData.password !== formData.confirmPassword
+  ) {
+    errors.confirmPassword = "Passwords do not match";
+  }
 
   if (formData.phone) {
     const phoneError = validatePhone(formData.phone);
@@ -172,14 +188,16 @@ export const validateRegisterForm = (formData) => {
  * Sanitize input to prevent XSS
  */
 export const sanitizeInput = (input) => {
+  if (input === null || input === undefined) return "";
   if (typeof input !== "string") return input;
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;")
-    .replace(/\//g, "&#x2F;");
+  // Remove script tags and their content
+  let cleaned = input.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
+  // Remove all other HTML tags
+  cleaned = cleaned.replace(/<[^>]*>/g, "");
+  return cleaned.trim();
 };
 
 /**

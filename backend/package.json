@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "seed:products": "node seed/products.seed.js"
+    "seed:products": "node seed/products.seed.js",
+    "test": "jest --watch",
+    "test:ci": "jest --ci --coverage --forceExit",
+    "test:coverage": "jest --coverage --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +31,9 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.2.2"
   },
   "overrides": {
     "fast-xml-parser": "^5.3.4"

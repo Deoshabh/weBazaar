@@ -10,7 +10,14 @@ exports.getAllProducts = async (req, res) => {
     console.log(
       `✅ Admin: Found ${products.length} products (including inactive)`,
     );
-    res.json(products);
+
+    // Map products to include status for frontend compatibility
+    const productsWithStatus = products.map((product) => ({
+      ...product.toObject(),
+      status: product.isActive ? "active" : "inactive",
+    }));
+
+    res.json(productsWithStatus);
   } catch (error) {
     console.error("Get all products error:", error);
     res.status(500).json({ message: "Server error" });
@@ -318,7 +325,13 @@ exports.toggleProductStatus = async (req, res) => {
     product.isActive = !product.isActive;
     await product.save();
 
-    res.json(product);
+    // Return product with status field for frontend compatibility
+    const productResponse = {
+      ...product.toObject(),
+      status: product.isActive ? "active" : "inactive",
+    };
+
+    res.json(productResponse);
   } catch (error) {
     console.error("Toggle product status error:", error);
     res.status(500).json({ message: "Server error" });

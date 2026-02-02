@@ -29,8 +29,8 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Fetch real stats from backend
-    if (isAuthenticated && user?.role === 'admin') {
+    // Fetch real stats from backend (only on client side to prevent SSR 404)
+    if (typeof window !== 'undefined' && isAuthenticated && user?.role === 'admin') {
       fetchStats();
     }
   }, [user, isAuthenticated, loading, router]);

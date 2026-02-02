@@ -1,0 +1,13 @@
+[2026-02-02T20:04:29.252Z] ERROR: Fatal startup error
+S3Error: S3 API Requests must be made to API port.
+    at parseError (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\xml-parser.js:58:13)
+    at Object.parseResponseError (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\xml-parser.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Client.makeRequestStreamAsync (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\client.js:514:19)
+    at async Client.getBucketRegionAsync (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\client.js:563:19)
+    at async Client.makeRequestStreamAsync (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\client.js:485:25)
+    at async Client.makeRequestAsyncOmit (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\client.js:445:17)
+    at async Client.bucketExists (E:\Projects\Shoes Website 2026\backend\node_modules\minio\dist\main\internal\client.js:736:7)
+    at async initializeBucket (E:\Projects\Shoes Website 2026\backend\utils\minio.js:56:18)
+    at async startServer (E:\Projects\Shoes Website 2026\backend\server.js:129:5)
+

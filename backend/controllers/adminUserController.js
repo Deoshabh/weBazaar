@@ -6,7 +6,14 @@ const User = require("../models/User");
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
-    res.json({ users });
+
+    // Map users to include isActive for frontend compatibility
+    const usersWithStatus = users.map((user) => ({
+      ...user.toObject(),
+      isActive: !user.isBlocked,
+    }));
+
+    res.json({ users: usersWithStatus });
   } catch (error) {
     console.error("Get all users error:", error);
     res.status(500).json({ message: "Server error" });
@@ -79,20 +86,33 @@ exports.updateUserRole = async (req, res) => {
 // @access  Private/Admin
 exports.toggleUserBlock = async (req, res) => {
   try {
+    console.log("Toggle block request:", {
+      userId: req.params.id,
+      requesterId: req.user?._id,
+      requesterRole: req.user?.role,
+    });
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
+      console.log("User not found:", req.params.id);
       return res.status(404).json({ message: "User not found" });
     }
 
     // Prevent admin from blocking themselves
     if (user._id.toString() === req.user._id.toString()) {
+      console.log("Admin attempted to block themselves");
       return res.status(400).json({ message: "Cannot block yourself" });
     }
 
     // Toggle blocked status
     user.isBlocked = !user.isBlocked;
     await user.save();
+
+    console.log("User block status toggled:", {
+      userId: user._id,
+      isBlocked: user.isBlocked,
+    });
 
     res.json({
       message: `User ${user.isBlocked ? "blocked" : "unblocked"} successfully`,
@@ -102,10 +122,17 @@ exports.toggleUserBlock = async (req, res) => {
         email: user.email,
         role: user.role,
         isBlocked: user.isBlocked,
+        isActive: !user.isBlocked, // For frontend compatibility
       },
     });
   } catch (error) {
     console.error("Toggle user block error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error stack:", error.stack);
+    console.error("Request params:", req.params);
+    console.error("Request user:", req.user?._id);
+    res.status(500).json({
+      message: "Server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
