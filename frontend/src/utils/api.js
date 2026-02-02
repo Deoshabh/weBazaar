@@ -90,6 +90,7 @@ export const productAPI = {
 
 export const categoryAPI = {
   getAllCategories: () => api.get("/categories"),
+  getNavbarCategories: () => api.get("/categories/navbar"),
   getCategoryBySlug: (slug) => api.get(`/categories/${slug}`),
 };
 
@@ -177,6 +178,12 @@ export const adminAPI = {
   updateCoupon: (id, data) => api.patch(`/admin/coupons/${id}`, data),
   deleteCoupon: (id) => api.delete(`/admin/coupons/${id}`),
   toggleCouponStatus: (id) => api.patch(`/admin/coupons/${id}/toggle`),
+
+  // Filters
+  getAllFilters: (params) => api.get("/admin/filters", { params }),
+  createFilter: (data) => api.post("/admin/filters", data),
+  updateFilter: (id, data) => api.patch(`/admin/filters/${id}`, data),
+  deleteFilter: (id) => api.delete(`/admin/filters/${id}`),
 
   // Media
   getUploadUrl: (data) => api.post("/admin/media/upload-url", data),

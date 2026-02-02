@@ -5,7 +5,10 @@ const Category = require("../models/Category");
 // @access  Private/Admin
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find().sort({ name: 1 });
+    const categories = await Category.find().sort({
+      displayOrder: 1,
+      name: 1,
+    });
     res.json({ categories });
   } catch (error) {
     console.error("Get categories error:", error);
@@ -18,7 +21,8 @@ exports.getAllCategories = async (req, res) => {
 // @access  Private/Admin
 exports.createCategory = async (req, res) => {
   try {
-    const { name, slug } = req.body;
+    const { name, slug, description, showInNavbar, displayOrder, image } =
+      req.body;
 
     if (!name || !slug) {
       return res.status(400).json({ message: "Name and slug are required" });
@@ -33,7 +37,14 @@ exports.createCategory = async (req, res) => {
         .json({ message: "Category name or slug already exists" });
     }
 
-    const category = await Category.create({ name, slug });
+    const category = await Category.create({
+      name,
+      slug,
+      description: description || "",
+      showInNavbar: showInNavbar !== undefined ? showInNavbar : true,
+      displayOrder: displayOrder || 0,
+      image: image || null,
+    });
     res.status(201).json({ category });
   } catch (error) {
     console.error("Create category error:", error);
@@ -67,7 +78,15 @@ exports.toggleCategoryStatus = async (req, res) => {
 // @access  Private/Admin
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, slug, isActive } = req.body;
+    const {
+      name,
+      slug,
+      description,
+      isActive,
+      showInNavbar,
+      displayOrder,
+      image,
+    } = req.body;
     const category = await Category.findById(req.params.id);
 
     if (!category) {
@@ -90,7 +109,11 @@ exports.updateCategory = async (req, res) => {
 
     if (name) category.name = name;
     if (slug) category.slug = slug;
+    if (description !== undefined) category.description = description;
     if (isActive !== undefined) category.isActive = isActive;
+    if (showInNavbar !== undefined) category.showInNavbar = showInNavbar;
+    if (displayOrder !== undefined) category.displayOrder = displayOrder;
+    if (image !== undefined) category.image = image;
 
     await category.save();
     res.json({ category });

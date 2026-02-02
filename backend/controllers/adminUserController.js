@@ -88,7 +88,7 @@ exports.toggleUserBlock = async (req, res) => {
   try {
     console.log("Toggle block request:", {
       userId: req.params.id,
-      requesterId: req.user?._id,
+      requesterId: req.user?.id || req.user?._id,
       requesterRole: req.user?.role,
     });
 
@@ -99,8 +99,11 @@ exports.toggleUserBlock = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Get requester ID (support both id and _id formats)
+    const requesterId = (req.user.id || req.user._id).toString();
+
     // Prevent admin from blocking themselves
-    if (user._id.toString() === req.user._id.toString()) {
+    if (user._id.toString() === requesterId) {
       console.log("Admin attempted to block themselves");
       return res.status(400).json({ message: "Cannot block yourself" });
     }

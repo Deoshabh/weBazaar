@@ -1,0 +1,131 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { categoryAPI, productAPI } from '@/utils/api';
+import { FiGrid } from 'react-icons/fi';
+
+export default function AllCategoriesPage() {
+  const router = useRouter();
+  const [categories, setCategories] = useState([]);
+  const [categoryStats, setCategoryStats] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const categoriesResponse = await categoryAPI.getAllCategories();
+      const cats = categoriesResponse.data.categories || [];
+      setCategories(cats);
+
+      // Fetch product count for each category
+      const stats = {};
+      await Promise.all(
+        cats.map(async (category) => {
+          try {
+            const productsResponse = await productAPI.getAllProducts({ category: category.slug });
+            const products = Array.isArray(productsResponse.data)
+              ? productsResponse.data
+              : productsResponse.data.products || [];
+            stats[category._id] = products.length;
+          } catch (error) {
+            console.error(`Failed to fetch products for ${category.name}:`, error);
+            stats[category._id] = 0;
+          }
+        })
+      );
+      setCategoryStats(stats);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-primary-50 pt-24">
+        <div className="container-custom section-padding">
+          <div className="flex justify-center items-center py-20">
+            <div className="spinner"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-primary-50 pt-24">
+      <div className="container-custom section-padding">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="font-serif text-4xl lg:text-5xl font-bold text-primary-900 mb-4">
+            All Categories
+          </h1>
+          <p className="text-lg text-primary-600 max-w-2xl mx-auto">
+            Explore our complete collection of handcrafted shoes organized by category
+          </p>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {categories.map((category) => (
+            <button
+              key={category._id}
+              onClick={() => router.push(`/category/${category.slug}`)}
+              className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+            >
+              {/* Category Image */}
+              <div className="relative aspect-[4/3] bg-primary-100">
+                {category.image?.url ? (
+                  <Image
+                    src={category.image.url}
+                    alt={category.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FiGrid className="w-16 h-16 text-primary-300" />
+                  </div>
+                )}
+              </div>
+
+              {/* Category Info */}
+              <div className="p-6">
+                <h3 className="font-serif text-xl font-bold text-primary-900 mb-2 group-hover:text-brand-brown transition-colors">
+                  {category.name}
+                </h3>
+                {category.description && (
+                  <p className="text-sm text-primary-600 mb-3 line-clamp-2">
+                    {category.description}
+                  </p>
+                )}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-primary-500">
+                    {categoryStats[category._id] || 0} Products
+                  </p>
+                  <span className="text-brand-brown group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {categories.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-primary-600 text-lg">No categories available at the moment.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

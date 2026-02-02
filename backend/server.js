@@ -29,13 +29,15 @@ app.set("trust proxy", 1);
 // ===============================
 // Database Connection
 // ===============================
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => log.success("MongoDB connected"))
-  .catch((err) => {
-    log.error("MongoDB connection error", err);
-    process.exit(1);
-  });
+if (process.env.NODE_ENV !== "test") {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => log.success("MongoDB connected"))
+    .catch((err) => {
+      log.error("MongoDB connection error", err);
+      process.exit(1);
+    });
+}
 
 // ===============================
 // CORS (Production safe)
@@ -112,12 +114,10 @@ app.use(errorHandler);
 // Health Check (deprecated - use /api/health)
 // ===============================
 app.get("/health", (req, res) => {
-  res
-    .status(200)
-    .json({
-      status: "OK",
-      message: "Use /api/health for detailed health check",
-    });
+  res.status(200).json({
+    status: "OK",
+    message: "Use /api/health for detailed health check",
+  });
 });
 
 // ===============================
@@ -140,4 +140,10 @@ async function startServer() {
   }
 }
 
-startServer();
+// Only start server if not in test environment
+if (process.env.NODE_ENV !== "test") {
+  startServer();
+}
+
+// Export app for testing
+module.exports = app;

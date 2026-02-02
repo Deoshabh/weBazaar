@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/utils/api';
 import AdminLayout from '@/components/AdminLayout';
-import { FiPackage, FiShoppingBag, FiUsers, FiDollarSign, FiTrendingUp, FiSettings } from 'react-icons/fi';
+import { FiPackage, FiShoppingBag, FiUsers, FiDollarSign, FiTrendingUp, FiSettings, FiFilter } from 'react-icons/fi';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -105,6 +105,7 @@ export default function AdminDashboard() {
     { title: 'View Orders', href: '/admin/orders', icon: FiPackage, description: 'Manage customer orders' },
     { title: 'Manage Users', href: '/admin/users', icon: FiUsers, description: 'View and manage users' },
     { title: 'Categories', href: '/admin/categories', icon: FiSettings, description: 'Manage product categories' },
+    { title: 'Filters', href: '/admin/filters', icon: FiFilter, description: 'Manage product filters' },
     { title: 'Coupons', href: '/admin/coupons', icon: FiTrendingUp, description: 'Create and manage coupons' },
     { title: 'Statistics', href: '/admin/stats', icon: FiDollarSign, description: 'View detailed analytics' },
   ];

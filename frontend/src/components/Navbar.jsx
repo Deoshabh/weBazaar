@@ -8,7 +8,7 @@ import { FiShoppingCart, FiHeart, FiUser, FiSearch, FiMenu, FiX, FiLogOut, FiPac
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
-import { productAPI } from '@/utils/api';
+import { productAPI, categoryAPI } from '@/utils/api';
 
 export default function Navbar() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function Navbar() {
 
   const fetchCategories = async () => {
     try {
-      const response = await productAPI.getCategories();
+      const response = await categoryAPI.getNavbarCategories();
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -134,11 +134,17 @@ export default function Navbar() {
                 </svg>
               </button>
               <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 animate-slide-down">
+                <Link
+                  href="/categories"
+                  className="block px-4 py-2 font-semibold text-brand-brown hover:bg-primary-50 first:rounded-t-lg border-b border-primary-100 transition-colors"
+                >
+                  All Categories
+                </Link>
                 {categories.map((category) => (
                   <Link
                     key={category._id}
                     href={`/category/${category.slug}`}
-                    className="block px-4 py-2 hover:bg-primary-50 first:rounded-t-lg last:rounded-b-lg transition-colors"
+                    className="block px-4 py-2 hover:bg-primary-50 last:rounded-b-lg transition-colors"
                   >
                     {category.name}
                   </Link>
@@ -313,7 +319,14 @@ export default function Navbar() {
               <Link href="/" className="px-4 py-2 hover:bg-primary-50 rounded transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                 Home
               </Link>
-              <Link href="/products" className="px-4 py-2 hover:bg-primary-50 rounded transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+              <Lin<Link
+                    href="/categories"
+                    className="py-1 font-semibold text-brand-brown hover:text-brand-brown/80 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    All Categories
+                  </Link>
+                  k href="/products" className="px-4 py-2 hover:bg-primary-50 rounded transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                 Products
               </Link>
               <div className="px-4 py-2">

@@ -22,6 +22,8 @@ export default function CategoriesPage() {
     name: '',
     slug: '',
     description: '',
+    showInNavbar: true,
+    displayOrder: 0,
     isActive: true,
   });
 
@@ -56,6 +58,8 @@ export default function CategoriesPage() {
         name: category.name,
         slug: category.slug,
         description: category.description || '',
+        showInNavbar: category.showInNavbar !== undefined ? category.showInNavbar : true,
+        displayOrder: category.displayOrder || 0,
         isActive: category.isActive,
       });
     } else {
@@ -65,6 +69,8 @@ export default function CategoriesPage() {
         name: '',
         slug: '',
         description: '',
+        showInNavbar: true,
+        displayOrder: 0,
         isActive: true,
       });
     }
@@ -75,7 +81,9 @@ export default function CategoriesPage() {
     setShowModal(false);
     setEditMode(false);
     setSelectedCategory(null);
-    setFormData({
+    seshowInNavbar: true,
+      displayOrder: 0,
+      tFormData({
       name: '',
       slug: '',
       description: '',
@@ -296,6 +304,40 @@ export default function CategoriesPage() {
                   className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
                   placeholder="Brief description of this category"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-primary-900 mb-2">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  name="displayOrder"
+                  value={formData.displayOrder}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                  placeholder="0"
+                />
+                <p className="text-xs text-primary-500 mt-1">
+                  Lower numbers appear first in the navbar
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer touch-manipulation">
+                  <input
+                    type="checkbox"
+                    name="showInNavbar"
+                    checked={formData.showInNavbar}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-primary-900 rounded focus:ring-2 focus:ring-primary-900"
+                  />
+                  <span className="text-sm font-medium text-primary-900">Show in Navbar</span>
+                </label>
+                <p className="text-xs text-primary-500 ml-6">
+                  Display this category in the navigation menu
+                </p>
               </div>
               
               <div>

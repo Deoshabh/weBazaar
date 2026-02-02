@@ -14,12 +14,28 @@ const categorySchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    description: {
+      type: String,
+      default: "",
+    },
+    image: {
+      url: String,
+      publicId: String,
+    },
     isActive: {
       type: Boolean,
       default: true,
     },
+    showInNavbar: {
+      type: Boolean,
+      default: true,
+    },
+    displayOrder: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Category", categorySchema);
