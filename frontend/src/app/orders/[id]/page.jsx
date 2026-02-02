@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -27,7 +27,22 @@ export default function OrderDetailPage() {
     if (isAuthenticated && params.id) {
       fetchOrder();
     }
-  }, [isAuthenticated, params.id]);
+  }, [isAuthenticated, params.id, fetchOrder]);
+
+  const fetchOrder = useCallback(async () => {
+    try {
+      setLoadingOrder(true);
+      const response = await orderAPI.getOrderById(params.id);
+      // Backend returns {order: {...}}
+      console.log('📦 Order Details API response:', response.data);
+      setOrder(response.data.order);
+    } catch (error) {
+      console.error('Failed to fetch order:', error);
+    } finally {
+      setLoadingOrder(false);
+    }
+  }, [params.id]);
+
   const handleCancelOrder = async () => {
     if (!window.confirm('Are you sure you want to cancel this order?')) {
       return;
@@ -43,19 +58,6 @@ export default function OrderDetailPage() {
       toast.error(error.response?.data?.message || 'Failed to cancel order');
     } finally {
       setCancelling(false);
-    }
-  };
-  const fetchOrder = async () => {
-    try {
-      setLoadingOrder(true);
-      const response = await orderAPI.getOrderById(params.id);
-      // Backend returns {order: {...}}
-      console.log('📦 Order Details API response:', response.data);
-      setOrder(response.data.order);
-    } catch (error) {
-      console.error('Failed to fetch order:', error);
-    } finally {
-      setLoadingOrder(false);
     }
   };
 

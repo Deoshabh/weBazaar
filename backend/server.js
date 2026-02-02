@@ -13,6 +13,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 const { initializeBucket } = require("./utils/minio");
+const { logger, log } = require("./utils/logger");
+const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 
 // ===============================
 // App init
@@ -29,9 +31,9 @@ app.set("trust proxy", 1);
 // ===============================
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(() => log.success("MongoDB connected"))
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    log.error("MongoDB connection error", err);
     process.exit(1);
   });
 
@@ -58,6 +60,7 @@ app.use(
 // ===============================
 // Middleware
 // ===============================
+app.use(logger); // HTTP request logging
 app.use(express.json());
 app.use(cookieParser());
 
@@ -73,6 +76,7 @@ app.use(
 // ===============================
 // Routes
 // ===============================
+app.use("/api/health", require("./routes/healthRoutes")); // Health checks
 app.use("/api/v1/auth", require("./routes/authRoutes"));
 app.use("/api/v1/products", require("./routes/productRoutes"));
 app.use("/api/v1/cart", require("./routes/cartRoutes"));
@@ -95,20 +99,25 @@ app.use("/api/v1/wishlist", require("./routes/wishlistRoutes"));
 app.use("/api/v1/user", require("./routes/userRoutes"));
 
 // ===============================
-// Health Check
+// 404 Handler (must be after all routes)
 // ===============================
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
-});
+app.use(notFoundHandler);
 
 // ===============================
-// Global Error Handler
+// Global Error Handler (must be last)
 // ===============================
-app.use((err, req, res, next) => {
-  console.error("❌ Error:", err.message);
-  res.status(err.status || 500).json({
-    message: err.message || "Internal Server Error",
-  });
+app.use(errorHandler);
+
+// ===============================
+// Health Check (deprecated - use /api/health)
+// ===============================
+app.get("/health", (req, res) => {
+  res
+    .status(200)
+    .json({
+      status: "OK",
+      message: "Use /api/health for detailed health check",
+    });
 });
 
 // ===============================
@@ -118,15 +127,15 @@ async function startServer() {
   try {
     // 🔴 CRITICAL: wait for MinIO
     await initializeBucket();
-    console.log("✅ MinIO initialized — starting server");
+    log.success("MinIO initialized — starting server");
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log("📡 CORS allowed origins:", allowedOrigins.join(", "));
+      log.success(`Server running on port ${PORT}`);
+      log.info("CORS allowed origins", { origins: allowedOrigins });
     });
   } catch (err) {
-    console.error("❌ Fatal startup error:", err.message);
+    log.error("Fatal startup error", err);
     process.exit(1);
   }
 }

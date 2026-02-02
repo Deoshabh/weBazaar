@@ -1,11 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
-
-// Note: Dynamic metadata generation requires server component
-// For client components with dynamic data, we update meta tags via useEffect
-// Consider moving to server component for better SEO
 import { useParams, useRouter } from 'next/navigation';
 import { productAPI } from '@/utils/api';
 import { useCart } from '@/context/CartContext';
@@ -13,6 +9,8 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { FiHeart, FiShoppingCart, FiAward, FiTruck, FiShield, FiCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import ProductMetadata from '@/components/ProductMetadata';
+import { PageLoader } from '@/components/LoadingSpinner';
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -34,9 +32,9 @@ export default function ProductDetailPage() {
     if (slug) {
       fetchProduct();
     }
-  }, [slug]);
+  }, [slug, fetchProduct]);
 
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
       const response = await productAPI.getProductBySlug(slug);
@@ -59,7 +57,7 @@ export default function ProductDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug, router]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -105,11 +103,7 @@ export default function ProductDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-primary-50 pt-24 flex justify-center items-center">
-        <div className="spinner"></div>
-      </div>
-    );
+    return <PageLoader text="Loading product..." />;
   }
 
   if (!product) {
@@ -119,7 +113,9 @@ export default function ProductDetailPage() {
   const inWishlist = isInWishlist(product._id);
 
   return (
-    <div className="min-h-screen bg-primary-50 pt-24">
+    <>
+      <ProductMetadata product={product} />
+      <div className="min-h-screen bg-primary-50 pt-24">
       <div className="container-custom section-padding">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Image Gallery */}
@@ -408,5 +404,6 @@ export default function ProductDetailPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -31,7 +31,7 @@ export default function CategoriesPage() {
       return;
     }
     fetchCategories();
-  }, [user]);
+  }, [user, router]);
 
   const fetchCategories = async () => {
     try {

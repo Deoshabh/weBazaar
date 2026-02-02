@@ -24,7 +24,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold text-primary-900 mb-4">Introduction</h2>
               <p className="leading-relaxed">
-                Welcome to Radeo ("we", "our", or "us"). These Terms of Service ("Terms") govern your 
+                Welcome to Radeo (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). These Terms of Service (&quot;Terms&quot;) govern your 
                 access to and use of our website and services. By accessing or using our services, you 
                 agree to be bound by these Terms. If you do not agree with any part of these Terms, you 
                 may not access our services.
@@ -175,7 +175,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold text-primary-900 mb-4">Disclaimer of Warranties</h2>
               <p className="leading-relaxed">
-                Our services are provided "as is" and "as available" without any warranties of any kind, 
+                Our services are provided &quot;as is&quot; and &quot;as available&quot; without any warranties of any kind, 
                 either express or implied. We do not warrant that our services will meet your requirements 
                 or that the operation will be uninterrupted or error-free.
               </p>

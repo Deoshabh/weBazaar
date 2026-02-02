@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { productAPI } from '@/utils/api';
 import ProductCard from '@/components/ProductCard';
 import { FiArrowRight, FiAward, FiTruck, FiShield } from 'react-icons/fi';
+import { ProductCardSkeleton } from '@/components/LoadingSpinner';
+import { JsonLd, generateWebsiteJsonLd, generateOrganizationJsonLd } from '@/utils/seo';
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -32,6 +34,10 @@ export default function Home() {
 
   return (
     <>
+      {/* Structured Data */}
+      <JsonLd data={generateWebsiteJsonLd()} />
+      <JsonLd data={generateOrganizationJsonLd()} />
+
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-50 via-brand-cream/20 to-primary-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24 relative z-10">
@@ -111,8 +117,8 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="spinner"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <ProductCardSkeleton count={8} />
             </div>
           ) : featuredProducts.length > 0 ? (
             <>

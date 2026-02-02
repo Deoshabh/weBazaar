@@ -6,6 +6,8 @@ import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { generateMetadata as generateSEOMetadata } from '@/utils/seo';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -19,25 +21,26 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-export const metadata = {
+export const metadata = generateSEOMetadata({
   title: 'Radeo - Premium Handcrafted Shoes',
   description: 'Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship.',
-  keywords: 'shoes, handcrafted, premium, leather, oxford, derby, brogue, loafer',
-};
+  keywords: ['shoes', 'handcrafted', 'premium', 'leather', 'oxford', 'derby', 'brogue', 'loafer'],
+});
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="antialiased">
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <Navbar />
-              <main className="min-h-screen pt-[80px]">
-                {children}
-              </main>
-              <Footer />
-              <Toaster 
+        <ErrorBoundary>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <Navbar />
+                <main className="min-h-screen pt-[80px]">
+                  {children}
+                </main>
+                <Footer />
+                <Toaster 
                 position="top-right"
                 toastOptions={{
                   duration: 3000,
@@ -64,6 +67,7 @@ export default function RootLayout({ children }) {
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>
+      </ErrorBoundary>
       </body>
     </html>
   );

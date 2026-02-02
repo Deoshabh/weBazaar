@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.3",
     "minio": "^8.0.1",
     "mongoose": "^9.0.1",
+    "morgan": "^1.10.1",
     "razorpay": "^2.9.6",
     "zod": "^4.2.1"
   },

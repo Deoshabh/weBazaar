@@ -36,7 +36,7 @@ export default function CouponsPage() {
       return;
     }
     fetchCoupons();
-  }, [user]);
+  }, [user, router]);
 
   const fetchCoupons = async () => {
     try {

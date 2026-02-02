@@ -17,7 +17,7 @@ export default function CartPage() {
     if (!isAuthenticated) {
       router.push('/auth/login');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated) {
     return null;

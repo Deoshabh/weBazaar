@@ -48,7 +48,7 @@ export default function CheckoutPage() {
         router.push('/cart');
       }
     }
-  }, [isAuthenticated, cartCount]);
+  }, [isAuthenticated, cartCount, router]);
 
   const fetchAddresses = async () => {
     try {

@@ -50,7 +50,7 @@ function ProductFormContent() {
       setIsEditMode(true);
       fetchProductData(editProductId);
     }
-  }, [user, editProductId]);
+  }, [user, editProductId, router]);
 
   const fetchProductData = async (productId) => {
     try {
