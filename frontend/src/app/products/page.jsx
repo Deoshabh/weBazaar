@@ -121,7 +121,7 @@ function ProductsContent() {
   const activeFilterCount = [selectedCategory, priceRange, searchQuery].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-primary-50 pt-24">
+    <div className="min-h-screen bg-primary-50 pt-8">
       <div className="container-custom section-padding">
         {/* Header */}
         <div className="mb-8">
