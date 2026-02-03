@@ -72,6 +72,7 @@ function ProductsContent() {
     }
   };
 
+  // Fetch initial data
   useEffect(() => {
     fetchCategories();
     fetchBrands();
