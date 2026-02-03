@@ -13,7 +13,7 @@ export default function OrdersPage() {
   const { isAuthenticated, loading } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, pending, processing, shipped, delivered, cancelled
+  const [filter, setFilter] = useState('all'); // all, delivered, cancelled
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -66,8 +66,8 @@ export default function OrdersPage() {
         return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'processing':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'pending':
-        return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'confirmed':
+        return 'bg-primary-100 text-primary-800 border-primary-300';
       default:
         return 'bg-primary-100 text-primary-800 border-primary-300';
     }
@@ -102,7 +102,7 @@ export default function OrdersPage() {
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex flex-wrap gap-2">
-            {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+            {['all', 'delivered', 'cancelled'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -155,16 +155,18 @@ export default function OrdersPage() {
                           })}
                         </p>
                       </div>
-                      <div className="h-8 w-px bg-primary-300"></div>
+                      <div className="hidden sm:block h-8 w-px bg-primary-300"></div>
                       <div>
-                        <p className="text-sm text-primary-600">Total Amount</p>
-                        <p className="font-semibold text-primary-900">₹{order.totalAmount?.toLocaleString()}</p>
+                        <p className="text-xs sm:text-sm text-primary-600">Total Amount</p>
+                        <p className="font-semibold text-sm sm:text-base text-primary-900">
+                          ₹{(order.totalAmount || order.total || 0).toLocaleString('en-IN')}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${getStatusColor(order.status)}`}>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs sm:text-sm ${getStatusColor(order.status)}`}>
                         {getStatusIcon(order.status)}
-                        <span className="font-medium capitalize">{order.status}</span>
+                        <span className="font-medium capitalize">{order.status || 'confirmed'}</span>
                       </div>
                       <Link
                         href={`/orders/${order._id}`}

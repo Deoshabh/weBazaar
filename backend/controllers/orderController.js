@@ -121,6 +121,7 @@ exports.createOrder = async (req, res) => {
       subtotal,
       discount,
       total,
+      totalAmount: total, // Store total as totalAmount for frontend
       coupon: couponData,
       shippingAddress: {
         fullName: shippingAddress.fullName.trim(),

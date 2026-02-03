@@ -77,6 +77,8 @@ export default function AdminOrdersPage() {
         return 'bg-blue-100 text-blue-800';
       case 'processing':
         return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed':
+        return 'bg-primary-100 text-primary-800';
       default:
         return 'bg-primary-100 text-primary-800';
     }
@@ -119,7 +121,7 @@ export default function AdminOrdersPage() {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+              {['all', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
@@ -170,7 +172,7 @@ export default function AdminOrdersPage() {
                         {new Date(order.createdAt).toLocaleDateString('en-IN')}
                       </td>
                       <td className="px-6 py-4 font-semibold text-primary-900">
-                        ₹{order.totalAmount?.toLocaleString()}
+                        ₹{(order.totalAmount || order.total || 0).toLocaleString('en-IN')}
                       </td>
                       <td className="px-6 py-4">
                         <select
@@ -178,7 +180,7 @@ export default function AdminOrdersPage() {
                           onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
                           className={`px-3 py-1 rounded-full text-sm font-medium border-0 focus:ring-2 focus:ring-primary-900 ${getStatusColor(order.status)}`}
                         >
-                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
                           <option value="processing">Processing</option>
                           <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
@@ -205,7 +207,7 @@ export default function AdminOrdersPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-          {['all', 'pending', 'processing', 'delivered'].map((status) => (
+          {['all', 'confirmed', 'processing', 'delivered'].map((status) => (
             <div key={status} className="bg-white rounded-lg shadow-md p-6">
               <p className="text-primary-600 text-sm mb-1 capitalize">{status} Orders</p>
               <p className="text-2xl font-bold text-primary-900">

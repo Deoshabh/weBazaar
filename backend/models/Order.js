@@ -13,7 +13,7 @@ const orderItemSchema = new mongoose.Schema(
     quantity: Number,
     price: Number, // snapshot price (₹ in cents)
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderSchema = new mongoose.Schema(
@@ -35,6 +35,7 @@ const orderSchema = new mongoose.Schema(
     subtotal: Number,
     discount: { type: Number, default: 0 },
     total: Number,
+    totalAmount: Number, // Same as total, for frontend clarity
 
     coupon: {
       code: String,
@@ -101,7 +102,7 @@ const orderSchema = new mongoose.Schema(
       default: 3,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Note: orderId is now generated in the controller
