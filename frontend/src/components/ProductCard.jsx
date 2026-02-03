@@ -124,18 +124,18 @@ export default function ProductCard({ product }) {
         {/* Product Info */}
         <div className="p-4 sm:p-6 flex-1 flex flex-col">
           {/* Category */}
-          <p className="text-xs uppercase tracking-wider text-primary-600 mb-2">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-primary-600 mb-1">
             {product.category}
           </p>
 
           {/* Name */}
-          <h3 className="font-serif text-lg sm:text-xl font-semibold text-primary-900 mb-2 group-hover:text-brand-brown transition-colors line-clamp-2">
+          <h3 className="font-serif text-base sm:text-lg font-semibold text-primary-900 mb-2 group-hover:text-brand-brown transition-colors line-clamp-1">
             {product.name}
           </h3>
 
           {/* Description */}
           {product.description && (
-            <p className="text-xs sm:text-sm text-primary-600 mb-3 line-clamp-2">
+            <p className="text-xs text-primary-600 mb-2 line-clamp-1">
               {product.description}
             </p>
           )}
@@ -143,13 +143,13 @@ export default function ProductCard({ product }) {
           {/* Price */}
           <div className="mt-auto">
             <div className="flex items-center justify-between">
-              <p className="text-lg sm:text-xl font-bold text-primary-800">
+              <p className="text-base sm:text-lg font-bold text-primary-800">
                 ₹{product.price?.toLocaleString()}
               </p>
               
               {/* Sizes Available */}
               {product.sizes && product.sizes.length > 0 && (
-                <p className="text-xs sm:text-sm text-primary-600">
+                <p className="text-[10px] sm:text-xs text-primary-600">
                   {product.sizes.length} sizes
                 </p>
               )}
