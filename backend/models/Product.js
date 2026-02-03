@@ -37,10 +37,12 @@ const productSchema = new mongoose.Schema(
       },
     },
     // Care instructions as array of points
-    careInstructions: [{
-      type: String,
-      trim: true,
-    }],
+    careInstructions: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     category: {
       type: String,
       required: true,

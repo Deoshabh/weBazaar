@@ -721,7 +721,7 @@ function ProductFormContent() {
                 </div>
                 
                 <p className="text-xs text-primary-500 mt-2">
-                  Add each care instruction as a separate point (e.g., "Use a soft brush to remove dirt", "Apply leather conditioner regularly")
+                  Add each care instruction as a separate point (e.g., &quot;Use a soft brush to remove dirt&quot;, &quot;Apply leather conditioner regularly&quot;)
                 </p>
               </div>
             </div>
