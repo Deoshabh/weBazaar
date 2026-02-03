@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI, categoryAPI, filterAPI } from '@/utils/api';
 import ProductCard from '@/components/ProductCard';
+import PriceRangeSlider from '@/components/PriceRangeSlider';
 import { FiFilter, FiX } from 'react-icons/fi';
 
 function ProductsContent() {
@@ -12,13 +13,18 @@ function ProductsContent() {
   
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [filters, setFilters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [priceRange, setPriceRange] = useState('');
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedMaterials, setSelectedMaterials] = useState([]);
+  const [selectedPriceRange, setSelectedPriceRange] = useState(null);
   const [sortBy, setSortBy] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -29,6 +35,41 @@ function ProductsContent() {
       setCategories(Array.isArray(response.data) ? response.data : (response.data.categories || []));
     } catch (error) {
       console.error('Failed to fetch categories:', error);
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const response = await productAPI.getBrands();
+      console.log('📦 Brands API response:', response.data);
+      setBrands(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch brands:', error);
+    }
+  };
+
+  const fetchMaterials = async () => {
+    try {
+      const response = await productAPI.getMaterials();
+      console.log('📦 Materials API response:', response.data);
+      setMaterials(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch materials:', error);
+    }
+  };
+
+  const fetchPriceRange = async () => {
+    try {
+      const response = await productAPI.getPriceRange();
+      console.log('📦 Price Range API response:', response.data);
+      if (response.data) {
+        setPriceRange(response.data);
+        if (!selectedPriceRange) {
+          setSelectedPriceRange(response.data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch price range:', error);
     }
   };
 
@@ -44,45 +85,28 @@ function ProductsContent() {
 
   useEffect(() => {
     fetchCategories();
+    fetchBrands();
+    fetchMaterials();
+    fetchPriceRange();
     fetchFilters();
   }, []);
 
-  const fetchProducts = useCallback(async (category, price, sort, search) => {
+  const fetchProducts = useCallback(async (category, brands, materials, priceMin, priceMax, sort, search) => {
     try {
       setLoading(true);
       const params = {};
       
       if (category) params.category = category;
       if (search) params.search = search;
+      if (brands && brands.length > 0) params.brand = brands[0]; // Backend supports single brand for now
+      if (materials && materials.length > 0) params.material = materials[0]; // Backend supports single material for now
       
-      // Price range filter - use dynamic filters if available
-      if (price) {
-        // Check if this is a filter from backend
-        const priceFilter = filters.find(
-          (f) => f.type === 'priceRange' && f.value === price
-        );
-        
-        if (priceFilter) {
-          // Use dynamic filter values
-          if (priceFilter.minPrice !== undefined) params.minPrice = priceFilter.minPrice;
-          if (priceFilter.maxPrice !== undefined && priceFilter.maxPrice !== null) {
-            params.maxPrice = priceFilter.maxPrice;
-          }
-        } else {
-          // Fallback to hardcoded ranges (for backward compatibility)
-          const ranges = {
-            'under-5000': { max: 5000 },
-            '5000-10000': { min: 5000, max: 10000 },
-            '10000-15000': { min: 10000, max: 15000 },
-            '15000-20000': { min: 15000, max: 20000 },
-            'above-20000': { min: 20000 },
-          };
-          
-          if (ranges[price]) {
-            if (ranges[price].min) params.minPrice = ranges[price].min;
-            if (ranges[price].max) params.maxPrice = ranges[price].max;
-          }
-        }
+      // Price range filter
+      if (priceMin !== undefined && priceMin !== null) {
+        params.minPrice = priceMin;
+      }
+      if (priceMax !== undefined && priceMax !== null) {
+        params.maxPrice = priceMax;
       }
       
       // Sorting
@@ -111,28 +135,52 @@ function ProductsContent() {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, []);
 
   useEffect(() => {
     // Get filters from URL
     const category = searchParams.get('category') || '';
-    const price = searchParams.get('price') || '';
+    const brandsParam = searchParams.get('brands') || '';
+    const materialsParam = searchParams.get('materials') || '';
+    const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
     const sort = searchParams.get('sort') || 'featured';
     const search = searchParams.get('search') || '';
 
     setSelectedCategory(category);
-    setPriceRange(price);
+    setSelectedBrands(brandsParam ? brandsParam.split(',') : []);
+    setSelectedMaterials(materialsParam ? materialsParam.split(',') : []);
     setSortBy(sort);
     setSearchQuery(search);
 
-    fetchProducts(category, price, sort, search);
-  }, [searchParams, fetchProducts]);
+    // Update price range from URL
+    if (minPrice || maxPrice) {
+      setSelectedPriceRange({
+        min: minPrice ? Number(minPrice) : priceRange.min,
+        max: maxPrice ? Number(maxPrice) : priceRange.max,
+      });
+    }
+
+    fetchProducts(
+      category, 
+      brandsParam ? brandsParam.split(',') : [], 
+      materialsParam ? materialsParam.split(',') : [],
+      minPrice ? Number(minPrice) : undefined,
+      maxPrice ? Number(maxPrice) : undefined,
+      sort, 
+      search
+    );
+  }, [searchParams, fetchProducts, priceRange]);
 
   const updateFilters = (key, value) => {
     const params = new URLSearchParams(searchParams.toString());
     
-    if (value) {
-      params.set(key, value);
+    if (value && (Array.isArray(value) ? value.length > 0 : true)) {
+      if (Array.isArray(value)) {
+        params.set(key, value.join(','));
+      } else {
+        params.set(key, value);
+      }
     } else {
       params.delete(key);
     }
@@ -140,11 +188,41 @@ function ProductsContent() {
     router.push(`/products?${params.toString()}`);
   };
 
+  const handlePriceChange = (newRange) => {
+    setSelectedPriceRange(newRange);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('minPrice', newRange.min);
+    params.set('maxPrice', newRange.max);
+    router.push(`/products?${params.toString()}`);
+  };
+
+  const handleBrandToggle = (brand) => {
+    const newBrands = selectedBrands.includes(brand)
+      ? selectedBrands.filter(b => b !== brand)
+      : [...selectedBrands, brand];
+    setSelectedBrands(newBrands);
+    updateFilters('brands', newBrands);
+  };
+
+  const handleMaterialToggle = (material) => {
+    const newMaterials = selectedMaterials.includes(material)
+      ? selectedMaterials.filter(m => m !== material)
+      : [...selectedMaterials, material];
+    setSelectedMaterials(newMaterials);
+    updateFilters('materials', newMaterials);
+  };
+
   const clearFilters = () => {
     router.push('/products');
   };
 
-  const activeFilterCount = [selectedCategory, priceRange, searchQuery].filter(Boolean).length;
+  const activeFilterCount = [
+    selectedCategory, 
+    searchQuery,
+    selectedBrands.length > 0,
+    selectedMaterials.length > 0,
+    selectedPriceRange && (selectedPriceRange.min !== priceRange.min || selectedPriceRange.max !== priceRange.max)
+  ].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-primary-50 pt-8">
@@ -241,87 +319,53 @@ function ProductsContent() {
               {/* Price Range Filter */}
               <div className="mb-6">
                 <h4 className="font-medium mb-3">Price Range</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="price"
-                      checked={!priceRange}
-                      onChange={() => updateFilters('price', '')}
-                      className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                    />
-                    <span className="text-sm">All Prices</span>
-                  </label>
-                  {filters
-                    .filter((f) => f.type === 'priceRange')
-                    .map((filter) => (
-                      <label key={filter._id} className="flex items-center gap-2 cursor-pointer">
+                <PriceRangeSlider
+                  min={priceRange.min}
+                  max={priceRange.max}
+                  value={selectedPriceRange}
+                  onChange={handlePriceChange}
+                />
+              </div>
+
+              {/* Brand Filter */}
+              {brands.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-3">Brand</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {brands.map((brand) => (
+                      <label key={brand} className="flex items-center gap-2 cursor-pointer">
                         <input
-                          type="radio"
-                          name="price"
-                          checked={priceRange === filter.value}
-                          onChange={() => updateFilters('price', filter.value)}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
+                          type="checkbox"
+                          checked={selectedBrands.includes(brand)}
+                          onChange={() => handleBrandToggle(brand)}
+                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
                         />
-                        <span className="text-sm">{filter.name}</span>
+                        <span className="text-sm">{brand}</span>
                       </label>
                     ))}
-                  {filters.filter((f) => f.type === 'priceRange').length === 0 && (
-                    <>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="price"
-                          checked={priceRange === 'under-5000'}
-                          onChange={() => updateFilters('price', 'under-5000')}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                        />
-                        <span className="text-sm">Under ₹5,000</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="price"
-                          checked={priceRange === '5000-10000'}
-                          onChange={() => updateFilters('price', '5000-10000')}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                        />
-                        <span className="text-sm">₹5,000 - ₹10,000</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="price"
-                          checked={priceRange === '10000-15000'}
-                          onChange={() => updateFilters('price', '10000-15000')}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                        />
-                        <span className="text-sm">₹10,000 - ₹15,000</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="price"
-                          checked={priceRange === '15000-20000'}
-                          onChange={() => updateFilters('price', '15000-20000')}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                        />
-                        <span className="text-sm">₹15,000 - ₹20,000</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="price"
-                          checked={priceRange === 'above-20000'}
-                          onChange={() => updateFilters('price', 'above-20000')}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                        />
-                        <span className="text-sm">Above ₹20,000</span>
-                      </label>
-                    </>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Material Filter */}
+              {materials.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-3">Material</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {materials.map((material) => (
+                      <label key={material} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedMaterials.includes(material)}
+                          onChange={() => handleMaterialToggle(material)}
+                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                        />
+                        <span className="text-sm">{material}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </aside>
 
@@ -375,63 +419,56 @@ function ProductsContent() {
                 {/* Price Range Filter */}
                 <div className="mb-6">
                   <h4 className="font-medium mb-3">Price Range</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="price-mobile"
-                        checked={!priceRange}
-                        onChange={() => {
-                          updateFilters('price', '');
-                          setIsFilterOpen(false);
-                        }}
-                        className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                      />
-                      <span className="text-sm">All Prices</span>
-                    </label>
-                    {filters
-                      .filter((f) => f.type === 'priceRange')
-                      .map((filter) => (
-                        <label key={filter._id} className="flex items-center gap-2 cursor-pointer">
+                  <PriceRangeSlider
+                    min={priceRange.min}
+                    max={priceRange.max}
+                    value={selectedPriceRange}
+                    onChange={(newRange) => {
+                      handlePriceChange(newRange);
+                      setIsFilterOpen(false);
+                    }}
+                  />
+                </div>
+
+                {/* Brand Filter */}
+                {brands.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">Brand</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {brands.map((brand) => (
+                        <label key={brand} className="flex items-center gap-2 cursor-pointer">
                           <input
-                            type="radio"
-                            name="price-mobile"
-                            checked={priceRange === filter.value}
-                            onChange={() => {
-                              updateFilters('price', filter.value);
-                              setIsFilterOpen(false);
-                            }}
-                            className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
+                            type="checkbox"
+                            checked={selectedBrands.includes(brand)}
+                            onChange={() => handleBrandToggle(brand)}
+                            className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
                           />
-                          <span className="text-sm">{filter.name}</span>
+                          <span className="text-sm">{brand}</span>
                         </label>
                       ))}
-                    {filters.filter((f) => f.type === 'priceRange').length === 0 && (
-                      <>
-                        {['under-5000', '5000-10000', '10000-15000', '15000-20000', 'above-20000'].map((range, idx) => (
-                          <label key={range} className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              name="price-mobile"
-                              checked={priceRange === range}
-                              onChange={() => {
-                                updateFilters('price', range);
-                                setIsFilterOpen(false);
-                              }}
-                              className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                            />
-                            <span className="text-sm">
-                              {idx === 0 ? 'Under ₹5,000' :
-                               idx === 1 ? '₹5,000 - ₹10,000' :
-                               idx === 2 ? '₹10,000 - ₹15,000' :
-                               idx === 3 ? '₹15,000 - ₹20,000' : 'Above ₹20,000'}
-                            </span>
-                          </label>
-                        ))}
-                      </>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Material Filter */}
+                {materials.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">Material</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {materials.map((material) => (
+                        <label key={material} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedMaterials.includes(material)}
+                            onChange={() => handleMaterialToggle(material)}
+                            className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                          />
+                          <span className="text-sm">{material}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <button onClick={clearFilters} className="w-full btn btn-secondary mb-4">
                   Clear All Filters

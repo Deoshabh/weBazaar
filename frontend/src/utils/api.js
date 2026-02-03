@@ -100,6 +100,9 @@ export const productAPI = {
   getAllProducts: (params) => api.get("/products", { params }),
   getProductBySlug: (slug) => api.get(`/products/${slug}`),
   getCategories: () => api.get("/products/categories"),
+  getBrands: () => api.get("/products/brands"),
+  getMaterials: () => api.get("/products/materials"),
+  getPriceRange: () => api.get("/products/price-range"),
   searchProducts: (query) =>
     api.get("/products/search", { params: { q: query } }),
 };
