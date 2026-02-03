@@ -72,12 +72,12 @@ function ProductsContent() {
     }
   };
 
-  const fetchFilters = async () => {
   useEffect(() => {
     fetchCategories();
     fetchBrands();
     fetchMaterials();
-    fetchPriceRange
+    fetchPriceRange();
+  }, []);
 
   const fetchProducts = useCallback(async (category, brands, materials, priceMin, priceMax, sort, search) => {
     try {
