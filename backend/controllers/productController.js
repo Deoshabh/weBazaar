@@ -49,6 +49,16 @@ exports.getAllProducts = async (req, res) => {
       query.materialAndCare = new RegExp(material, "i"); // Case-insensitive contains
     }
 
+    // Filter by color if provided
+    if (req.query.color) {
+      query.colors = { $in: [new RegExp(`^${req.query.color}$`, "i")] };
+    }
+
+    // Filter by size if provided
+    if (req.query.size) {
+      query["sizes.size"] = new RegExp(`^${req.query.size}$`, "i");
+    }
+
     // Price range filtering
     if (minPrice || maxPrice) {
       query.price = {};
@@ -231,6 +241,60 @@ exports.getPriceRange = async (req, res) => {
     }
   } catch (error) {
     console.error("Get price range error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/v1/products/colors
+exports.getColors = async (req, res) => {
+  try {
+    const colors = await Product.distinct("colors", {
+      isActive: true,
+      colors: { $exists: true, $ne: [] },
+    });
+    // Filter out empty strings and sort alphabetically
+    const sortedColors = colors.filter(Boolean).sort();
+    res.json(sortedColors);
+  } catch (error) {
+    console.error("Get colors error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/v1/products/sizes
+exports.getSizes = async (req, res) => {
+  try {
+    const products = await Product.find(
+      {
+        isActive: true,
+        sizes: { $exists: true, $ne: [] },
+      },
+      { sizes: 1 },
+    );
+
+    // Extract unique sizes
+    const sizesSet = new Set();
+    products.forEach((product) => {
+      product.sizes.forEach((sizeObj) => {
+        if (sizeObj.size) {
+          sizesSet.add(sizeObj.size);
+        }
+      });
+    });
+
+    // Sort sizes numerically if possible, otherwise alphabetically
+    const sizes = Array.from(sizesSet).sort((a, b) => {
+      const numA = parseFloat(a);
+      const numB = parseFloat(b);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numA - numB;
+      }
+      return a.localeCompare(b);
+    });
+
+    res.json(sizes);
+  } catch (error) {
+    console.error("Get sizes error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -55,12 +55,12 @@ export default function ProductCard({ product }) {
     <Link href={`/products/${product.slug}`}>
       <div className="card group overflow-hidden h-full flex flex-col">
         {/* Image Container */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-primary-100">
+        <div className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-primary-100">
           <Image
             src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.jpg'}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover group-hover:scale-110 transition-transform duration-500"
           />
           
@@ -122,20 +122,20 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Product Info */}
-        <div className="p-6 flex-1 flex flex-col">
+        <div className="p-4 sm:p-6 flex-1 flex flex-col">
           {/* Category */}
           <p className="text-xs uppercase tracking-wider text-primary-600 mb-2">
-            {product.category?.name || 'Shoes'}
+            {product.category}
           </p>
 
           {/* Name */}
-          <h3 className="font-serif text-xl font-semibold text-primary-900 mb-2 group-hover:text-brand-brown transition-colors line-clamp-2">
+          <h3 className="font-serif text-lg sm:text-xl font-semibold text-primary-900 mb-2 group-hover:text-brand-brown transition-colors line-clamp-2">
             {product.name}
           </h3>
 
           {/* Description */}
           {product.description && (
-            <p className="text-sm text-primary-600 mb-3 line-clamp-2">
+            <p className="text-xs sm:text-sm text-primary-600 mb-3 line-clamp-2">
               {product.description}
             </p>
           )}
@@ -143,13 +143,13 @@ export default function ProductCard({ product }) {
           {/* Price */}
           <div className="mt-auto">
             <div className="flex items-center justify-between">
-              <p className="text-xl font-bold text-primary-800">
+              <p className="text-lg sm:text-xl font-bold text-primary-800">
                 ₹{product.price?.toLocaleString()}
               </p>
               
               {/* Sizes Available */}
               {product.sizes && product.sizes.length > 0 && (
-                <p className="text-sm text-primary-600">
+                <p className="text-xs sm:text-sm text-primary-600">
                   {product.sizes.length} sizes
                 </p>
               )}

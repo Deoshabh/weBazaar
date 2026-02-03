@@ -103,6 +103,8 @@ export const productAPI = {
   getBrands: () => api.get("/products/brands"),
   getMaterials: () => api.get("/products/materials"),
   getPriceRange: () => api.get("/products/price-range"),
+  getColors: () => api.get("/products/colors"),
+  getSizes: () => api.get("/products/sizes"),
   searchProducts: (query) =>
     api.get("/products/search", { params: { q: query } }),
 };

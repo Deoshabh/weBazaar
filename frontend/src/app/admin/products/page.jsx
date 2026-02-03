@@ -206,14 +206,14 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <button
-                          onClick={() => handleToggleFeatured(product._id, product.isFeatured)}
+                          onClick={() => handleToggleFeatured(product._id, product.featured)}
                           className={`p-2 rounded-lg transition-colors ${
-                            product.isFeatured
+                            product.featured
                               ? 'text-yellow-500 hover:bg-yellow-50'
                               : 'text-primary-300 hover:bg-primary-50'
                           }`}
                         >
-                          <FiStar className={product.isFeatured ? 'fill-current' : ''} />
+                          <FiStar className={product.featured ? 'fill-current' : ''} />
                         </button>
                       </td>
                       <td className="px-6 py-4">

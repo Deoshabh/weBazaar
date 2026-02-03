@@ -15,6 +15,8 @@ function ProductsContent() {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -23,13 +25,15 @@ function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState(null);
   const [sortBy, setSortBy] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchCategories = async () => {
     try {
-      const response = await productAPI.getCategories();
+      const response = await categoryAPI.getAllCategories();
       console.log('📦 Categories API response:', response.data);
       setCategories(Array.isArray(response.data) ? response.data : (response.data.categories || []));
     } catch (error) {
@@ -72,15 +76,37 @@ function ProductsContent() {
     }
   };
 
+  const fetchColors = async () => {
+    try {
+      const response = await productAPI.getColors();
+      console.log('📦 Colors API response:', response.data);
+      setColors(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch colors:', error);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const response = await productAPI.getSizes();
+      console.log('📦 Sizes API response:', response.data);
+      setSizes(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch sizes:', error);
+    }
+  };
+
   // Fetch initial data
   useEffect(() => {
     fetchCategories();
     fetchBrands();
     fetchMaterials();
     fetchPriceRange();
+    fetchColors();
+    fetchSizes();
   }, []);
 
-  const fetchProducts = useCallback(async (category, brands, materials, priceMin, priceMax, sort, search) => {
+  const fetchProducts = useCallback(async (category, brands, materials, colors, sizes, priceMin, priceMax, sort, search) => {
     try {
       setLoading(true);
       const params = {};
@@ -89,6 +115,8 @@ function ProductsContent() {
       if (search) params.search = search;
       if (brands && brands.length > 0) params.brand = brands[0]; // Backend supports single brand for now
       if (materials && materials.length > 0) params.material = materials[0]; // Backend supports single material for now
+      if (colors && colors.length > 0) params.color = colors[0]; // Backend supports single color for now
+      if (sizes && sizes.length > 0) params.size = sizes[0]; // Backend supports single size for now
       
       // Price range filter
       if (priceMin !== undefined && priceMin !== null) {
@@ -131,6 +159,8 @@ function ProductsContent() {
     const category = searchParams.get('category') || '';
     const brandsParam = searchParams.get('brands') || '';
     const materialsParam = searchParams.get('materials') || '';
+    const colorsParam = searchParams.get('colors') || '';
+    const sizesParam = searchParams.get('sizes') || '';
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const sort = searchParams.get('sort') || 'featured';
@@ -139,6 +169,8 @@ function ProductsContent() {
     setSelectedCategory(category);
     setSelectedBrands(brandsParam ? brandsParam.split(',') : []);
     setSelectedMaterials(materialsParam ? materialsParam.split(',') : []);
+    setSelectedColors(colorsParam ? colorsParam.split(',') : []);
+    setSelectedSizes(sizesParam ? sizesParam.split(',') : []);
     setSortBy(sort);
     setSearchQuery(search);
 
@@ -154,6 +186,8 @@ function ProductsContent() {
       category, 
       brandsParam ? brandsParam.split(',') : [], 
       materialsParam ? materialsParam.split(',') : [],
+      colorsParam ? colorsParam.split(',') : [],
+      sizesParam ? sizesParam.split(',') : [],
       minPrice ? Number(minPrice) : undefined,
       maxPrice ? Number(maxPrice) : undefined,
       sort, 
@@ -201,6 +235,22 @@ function ProductsContent() {
     updateFilters('materials', newMaterials);
   };
 
+  const handleColorToggle = (color) => {
+    const newColors = selectedColors.includes(color)
+      ? selectedColors.filter(c => c !== color)
+      : [...selectedColors, color];
+    setSelectedColors(newColors);
+    updateFilters('colors', newColors);
+  };
+
+  const handleSizeToggle = (size) => {
+    const newSizes = selectedSizes.includes(size)
+      ? selectedSizes.filter(s => s !== size)
+      : [...selectedSizes, size];
+    setSelectedSizes(newSizes);
+    updateFilters('sizes', newSizes);
+  };
+
   const clearFilters = () => {
     router.push('/products');
   };
@@ -210,6 +260,8 @@ function ProductsContent() {
     searchQuery,
     selectedBrands.length > 0,
     selectedMaterials.length > 0,
+    selectedColors.length > 0,
+    selectedSizes.length > 0,
     selectedPriceRange && (selectedPriceRange.min !== priceRange.min || selectedPriceRange.max !== priceRange.max)
   ].filter(Boolean).length;
 
@@ -355,6 +407,55 @@ function ProductsContent() {
                   </div>
                 </div>
               )}
+
+              {/* Color Filter */}
+              {colors.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-3">Color</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {colors.map((color) => (
+                      <label key={color} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedColors.includes(color)}
+                          onChange={() => handleColorToggle(color)}
+                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                        />
+                        <span className="text-sm">{color}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Size Filter */}
+              {sizes.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-3">Size</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {sizes.map((size) => (
+                      <label key={size} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedSizes.includes(size)}
+                          onChange={() => handleSizeToggle(size)}
+                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                        />
+                        <span className="text-sm">{size}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+                          onChange={() => handleMaterialToggle(material)}
+                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                        />
+                        <span className="text-sm">{material}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </aside>
 
@@ -447,6 +548,57 @@ function ProductsContent() {
                       {materials.map((material) => (
                         <label key={material} className="flex items-center gap-2 cursor-pointer">
                           <input
+                            type="checkbox"
+                            checked={selectedMaterials.includes(material)}
+                            onChange={() => handleMaterialToggle(material)}
+                            className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                          />
+                          <span className="text-sm">{material}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Color Filter */}
+                {colors.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">Color</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {colors.map((color) => (
+                        <label key={color} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedColors.includes(color)}
+                            onChange={() => handleColorToggle(color)}
+                            className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                          />
+                          <span className="text-sm">{color}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Size Filter */}
+                {sizes.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">Size</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {sizes.map((size) => (
+                        <label key={size} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedSizes.includes(size)}
+                            onChange={() => handleSizeToggle(size)}
+                            className="w-4 h-4 text-brand-brown focus:ring-brand-brown rounded"
+                          />
+                          <span className="text-sm">{size}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
                             type="checkbox"
                             checked={selectedMaterials.includes(material)}
                             onChange={() => handleMaterialToggle(material)}
