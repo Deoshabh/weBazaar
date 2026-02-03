@@ -22,17 +22,18 @@ export default function ProductCard({ product }) {
     if (!isAuthenticated) {
       toast.error('Please login to add items to cart');
       router.push('/auth/login');
-      return;
+      return false;
     }
 
     if (!product.sizes || product.sizes.length === 0) {
       toast.error('No sizes available');
-      return;
+      return false;
     }
 
     // Add first available size - handle both string and object formats
     const firstSize = typeof product.sizes[0] === 'object' ? product.sizes[0].size : product.sizes[0];
-    await addToCart(product._id, firstSize);
+    const result = await addToCart(product._id, firstSize);
+    return result.success;
   };
 
   const handleToggleWishlist = async (e) => {
@@ -87,14 +88,14 @@ export default function ProductCard({ product }) {
             {product.inStock ? (
               <>
                 <button
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleAddToCart(e).then(() => {
-                      if (typeof window !== 'undefined') {
-                        window.location.href = '/cart';
-                      }
-                    });
+                    const result = await handleAddToCart(e);
+                    if (result !== false) {
+                      // Use Next.js router for navigation instead of window.location
+                      router.push('/cart');
+                    }
                   }}
                   className="flex-1 btn btn-primary flex items-center justify-center gap-2 text-sm py-2.5"
                 >

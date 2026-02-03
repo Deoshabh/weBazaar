@@ -53,21 +53,25 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - only redirect if on a protected page
-        // Don't redirect if user is just browsing products
+        // Refresh failed - clear tokens
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
 
+        // Only redirect to login if:
+        // 1. User is on a protected page route
+        // 2. OR the original request was to a protected API endpoint that requires auth
         if (typeof window !== "undefined") {
-          const isProtectedRoute = [
-            "/cart",
+          const isProtectedPageRoute = [
             "/checkout",
             "/orders",
             "/profile",
             "/admin",
           ].some((route) => window.location.pathname.startsWith(route));
 
-          if (isProtectedRoute) {
+          // Don't redirect from /cart - let the page handle showing login prompt
+          // Don't redirect from product pages - users should be able to browse
+
+          if (isProtectedPageRoute) {
             window.location.href = "/auth/login";
           }
         }
