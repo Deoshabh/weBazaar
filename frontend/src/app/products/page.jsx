@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI, categoryAPI, filterAPI } from '@/utils/api';
 import ProductCard from '@/components/ProductCard';
@@ -22,26 +22,6 @@ function ProductsContent() {
   const [sortBy, setSortBy] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    fetchCategories();
-    fetchFilters();
-  }, []);
-
-  useEffect(() => {
-    // Get filters from URL
-    const category = searchParams.get('category') || '';
-    const price = searchParams.get('price') || '';
-    const sort = searchParams.get('sort') || 'featured';
-    const search = searchParams.get('search') || '';
-
-    setSelectedCategory(category);
-    setPriceRange(price);
-    setSortBy(sort);
-    setSearchQuery(search);
-
-    fetchProducts(category, price, sort, search);
-  }, [searchParams]);
-
   const fetchCategories = async () => {
     try {
       const response = await productAPI.getCategories();
@@ -62,7 +42,91 @@ function ProductsContent() {
     }
   };
 
-  const fetchProducts = async (category, price, sort, search) => {
+  useEffect(() => {
+    fetchCategories();
+    fetchFilters();
+  }, []);
+
+  const fetchProducts = useCallback(async (category, price, sort, search) => {
+    try {
+      setLoading(true);
+      const params = {};
+      
+      if (category) params.category = category;
+      if (search) params.search = search;
+      
+      // Price range filter - use dynamic filters if available
+      if (price) {
+        // Check if this is a filter from backend
+        const priceFilter = filters.find(
+          (f) => f.type === 'priceRange' && f.value === price
+        );
+        
+        if (priceFilter) {
+          // Use dynamic filter values
+          if (priceFilter.minPrice !== undefined) params.minPrice = priceFilter.minPrice;
+          if (priceFilter.maxPrice !== undefined && priceFilter.maxPrice !== null) {
+            params.maxPrice = priceFilter.maxPrice;
+          }
+        } else {
+          // Fallback to hardcoded ranges (for backward compatibility)
+          const ranges = {
+            'under-5000': { max: 5000 },
+            '5000-10000': { min: 5000, max: 10000 },
+            '10000-15000': { min: 10000, max: 15000 },
+            '15000-20000': { min: 15000, max: 20000 },
+            'above-20000': { min: 20000 },
+          };
+          
+          if (ranges[price]) {
+            if (ranges[price].min) params.minPrice = ranges[price].min;
+            if (ranges[price].max) params.maxPrice = ranges[price].max;
+          }
+        }
+      }
+      
+      // Sorting
+      if (sort && sort !== 'featured') {
+        const sortMap = {
+          'price-asc': { sortBy: 'price', order: 'asc' },
+          'price-desc': { sortBy: 'price', order: 'desc' },
+          'name-asc': { sortBy: 'name', order: 'asc' },
+          'name-desc': { sortBy: 'name', order: 'desc' },
+        };
+        
+        if (sortMap[sort]) {
+          params.sortBy = sortMap[sort].sortBy;
+          params.order = sortMap[sort].order;
+        }
+      }
+
+      const response = await productAPI.getAllProducts(params);
+      console.log('📦 Products API response:', response.data);
+      // Backend returns array directly, not wrapped in {products: [...]}
+      const productsData = Array.isArray(response.data) ? response.data : (response.data.products || []);
+      console.log(`✅ Loaded ${productsData.length} products`);
+      setProducts(productsData);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    // Get filters from URL
+    const category = searchParams.get('category') || '';
+    const price = searchParams.get('price') || '';
+    const sort = searchParams.get('sort') || 'featured';
+    const search = searchParams.get('search') || '';
+
+    setSelectedCategory(category);
+    setPriceRange(price);
+    setSortBy(sort);
+    setSearchQuery(search);
+
+    fetchProducts(category, price, sort, search);
+  }, [searchParams, fetchProducts]);
     try {
       setLoading(true);
       const params = {};

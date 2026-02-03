@@ -28,12 +28,6 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
 
-  useEffect(() => {
-    if (slug) {
-      fetchProduct();
-    }
-  }, [slug, fetchProduct]);
-
   const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
@@ -58,6 +52,12 @@ export default function ProductDetailPage() {
       setLoading(false);
     }
   }, [slug, router]);
+
+  useEffect(() => {
+    if (slug) {
+      fetchProduct();
+    }
+  }, [slug, fetchProduct]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
