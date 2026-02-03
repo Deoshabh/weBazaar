@@ -169,17 +169,17 @@ export default function CheckoutPage() {
 
         // Create Razorpay order
         const rzpResponse = await orderAPI.createRazorpayOrder(order._id);
-        const { razorpayOrderId, amount, currency } = rzpResponse.data;
+        const { razorpayOrderId, amount, currency, key } = rzpResponse.data;
 
-        // Validate Razorpay key is configured
-        if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+        // Use key from backend response (more secure than env variable)
+        if (!key) {
           toast.error('Payment system not configured. Please contact support.');
           setIsProcessing(false);
           return;
         }
 
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          key: key, // Use key from backend API
           amount: amount,
           currency: currency,
           name: 'Radeo',
