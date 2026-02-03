@@ -413,14 +413,9 @@ export default function ProductDetailPage() {
                     {product.careInstructions}
                   </div>
                 ) : (
-                  <ul className="space-y-2 text-primary-700">
-                    <li>• Use a soft brush to remove dirt and dust</li>
-                    <li>• Apply leather conditioner regularly to maintain suppleness</li>
-                    <li>• Store in a cool, dry place away from direct sunlight</li>
-                    <li>• Use shoe trees to maintain shape</li>
-                    <li>• Avoid exposure to water; if wet, let dry naturally</li>
-                    <li>• Professional cleaning recommended for stubborn stains</li>
-                  </ul>
+                  <p className="text-primary-600 italic">
+                    Care instructions not available for this product.
+                  </p>
                 )}
               </div>
             )}
