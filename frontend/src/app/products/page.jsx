@@ -1,5 +1,5 @@
 'use client';
-
+// Rebuild trigger - v3
 import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI, categoryAPI } from '@/utils/api';
