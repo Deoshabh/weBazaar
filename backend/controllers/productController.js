@@ -3,7 +3,8 @@ const Product = require("../models/Product");
 // GET /api/v1/products
 exports.getAllProducts = async (req, res) => {
   try {
-    const { featured, category, search } = req.query;
+    const { featured, category, search, minPrice, maxPrice, sortBy, order } =
+      req.query;
 
     const query = { isActive: true };
 
@@ -29,8 +30,32 @@ exports.getAllProducts = async (req, res) => {
       query.category = category.toLowerCase();
     }
 
+    // Price range filtering
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) {
+        query.price.$gte = Number(minPrice);
+      }
+      if (maxPrice) {
+        query.price.$lte = Number(maxPrice);
+      }
+    }
+
     console.log("📦 Fetching products with query:", query);
-    const products = await Product.find(query).sort({ createdAt: -1 });
+
+    // Build sort options
+    let sortOptions = {};
+    if (sortBy) {
+      const sortOrder = order === "asc" ? 1 : -1;
+      sortOptions[sortBy] = sortOrder;
+    } else {
+      // Default sort
+      sortOptions = { createdAt: -1 };
+    }
+
+    console.log("📊 Sorting by:", sortOptions);
+
+    const products = await Product.find(query).sort(sortOptions);
     console.log(`✅ Found ${products.length} products`);
 
     res.json(products);
