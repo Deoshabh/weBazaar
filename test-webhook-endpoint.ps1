@@ -6,11 +6,11 @@ $token = "48f6cc854c7a94beb4ea1144ca8242ba7e78a0f5a07127364250cade5083f7a2"
 
 $headers = @{
     "Content-Type" = "application/json"
-    "x-api-key" = $token
+    "x-api-key"    = $token
 }
 
 $body = @{
-    test = $true
+    test    = $true
     message = "Test webhook from PowerShell"
 } | ConvertTo-Json
 
@@ -22,7 +22,8 @@ try {
     Write-Host "Status Code: $($response.StatusCode)" -ForegroundColor Green
     Write-Host "Response:" -ForegroundColor Cyan
     Write-Host $response.Content
-} catch {
+}
+catch {
     Write-Host "`nError!" -ForegroundColor Red
     Write-Host "Status Code: $($_.Exception.Response.StatusCode.Value__)" -ForegroundColor Red
     Write-Host "Error Message: $($_.Exception.Message)" -ForegroundColor Red

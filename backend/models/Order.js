@@ -97,6 +97,16 @@ const orderSchema = new mongoose.Schema(
       tracking_url: String,
       current_status: String,
       last_tracking_update: Date,
+      // Tracking history timeline
+      trackingHistory: [
+        {
+          status: String,
+          timestamp: Date,
+          location: String,
+          description: String,
+          scanType: String,
+        },
+      ],
     },
 
     status: {

@@ -111,7 +111,7 @@ services:
       - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
 
       # Allow these headers
-      - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=Authorization, Content-Type, X-Requested-With"
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=Authorization, Content-Type, X-Requested-With, x-api-key"
 
       # Allow credentials (cookies, authorization headers)
       - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowcredentials=true"
