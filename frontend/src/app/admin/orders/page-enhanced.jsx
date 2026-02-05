@@ -485,11 +485,17 @@ export default function AdminOrdersDashboard() {
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-gray-900">
-                            ₹{(order.total / 100).toLocaleString('en-IN')}
+                            ₹{(order.total || order.totalAmount || 0).toLocaleString('en-IN')}
                           </span>
-                          {order.payment?.method === 'cod' && (
-                            <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded bg-orange-100 text-orange-800">
+                          {order.payment?.method === 'cod' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded bg-orange-100 text-orange-800">
+                              <FiDollarSign className="text-xs" />
                               COD
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded bg-green-100 text-green-800">
+                              <FiCreditCard className="text-xs" />
+                              Online
                             </span>
                           )}
                         </div>
@@ -499,13 +505,16 @@ export default function AdminOrdersDashboard() {
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           {/* Create Shipment */}
-                          {!order.shipping?.awb_code && (
+                          {!order.shipping?.awb_code && order.status === 'confirmed' && (
                             <button
-                              onClick={() => handleCreateShipment(order)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCreateShipment(order);
+                              }}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors hover:scale-110"
                               title="Create Shipment"
                             >
-                              <FiPackage />
+                              <FiPackage className="w-4 h-4" />
                             </button>
                           )}
 
@@ -577,10 +586,15 @@ export default function AdminOrdersDashboard() {
       </div>
 
       {/* Modals */}
-      {showShipmentModal && selectedOrder && (
+      {selectedOrder && (
         <ShiprocketShipmentModal
           order={selectedOrder}
+          isOpen={showShipmentModal}
           onClose={() => {
+            setShowShipmentModal(false);
+            setSelectedOrder(null);
+          }}
+          onSuccess={() => {
             setShowShipmentModal(false);
             setSelectedOrder(null);
             fetchOrders();
