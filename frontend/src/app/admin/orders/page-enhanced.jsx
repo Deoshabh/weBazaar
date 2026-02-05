@@ -28,6 +28,8 @@ import {
   FiPhone,
   FiAlertTriangle,
   FiAlertCircle,
+  FiDollarSign,
+  FiCreditCard,
   FiCheckCircle,
   FiX,
 } from 'react-icons/fi';
