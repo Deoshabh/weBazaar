@@ -483,24 +483,26 @@ export default function AdminOrdersDashboard() {
 
                       {/* Amount */}
                       <td className="px-4 py-4">
-                        <div className="font-medium text-gray-900">
-                          ₹{((order.total || order.totalAmount) / 100).toLocaleString()}
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">
+                            ₹{(order.total / 100).toLocaleString('en-IN')}
+                          </span>
+                          {order.payment?.method === 'cod' && (
+                            <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded bg-orange-100 text-orange-800">
+                              COD
+                            </span>
+                          )}
                         </div>
-                        {order.payment?.method === 'cod' && (
-                          <div className="text-xs text-orange-600 font-semibold">
-                            COD
-                          </div>
-                        )}
                       </td>
 
                       {/* Actions */}
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           {/* Create Shipment */}
-                          {!order.shipping?.shipment_id && (
+                          {!order.shipping?.awb_code && (
                             <button
                               onClick={() => handleCreateShipment(order)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Create Shipment"
                             >
                               <FiPackage />
