@@ -235,5 +235,6 @@ export const adminAPI = {
   deleteMedia: (key) => api.delete("/admin/media", { data: { key } }),
 
   // Stats
-  getStats: () => api.get("/admin/stats"),
+  getAdminStats: () => api.get("/admin/stats"),
+  getStats: () => api.get("/admin/stats"), // Alias for backward compatibility
 };
