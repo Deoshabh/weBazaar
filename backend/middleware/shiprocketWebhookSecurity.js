@@ -19,6 +19,7 @@ const SHIPROCKET_IPS = [
 
 /**
  * Middleware: Verify request is from Shiprocket IP
+ * Note: IP check is skipped if valid x-api-key token is provided
  */
 const verifyShiprocketIP = (req, res, next) => {
   // Skip IP check in development mode
@@ -34,8 +35,16 @@ const verifyShiprocketIP = (req, res, next) => {
 
   console.log(`📡 Webhook request from IP: ${clientIP}`);
 
+  // Skip IP check if valid x-api-key token is provided
+  const apiKey = req.headers["x-api-key"];
+  if (apiKey && apiKey === process.env.SHIPROCKET_WEBHOOK_TOKEN) {
+    console.log("✅ Webhook: Valid token provided, skipping IP check");
+    return next();
+  }
+
+  // Verify IP is from Shiprocket
   if (!SHIPROCKET_IPS.includes(clientIP)) {
-    console.log(`⚠️ Webhook: Unauthorized IP ${clientIP}`);
+    console.log(`⚠️ Webhook: Unauthorized IP ${clientIP} (no valid token)`);
     return res.status(403).json({
       success: false,
       message: "Forbidden: Unauthorized IP address",
