@@ -179,6 +179,16 @@ export const adminAPI = {
   getOrderById: (id) => api.get(`/admin/orders/${id}`),
   updateOrderStatus: (id, status) =>
     api.patch(`/admin/orders/${id}`, { status }),
+  updateShippingAddress: (id, data) =>
+    api.put(`/admin/orders/${id}/shipping-address`, data),
+
+  // Bulk operations
+  bulkUpdateStatus: (orderIds, status) =>
+    api.post("/admin/orders/bulk/status", { orderIds, status }),
+  bulkCreateShipments: (orderIds) =>
+    api.post("/admin/orders/bulk/create-shipments", { orderIds }),
+  bulkPrintLabels: (orderIds) =>
+    api.post("/admin/orders/bulk/print-labels", { orderIds }),
 
   // Shiprocket
   getShippingRates: (data) => api.post("/admin/shiprocket/rates", data),

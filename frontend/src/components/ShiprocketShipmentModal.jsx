@@ -33,8 +33,22 @@ export default function ShiprocketShipmentModal({ order, isOpen, onClose, onSucc
   const fetchShippingRates = async () => {
     try {
       setLoading(true);
+      
+      // Get pickup postcode from selected pickup address or use default
+      let pickupPostcode = '201301'; // Default Noida PIN code (update with your actual warehouse PIN)
+      
+      // If pickup addresses are loaded, find the selected one
+      if (pickupAddresses.length > 0) {
+        const selectedPickup = pickupAddresses.find(
+          addr => addr.pickup_location === pickupLocation
+        );
+        if (selectedPickup && selectedPickup.pin_code) {
+          pickupPostcode = selectedPickup.pin_code;
+        }
+      }
+      
       const response = await adminAPI.getShippingRates({
-        pickup_postcode: '110001', // Default or from pickup address
+        pickup_postcode: pickupPostcode,
         delivery_postcode: order.shippingAddress.postalCode,
         weight: weight,
         cod: order.payment.method === 'cod' ? 1 : 0,
@@ -42,6 +56,18 @@ export default function ShiprocketShipmentModal({ order, isOpen, onClose, onSucc
       });
 
       const couriers = response.data?.data?.available_courier_companies || [];
+      
+      if (couriers.length === 0) {
+        toast.error(
+          <div>
+            <div>No courier services available. Check:</div>
+            <div>1. Pickup PIN: {pickupPostcode}</div>
+            <div>2. Delivery PIN: {order.shippingAddress.postalCode}</div>
+            <div>3. Shiprocket account has pickup location configured</div>
+          </div>
+        );
+      }
+      
       setRates(couriers);
       setStep(2);
     } catch (error) {
