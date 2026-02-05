@@ -23,10 +23,10 @@ export default function AdminDashboard() {
       const response = await adminAPI.getStats();
       console.log('📊 Admin stats:', response.data);
       setStats({
-        totalOrders: response.data.totalOrders || 0,
-        totalProducts: response.data.totalProducts || 0,
-        totalUsers: response.data.totalUsers || 0,
-        totalRevenue: response.data.totalRevenue || 0,
+        totalOrders: response.data.orders?.total || 0,
+        totalProducts: response.data.products?.total || 0,
+        totalUsers: response.data.users?.customers || 0,
+        totalRevenue: response.data.revenue?.total || 0,
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
