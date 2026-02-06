@@ -137,7 +137,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }) {
               {order.items?.map((item, index) => (
                 <div key={index} className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
                   <img
-                    src={item.product?.images?.[0] || '/placeholder.png'}
+                    src={item.product?.images?.[0]?.url || item.product?.images?.[0] || '/placeholder.png'}
                     alt={item.product?.name}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
