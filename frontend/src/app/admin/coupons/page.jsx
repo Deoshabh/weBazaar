@@ -35,7 +35,6 @@ export default function CouponsPage() {
       setLoading(true);
       const response = await adminAPI.getAllCoupons();
       // Backend returns array directly, not wrapped
-      console.log('📦 Admin Coupons API response:', response.data);
       const couponsData = Array.isArray(response.data) ? response.data : (response.data.coupons || []);
       setCoupons(couponsData);
     } catch (error) {

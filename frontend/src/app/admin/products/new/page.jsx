@@ -249,16 +249,12 @@ function ProductFormContent() {
               productSlug: formData.slug,
             });
             
-            console.log('Upload URL response:', responseData);
-            
             // Validate response structure
             const uploadUrlData = responseData?.data || responseData;
             if (!uploadUrlData?.signedUrl || !uploadUrlData?.publicUrl || !uploadUrlData?.key) {
               console.error('Invalid response structure:', uploadUrlData);
               throw new Error(`Invalid upload URL response for ${file.name}`);
             }
-            
-            console.log('Using upload URL:', uploadUrlData.signedUrl);
             
             // Upload image to MinIO
             const uploadResponse = await fetch(uploadUrlData.signedUrl, {
@@ -280,8 +276,6 @@ function ProductFormContent() {
               isPrimary: existingImages.length === 0 && i === 0,
               order: existingImages.length + i,
             });
-            
-            console.log(`Image ${i + 1} uploaded:`, uploadedImages[i]);
           } catch (uploadError) {
             console.error(`Failed to upload image ${i + 1}:`, uploadError);
             toast.error(`Failed to upload ${file.name}`);
@@ -289,7 +283,6 @@ function ProductFormContent() {
           }
         }
         
-        console.log('All new images uploaded:', uploadedImages);
         toast.success('Images uploaded successfully', { id: 'upload' });
       }
       
@@ -353,8 +346,6 @@ function ProductFormContent() {
       }
       
       productData.isActive = formData.isActive;
-      
-      console.log('Product data to send:', productData);
       
       // Step 3: Create or Update product
       if (isEditMode) {

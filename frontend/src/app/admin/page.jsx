@@ -21,7 +21,6 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const response = await adminAPI.getStats();
-      console.log('📊 Admin stats:', response.data);
       setStats({
         totalOrders: response.data.orders?.total || 0,
         totalProducts: response.data.products?.total || 0,

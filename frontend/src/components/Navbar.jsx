@@ -133,22 +133,50 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 animate-slide-down">
+              <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 animate-slide-down border border-gray-100">
                 <Link
                   href="/categories"
-                  className="block px-4 py-2 font-semibold text-brand-brown hover:bg-primary-50 first:rounded-t-lg border-b border-primary-100 transition-colors"
+                  className="block px-4 py-3 font-semibold text-brand-brown hover:bg-primary-50 first:rounded-t-lg border-b border-primary-100 transition-colors"
                 >
-                  All Categories
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    All Categories
+                  </div>
                 </Link>
-                {categories.map((category) => (
-                  <Link
-                    key={category._id}
-                    href={`/category/${category.slug}`}
-                    className="block px-4 py-2 hover:bg-primary-50 last:rounded-b-lg transition-colors"
-                  >
-                    {category.name}
-                  </Link>
-                ))}
+                <div className="max-h-96 overflow-y-auto">
+                  {categories.map((category) => (
+                    <Link
+                      key={category._id}
+                      href={`/category/${category.slug}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-primary-50 transition-colors group/item"
+                    >
+                      {category.image?.url ? (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                          <img
+                            src={category.image.url}
+                            alt={category.name}
+                            className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-200"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-700 font-bold text-lg">{category.name.charAt(0)}</span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900 group-hover/item:text-brand-brown transition-colors">{category.name}</div>
+                        {category.description && (
+                          <div className="text-xs text-gray-500 truncate">{category.description}</div>
+                        )}
+                      </div>
+                      <svg className="w-4 h-4 text-gray-400 opacity-0 group-hover/item:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -330,16 +358,29 @@ export default function Navbar() {
                 Products
               </Link>
               <div className="px-4 py-2">
-                <p className="text-sm font-semibold text-primary-600 mb-2">Categories</p>
-                <div className="flex flex-col gap-1 ml-4">
+                <p className="text-sm font-semibold text-primary-600 mb-3">Categories</p>
+                <div className="flex flex-col gap-2">
                   {categories.map((category) => (
                     <Link
                       key={category._id}
                       href={`/category/${category.slug}`}
-                      className="py-1 hover:text-brand-brown transition-colors"
+                      className="flex items-center gap-3 py-2 hover:bg-primary-50 rounded transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      {category.name}
+                      {category.image?.url ? (
+                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                          <img
+                            src={category.image.url}
+                            alt={category.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-700 font-semibold">{category.name.charAt(0)}</span>
+                        </div>
+                      )}
+                      <span className="text-gray-900">{category.name}</span>
                     </Link>
                   ))}
                 </div>

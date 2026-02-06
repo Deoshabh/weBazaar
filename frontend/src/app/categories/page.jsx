@@ -73,15 +73,15 @@ export default function AllCategoriesPage() {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
           {categories.map((category) => (
             <button
               key={category._id}
               onClick={() => router.push(`/category/${category.slug}`)}
-              className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+              className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-brand-brown"
             >
               {/* Category Image */}
-              <div className="relative aspect-[4/3] bg-primary-100">
+              <div className="relative aspect-[4/3] bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden">
                 {category.image?.url ? (
                   <Image
                     src={category.image.url}
@@ -92,9 +92,13 @@ export default function AllCategoriesPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <FiGrid className="w-16 h-16 text-primary-300" />
+                    <div className="w-20 h-20 rounded-full bg-white/80 flex items-center justify-center backdrop-blur-sm">
+                      <span className="text-3xl font-bold text-brand-brown">{category.name.charAt(0)}</span>
+                    </div>
                   </div>
                 )}
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
 
               {/* Category Info */}
@@ -107,13 +111,18 @@ export default function AllCategoriesPage() {
                     {category.description}
                   </p>
                 )}
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-primary-500">
-                    {categoryStats[category._id] || 0} Products
-                  </p>
-                  <span className="text-brand-brown group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <p className="text-sm font-medium text-gray-700">
+                      {categoryStats[category._id] || 0} Products
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-brand-brown/10 group-hover:bg-brand-brown flex items-center justify-center transition-colors">
+                    <span className="text-brand-brown group-hover:text-white group-hover:translate-x-0.5 transition-all text-lg">
+                      →
+                    </span>
+                  </div>
                 </div>
               </div>
             </button>
@@ -122,6 +131,9 @@ export default function AllCategoriesPage() {
 
         {categories.length === 0 && (
           <div className="text-center py-20">
+            <div className="w-16 h-16 rounded-full bg-gray-100 mx-auto mb-4 flex items-center justify-center">
+              <FiGrid className="w-8 h-8 text-gray-400" />
+            </div>
             <p className="text-primary-600 text-lg">No categories available at the moment.</p>
           </div>
         )}

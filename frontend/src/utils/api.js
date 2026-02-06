@@ -232,6 +232,7 @@ export const adminAPI = {
 
   // Media
   getUploadUrl: (data) => api.post("/admin/media/upload-url", data),
+  uploadMedia: (formData) => api.post("/admin/media/upload", formData),
   deleteMedia: (key) => api.delete("/admin/media", { data: { key } }),
 
   // Stats

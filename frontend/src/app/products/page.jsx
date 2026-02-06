@@ -12,7 +12,6 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [colors, setColors] = useState([]);
@@ -22,7 +21,6 @@ function ProductsContent() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   // Filter states
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
@@ -30,16 +28,6 @@ function ProductsContent() {
   const [selectedPriceRange, setSelectedPriceRange] = useState(null);
   const [sortBy, setSortBy] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const fetchCategories = async () => {
-    try {
-      const response = await categoryAPI.getAllCategories();
-      console.log('📦 Categories API response:', response.data);
-      setCategories(Array.isArray(response.data) ? response.data : (response.data.categories || []));
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
-    }
-  };
 
   const fetchBrands = async () => {
     try {
@@ -98,7 +86,6 @@ function ProductsContent() {
 
   // Fetch initial data
   useEffect(() => {
-    fetchCategories();
     fetchBrands();
     fetchMaterials();
     fetchPriceRange();
@@ -156,7 +143,6 @@ function ProductsContent() {
 
   useEffect(() => {
     // Get filters from URL
-    const category = searchParams.get('category') || '';
     const brandsParam = searchParams.get('brands') || '';
     const materialsParam = searchParams.get('materials') || '';
     const colorsParam = searchParams.get('colors') || '';
@@ -166,7 +152,6 @@ function ProductsContent() {
     const sort = searchParams.get('sort') || 'featured';
     const search = searchParams.get('search') || '';
 
-    setSelectedCategory(category);
     setSelectedBrands(brandsParam ? brandsParam.split(',') : []);
     setSelectedMaterials(materialsParam ? materialsParam.split(',') : []);
     setSelectedColors(colorsParam ? colorsParam.split(',') : []);
@@ -183,7 +168,7 @@ function ProductsContent() {
     }
 
     fetchProducts(
-      category, 
+      '', 
       brandsParam ? brandsParam.split(',') : [], 
       materialsParam ? materialsParam.split(',') : [],
       colorsParam ? colorsParam.split(',') : [],
@@ -256,7 +241,6 @@ function ProductsContent() {
   };
 
   const activeFilterCount = [
-    selectedCategory, 
     searchQuery,
     selectedBrands.length > 0,
     selectedMaterials.length > 0,
@@ -326,35 +310,6 @@ function ProductsContent() {
                     Clear All
                   </button>
                 )}
-              </div>
-
-              {/* Category Filter */}
-              <div className="mb-6">
-                <h4 className="font-medium mb-3">Category</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={!selectedCategory}
-                      onChange={() => updateFilters('category', '')}
-                      className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                    />
-                    <span className="text-sm">All Products</span>
-                  </label>
-                  {categories.map((category) => (
-                    <label key={category._id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={selectedCategory === category.slug}
-                        onChange={() => updateFilters('category', category.slug)}
-                        className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                      />
-                      <span className="text-sm">{category.name}</span>
-                    </label>
-                  ))}
-                </div>
               </div>
 
               {/* Price Range Filter */}
@@ -462,41 +417,6 @@ function ProductsContent() {
                 </div>
 
                 {/* Same filter content as desktop */}
-                {/* Category Filter */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3">Category</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category-mobile"
-                        checked={!selectedCategory}
-                        onChange={() => {
-                          updateFilters('category', '');
-                          setIsFilterOpen(false);
-                        }}
-                        className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                      />
-                      <span className="text-sm">All Products</span>
-                    </label>
-                    {categories.map((category) => (
-                      <label key={category._id} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="category-mobile"
-                          checked={selectedCategory === category.slug}
-                          onChange={() => {
-                            updateFilters('category', category.slug);
-                            setIsFilterOpen(false);
-                          }}
-                          className="w-4 h-4 text-brand-brown focus:ring-brand-brown"
-                        />
-                        <span className="text-sm">{category.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Price Range Filter */}
                 <div className="mb-6">
                   <h4 className="font-medium mb-3">Price Range</h4>

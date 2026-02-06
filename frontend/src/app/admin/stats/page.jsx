@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/utils/api';
 import AdminLayout from '@/components/AdminLayout';
-import Image from 'next/image';
 import toast from 'react-hot-toast';
 import {
   FiShoppingBag,
@@ -46,11 +45,10 @@ export default function AdminStatsPage() {
     try {
       setLoadingStats(true);
       const response = await adminAPI.getAdminStats();
-      console.log('📊 Stats data:', response.data);
       setStats(response.data);
     } catch (error) {
       toast.error('Failed to fetch statistics');
-      console.error(error);
+      console.error('Failed to fetch statistics:', error);
     } finally {
       setLoadingStats(false);
     }

@@ -27,11 +27,10 @@ export default function AdminUsersPage() {
       setLoadingUsers(true);
       const response = await adminAPI.getAllUsers();
       // Backend returns {users: [...]}
-      console.log('📦 Admin Users API response:', response.data);
       setUsers(response.data.users || []);
     } catch (error) {
       toast.error('Failed to fetch users');
-      console.error(error);
+      console.error('Failed to fetch users:', error);
     } finally {
       setLoadingUsers(false);
     }
