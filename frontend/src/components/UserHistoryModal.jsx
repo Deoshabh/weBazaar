@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiX, FiShoppingBag, FiHeart, FiShoppingCart, FiTag, FiPackage, FiTrendingUp } from 'react-icons/fi';
 import { adminAPI } from '@/utils/api';
 import toast from 'react-hot-toast';
@@ -8,12 +8,7 @@ export default function UserHistoryModal({ userId, userName, onClose }) {
   const [historyData, setHistoryData] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  useEffect(() => {
-    if (!userId) return;
-    fetchUserHistory();
-  }, [userId]);
-
-  const fetchUserHistory = async () => {
+  const fetchUserHistory = useCallback(async () => {
     if (!userId) return;
     try {
       setLoading(true);
@@ -25,7 +20,12 @@ export default function UserHistoryModal({ userId, userName, onClose }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetchUserHistory();
+  }, [userId, fetchUserHistory]);
 
   if (!userId) return null;
 
@@ -179,7 +179,7 @@ export default function UserHistoryModal({ userId, userName, onClose }) {
 
                   {historyData.statistics.totalOrders === 0 && (
                     <div className="bg-gray-50 p-8 rounded-lg text-center">
-                      <p className="text-gray-600">This user hasn't made any purchases yet.</p>
+                      <p className="text-gray-600">This user hasn&apos;t made any purchases yet.</p>
                     </div>
                   )}
                 </div>
@@ -271,7 +271,7 @@ export default function UserHistoryModal({ userId, userName, onClose }) {
                     <>
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <p className="text-yellow-800">
-                          <strong>Active Cart:</strong> This user has {historyData.cart.itemCount} item(s) in their cart that haven't been purchased yet.
+                          <strong>Active Cart:</strong> This user has {historyData.cart.itemCount} item(s) in their cart that haven&apos;t been purchased yet.
                         </p>
                       </div>
                       {historyData.cart.items.map((item, index) => (
