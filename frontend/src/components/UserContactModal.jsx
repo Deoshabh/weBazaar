@@ -50,18 +50,36 @@ export default function UserContactModal({ user, onClose }) {
               </div>
             </div>
 
-            {/* Phone */}
-            {user.addresses && user.addresses.length > 0 && user.addresses[0].phone && (
+            {/* Phone Numbers */}
+            {user.addresses && user.addresses.length > 0 && user.addresses.some(a => a.phone) && (
               <div className="flex items-start gap-3 p-4 bg-primary-50 rounded-lg">
                 <FiPhone className="w-5 h-5 text-primary-700 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-primary-900 mb-1">Phone Number</p>
-                  <a 
-                    href={`tel:+91${user.addresses[0].phone}`}
-                    className="text-primary-700 hover:text-primary-900 hover:underline"
-                  >
-                    +91 {user.addresses[0].phone}
-                  </a>
+                  <p className="text-sm font-medium text-primary-900 mb-2">Phone Numbers</p>
+                  <div className="space-y-1">
+                    {user.addresses
+                      .filter(addr => addr.phone)
+                      .map((address, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <a 
+                            href={`tel:+91${address.phone}`}
+                            className="text-primary-700 hover:text-primary-900 hover:underline"
+                          >
+                            +91 {address.phone}
+                          </a>
+                          {address.isPriority ? (
+                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded font-medium">
+                              Profile
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-medium">
+                              From Order
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    }
+                  </div>
                 </div>
               </div>
             )}
@@ -71,15 +89,26 @@ export default function UserContactModal({ user, onClose }) {
               <div className="space-y-3">
                 <p className="text-sm font-semibold text-primary-900 flex items-center gap-2">
                   <FiMapPin className="w-5 h-5" />
-                  Saved Addresses ({user.addresses.length})
+                  All Addresses ({user.addresses.length})
                 </p>
                 {user.addresses.map((address, index) => (
                   <div key={index} className="p-4 bg-primary-50 rounded-lg space-y-2">
-                    {address.isDefault && (
-                      <span className="inline-block px-2 py-1 bg-primary-900 text-white text-xs rounded font-medium">
-                        Default
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {address.isDefault && (
+                        <span className="px-2 py-1 bg-primary-900 text-white text-xs rounded font-medium">
+                          Default
+                        </span>
+                      )}
+                      {address.isPriority ? (
+                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium">
+                          Saved in Profile
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">
+                          From Order History
+                        </span>
+                      )}
+                    </div>
                     <p className="font-medium text-primary-900">{address.fullName}</p>
                     {address.phone && (
                       <p className="text-sm text-primary-700">

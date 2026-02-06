@@ -6,13 +6,65 @@ const bcrypt = require("bcrypt");
 // @access  Private/Admin
 exports.getAllUsers = async (req, res) => {
   try {
+    const Order = require("../models/Order");
     const users = await User.find().select("-password").sort({ createdAt: -1 });
 
-    // Map users to include isActive for frontend compatibility
-    const usersWithStatus = users.map((user) => ({
-      ...user.toObject(),
-      isActive: !user.isBlocked,
-    }));
+    // Map users to include isActive and collect all addresses from profile and orders
+    const usersWithStatus = await Promise.all(
+      users.map(async (user) => {
+        const userObj = user.toObject();
+
+        // Collect all unique addresses from orders
+        const orders = await Order.find({ user: user._id })
+          .sort({ createdAt: -1 })
+          .select("shippingAddress")
+          .lean();
+
+        const allAddresses = [];
+        const profileAddresses = userObj.addresses || [];
+
+        // Mark profile addresses as priority
+        profileAddresses.forEach((addr) => {
+          allAddresses.push({
+            ...addr,
+            source: "profile",
+            isPriority: true,
+          });
+        });
+
+        // Collect unique addresses from orders
+        const seenPhones = new Set(
+          profileAddresses.map((a) => a.phone).filter(Boolean),
+        );
+
+        orders.forEach((order) => {
+          if (order.shippingAddress && order.shippingAddress.phone) {
+            // Add if phone number not already in profile
+            if (!seenPhones.has(order.shippingAddress.phone)) {
+              seenPhones.add(order.shippingAddress.phone);
+              allAddresses.push({
+                fullName: order.shippingAddress.fullName,
+                phone: order.shippingAddress.phone,
+                addressLine1: order.shippingAddress.addressLine1,
+                addressLine2: order.shippingAddress.addressLine2,
+                city: order.shippingAddress.city,
+                state: order.shippingAddress.state,
+                postalCode: order.shippingAddress.postalCode,
+                country: order.shippingAddress.country || "India",
+                source: "order",
+                isPriority: false,
+              });
+            }
+          }
+        });
+
+        return {
+          ...userObj,
+          addresses: allAddresses,
+          isActive: !user.isBlocked,
+        };
+      }),
+    );
 
     res.json({ users: usersWithStatus });
   } catch (error) {
@@ -26,13 +78,60 @@ exports.getAllUsers = async (req, res) => {
 // @access  Private/Admin
 exports.getUserById = async (req, res) => {
   try {
+    const Order = require("../models/Order");
     const user = await User.findById(req.params.id).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ user });
+    const userObj = user.toObject();
+
+    // Collect all unique addresses from orders
+    const orders = await Order.find({ user: user._id })
+      .sort({ createdAt: -1 })
+      .select("shippingAddress")
+      .lean();
+
+    const allAddresses = [];
+    const profileAddresses = userObj.addresses || [];
+
+    // Mark profile addresses as priority
+    profileAddresses.forEach((addr) => {
+      allAddresses.push({
+        ...addr,
+        source: "profile",
+        isPriority: true,
+      });
+    });
+
+    // Collect unique addresses from orders
+    const seenPhones = new Set(
+      profileAddresses.map((a) => a.phone).filter(Boolean),
+    );
+
+    orders.forEach((order) => {
+      if (order.shippingAddress && order.shippingAddress.phone) {
+        // Add if phone number not already in profile
+        if (!seenPhones.has(order.shippingAddress.phone)) {
+          seenPhones.add(order.shippingAddress.phone);
+          allAddresses.push({
+            fullName: order.shippingAddress.fullName,
+            phone: order.shippingAddress.phone,
+            addressLine1: order.shippingAddress.addressLine1,
+            addressLine2: order.shippingAddress.addressLine2,
+            city: order.shippingAddress.city,
+            state: order.shippingAddress.state,
+            postalCode: order.shippingAddress.postalCode,
+            country: order.shippingAddress.country || "India",
+            source: "order",
+            isPriority: false,
+          });
+        }
+      }
+    });
+
+    res.json({ user: { ...userObj, addresses: allAddresses } });
   } catch (error) {
     console.error("Get user by ID error:", error);
     res.status(500).json({ message: "Server error" });
@@ -265,11 +364,52 @@ exports.getUserHistory = async (req, res) => {
       });
     }
 
+    const userObj = user.toObject();
+
     // Get user orders
     const orders = await Order.find({ user: id })
       .populate("items.product", "name images")
       .sort({ createdAt: -1 })
       .lean();
+
+    // Collect all unique addresses from profile and orders
+    const allAddresses = [];
+    const profileAddresses = userObj.addresses || [];
+
+    // Mark profile addresses as priority
+    profileAddresses.forEach((addr) => {
+      allAddresses.push({
+        ...addr,
+        source: "profile",
+        isPriority: true,
+      });
+    });
+
+    // Collect unique addresses from orders
+    const seenPhones = new Set(
+      profileAddresses.map((a) => a.phone).filter(Boolean),
+    );
+
+    orders.forEach((order) => {
+      if (order.shippingAddress && order.shippingAddress.phone) {
+        // Add if phone number not already in profile
+        if (!seenPhones.has(order.shippingAddress.phone)) {
+          seenPhones.add(order.shippingAddress.phone);
+          allAddresses.push({
+            fullName: order.shippingAddress.fullName,
+            phone: order.shippingAddress.phone,
+            addressLine1: order.shippingAddress.addressLine1,
+            addressLine2: order.shippingAddress.addressLine2,
+            city: order.shippingAddress.city,
+            state: order.shippingAddress.state,
+            postalCode: order.shippingAddress.postalCode,
+            country: order.shippingAddress.country || "India",
+            source: "order",
+            isPriority: false,
+          });
+        }
+      }
+    });
 
     // Get wishlist
     const wishlist = await Wishlist.findOne({ user: id })
@@ -303,11 +443,11 @@ exports.getUserHistory = async (req, res) => {
       success: true,
       data: {
         user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.addresses?.[0]?.phone || null,
-          addresses: user.addresses || [],
+          _id: userObj._id,
+          name: userObj.name,
+          email: userObj.email,
+          phone: allAddresses?.[0]?.phone || null,
+          addresses: allAddresses || [],
         },
         orders: orders.map((order) => ({
           _id: order._id,

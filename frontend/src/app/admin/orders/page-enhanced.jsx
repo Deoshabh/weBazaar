@@ -415,7 +415,7 @@ export default function AdminOrdersDashboard() {
                         <div>
                           <button
                             onClick={() => handleViewUserHistory(order)}
-                            className="font-medium text-primary-700 hover:text-primary-900 hover:underline text-left transition-colors"
+                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left transition-colors"
                             title="View User History"
                           >
                             {order.shippingAddress?.fullName}
