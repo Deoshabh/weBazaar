@@ -189,37 +189,11 @@ exports.updateShippingInfo = async (req, res) => {
  */
 exports.updateShippingAddress = async (req, res) => {
   try {
-    const { shippingAddress } = req.body;
-
-    if (!shippingAddress) {
-      return res.status(400).json({ message: "Shipping address is required" });
-    }
-
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    // Don't allow address change if shipment already created
-    if (order.shipping?.shipment_id) {
-      return res.status(400).json({
-        message: "Cannot update address after shipment creation",
-      });
-    }
-
-    // Update address
-    order.shippingAddress = {
-      ...order.shippingAddress,
-      ...shippingAddress,
-    };
-
-    await order.save();
-
-    res.json({
-      success: true,
-      message: "Shipping address updated successfully",
-      order,
+    // Admin can no longer edit shipping addresses
+    return res.status(403).json({
+      success: false,
+      message:
+        "Address editing has been disabled for admins. Address is view-only.",
     });
   } catch (error) {
     console.error("Update shipping address error:", error);

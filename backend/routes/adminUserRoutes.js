@@ -5,6 +5,7 @@ const {
   getUserById,
   updateUserRole,
   toggleUserBlock,
+  createAdmin,
 } = require("../controllers/adminUserController");
 const { authenticate } = require("../middleware/auth");
 const admin = require("../middleware/admin");
@@ -15,6 +16,9 @@ router.use(admin);
 
 // @route   GET /api/v1/admin/users
 router.get("/", getAllUsers);
+
+// @route   POST /api/v1/admin/users/create-admin
+router.post("/create-admin", createAdmin);
 
 // @route   GET /api/v1/admin/users/:id
 router.get("/:id", getUserById);

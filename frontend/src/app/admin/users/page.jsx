@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/utils/api';
 import AdminLayout from '@/components/AdminLayout';
+import CreateAdminModal from '@/components/CreateAdminModal';
 import toast from 'react-hot-toast';
-import { FiSearch, FiMail, FiPhone, FiShield, FiUser } from 'react-icons/fi';
+import { FiSearch, FiMail, FiPhone, FiShield, FiUser, FiUserPlus } from 'react-icons/fi';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export default function AdminUsersPage() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('all');
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+
+  const adminCount = users.filter(u => u.role === 'admin').length;
+  const maxAdmins = 5;
 
   useEffect(() => {
     if (!loading && (!isAuthenticated || user?.role !== 'admin')) {
@@ -43,15 +48,9 @@ export default function AdminUsersPage() {
   }, [isAuthenticated, user]);
 
   const handleUpdateRole = async (userId, newRole) => {
-    if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
-    
-    try {
-      await adminAPI.updateUserRole(userId, newRole);
-      toast.success('User role updated successfully');
-      fetchUsers();
-    } catch (error) {
-      toast.error('Failed to update user role');
-    }
+    // Role editing disabled - admins can only be created via Create Admin button
+    toast.error('Role editing has been disabled. Use "Create Admin" button to add new admins.');
+    return;
   };
 
   const handleToggleStatus = async (userId) => {
@@ -83,9 +82,20 @@ export default function AdminUsersPage() {
     <AdminLayout>
     <div className="min-h-screen bg-primary-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Users Management</h1>
-          <p className="text-sm sm:text-base text-primary-600 mt-1">Manage user accounts and permissions</p>
+        <div className="mb-6 sm:mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Users Management</h1>
+            <p className="text-sm sm:text-base text-primary-600 mt-1">Manage user accounts and permissions</p>
+          </div>
+          <button
+            onClick={() => setShowCreateAdminModal(true)}
+            disabled={adminCount >= maxAdmins}
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={adminCount >= maxAdmins ? `Admin limit reached (${maxAdmins} max)` : 'Create new admin account'}
+          >
+            <FiUserPlus />
+            Create Admin
+          </button>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6">
@@ -167,18 +177,15 @@ export default function AdminUsersPage() {
                         {new Date(u.createdAt).toLocaleDateString('en-IN')}
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleUpdateRole(u._id, e.target.value)}
-                          className={`px-3 py-1 rounded-full text-sm font-medium border-0 focus:ring-2 focus:ring-primary-900 ${
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
                             u.role === 'admin'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-blue-100 text-blue-800'
                           }`}
                         >
-                          <option value="user">User</option>
-                          <option value="admin">Admin</option>
-                        </select>
+                          {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <button
@@ -220,6 +227,17 @@ export default function AdminUsersPage() {
         </div>
       </div>
     </div>
+
+    {/* Create Admin Modal */}
+    <CreateAdminModal
+      isOpen={showCreateAdminModal}
+      onClose={() => setShowCreateAdminModal(false)}
+      onSuccess={() => {
+        fetchUsers();
+        setShowCreateAdminModal(false);
+      }}
+      currentAdminCount={adminCount}
+    />
     </AdminLayout>
   );
 }

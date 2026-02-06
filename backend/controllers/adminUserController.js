@@ -43,37 +43,12 @@ exports.getUserById = async (req, res) => {
 // @access  Private/Admin
 exports.updateUserRole = async (req, res) => {
   try {
-    const { role } = req.body;
-
-    if (!role || !["user", "admin"].includes(role)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid role. Must be 'user' or 'admin'" });
-    }
-
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Prevent admin from changing their own role
-    if (user._id.toString() === req.user._id.toString()) {
-      return res.status(400).json({ message: "Cannot change your own role" });
-    }
-
-    user.role = role;
-    await user.save();
-
-    res.json({
-      message: "User role updated successfully",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isBlocked: user.isBlocked,
-      },
+    // Role editing has been disabled
+    // Admins can only be created via the Create Admin endpoint
+    return res.status(403).json({
+      success: false,
+      message:
+        "Role editing has been disabled. Use the Create Admin function to add new admin accounts.",
     });
   } catch (error) {
     console.error("Update user role error:", error);
@@ -134,6 +109,81 @@ exports.toggleUserBlock = async (req, res) => {
     console.error("Request params:", req.params);
     console.error("Request user:", req.user?._id);
     res.status(500).json({
+      message: "Server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+// @desc    Create new admin account
+// @route   POST /api/v1/admin/users/create-admin
+// @access  Private/Admin
+exports.createAdmin = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered",
+      });
+    }
+
+    // Check admin limit (max 5 admins)
+    const adminCount = await User.countDocuments({ role: "admin" });
+    const MAX_ADMINS = 5;
+
+    if (adminCount >= MAX_ADMINS) {
+      return res.status(400).json({
+        success: false,
+        message: `Admin limit reached. Maximum ${MAX_ADMINS} admin accounts allowed. Currently: ${adminCount} admins.`,
+      });
+    }
+
+    // Create admin user
+    const adminUser = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password, // Will be hashed by User model pre-save hook
+      role: "admin",
+      isBlocked: false,
+    });
+
+    // Return response (exclude password)
+    res.status(201).json({
+      success: true,
+      message: "Admin account created successfully",
+      user: {
+        _id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+        isBlocked: adminUser.isBlocked,
+        isActive: !adminUser.isBlocked,
+        createdAt: adminUser.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Create admin error:", error);
+    res.status(500).json({
+      success: false,
       message: "Server error",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });

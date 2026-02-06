@@ -148,12 +148,44 @@ export default function CategoriesPage() {
     
     try {
       setUploadingImage(true);
-      const formData = new FormData();
-      formData.append('file', imageFile);
-      formData.append('folder', 'categories');
-
-      const response = await adminAPI.uploadMedia(formData);
-      return response.data;
+      
+      // Generate a slug-safe filename for the category
+      const categorySlug = formData.slug || formData.name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      
+      // Step 1: Get signed upload URL
+      const { data: responseData } = await adminAPI.getUploadUrl({
+        fileName: imageFile.name,
+        fileType: imageFile.type,
+        productSlug: `categories/${categorySlug}`, // Use category path
+      });
+      
+      // Validate response structure
+      const uploadUrlData = responseData?.data || responseData;
+      if (!uploadUrlData?.signedUrl || !uploadUrlData?.publicUrl || !uploadUrlData?.key) {
+        console.error('Invalid response structure:', uploadUrlData);
+        throw new Error('Invalid upload URL response');
+      }
+      
+      // Step 2: Upload image to MinIO
+      const uploadResponse = await fetch(uploadUrlData.signedUrl, {
+        method: 'PUT',
+        body: imageFile,
+        headers: {
+          'Content-Type': imageFile.type,
+        },
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload: ${uploadResponse.statusText}`);
+      }
+      
+      // Return image data
+      return {
+        url: uploadUrlData.publicUrl,
+        publicId: uploadUrlData.key,
+      };
     } catch (error) {
       console.error('Image upload failed:', error);
       toast.error('Failed to upload image');

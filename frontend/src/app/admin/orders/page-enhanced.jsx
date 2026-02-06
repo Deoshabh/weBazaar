@@ -2,17 +2,18 @@
 
 /**
  * Enhanced Admin Orders Dashboard
- * Features: Quick actions, lifecycle status, risk flags, aging indicators, bulk operations, timeline
+ * Features: Quick actions, risk flags, aging indicators, bulk operations, timeline
  */
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/utils/api';
+import { exportOrdersToCSV } from '@/utils/exportCSV';
 import AdminLayout from '@/components/AdminLayout';
 import ShiprocketShipmentModal from '@/components/ShiprocketShipmentModal';
 import OrderTimelinePanel from '@/components/OrderTimelinePanel';
-import EditAddressModal from '@/components/EditAddressModal';
+import ViewContactModal from '@/components/ViewContactModal';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import toast from 'react-hot-toast';
@@ -33,6 +34,7 @@ import {
   FiCreditCard,
   FiCheckCircle,
   FiX,
+  FiDownload,
 } from 'react-icons/fi';
 
 export default function AdminOrdersDashboard() {
@@ -46,7 +48,7 @@ export default function AdminOrdersDashboard() {
   const [showShipmentModal, setShowShipmentModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [expandedRow, setExpandedRow] = useState(null);
-  const [showEditAddressModal, setShowEditAddressModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
 
@@ -112,41 +114,7 @@ export default function AdminOrdersDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  // Get lifecycle badge color
-  const getLifecycleBadgeColor = (status) => {
-    const colors = {
-      ready_to_ship: 'bg-gray-100 text-gray-700',
-      shipment_created: 'bg-blue-100 text-blue-700',
-      pickup_scheduled: 'bg-indigo-100 text-indigo-700',
-      picked_up: 'bg-purple-100 text-purple-700',
-      in_transit: 'bg-yellow-100 text-yellow-700',
-      out_for_delivery: 'bg-orange-100 text-orange-700',
-      delivered: 'bg-green-100 text-green-700',
-      failed_delivery: 'bg-red-100 text-red-700',
-      rto_initiated: 'bg-red-100 text-red-700',
-      rto_delivered: 'bg-red-100 text-red-700',
-      cancelled: 'bg-gray-100 text-gray-700',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-700';
-  };
 
-  // Get lifecycle display name
-  const getLifecycleDisplayName = (status) => {
-    const names = {
-      ready_to_ship: 'Ready to Ship',
-      shipment_created: 'Shipment Created',
-      pickup_scheduled: 'Pickup Scheduled',
-      picked_up: 'Picked Up',
-      in_transit: 'In Transit',
-      out_for_delivery: 'Out for Delivery',
-      delivered: 'Delivered',
-      failed_delivery: 'Failed Delivery',
-      rto_initiated: 'RTO Initiated',
-      rto_delivered: 'RTO Delivered',
-      cancelled: 'Cancelled',
-    };
-    return names[status] || status;
-  };
 
   // Get aging indicator color
   const getAgingColor = (ageInHours) => {
@@ -204,21 +172,24 @@ export default function AdminOrdersDashboard() {
     setExpandedRow(expandedRow === order._id ? null : order._id);
   };
 
-  const handleEditAddress = (order) => {
-    if (order.shipping?.shipment_id) {
-      toast.error('Cannot edit address after shipment creation');
-      return;
-    }
+  const handleViewAddress = (order) => {
+    // View address and contact information (read-only)
     setSelectedOrder(order);
-    setShowEditAddressModal(true);
+    setShowContactModal(true);
   };
 
   const handleContactCustomer = (order) => {
-    const phone = order.shippingAddress?.phone;
-    if (phone) {
-      window.location.href = `tel:+91${phone}`;
-    } else {
-      toast.error('Phone number not available');
+    setSelectedOrder(order);
+    setShowContactModal(true);
+  };
+
+  // CSV Export handler
+  const handleExportCSV = () => {
+    try {
+      exportOrdersToCSV(filteredOrders, `orders-${new Date().toISOString().split('T')[0]}.csv`);
+      toast.success(`Exported ${filteredOrders.length} orders to CSV`);
+    } catch (error) {
+      toast.error('Failed to export orders');
     }
   };
 
@@ -305,6 +276,14 @@ export default function AdminOrdersDashboard() {
               {selectedOrders.length > 0 && ` • ${selectedOrders.length} selected`}
             </p>
           </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={filteredOrders.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FiDownload />
+            Export CSV
+          </button>
         </div>
 
         {/* Search and Filters */}
@@ -376,9 +355,6 @@ export default function AdminOrdersDashboard() {
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Lifecycle
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Risks
@@ -457,19 +433,6 @@ export default function AdminOrdersDashboard() {
                           }`}
                         >
                           {order.status}
-                        </span>
-                      </td>
-
-                      {/* Lifecycle */}
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getLifecycleBadgeColor(
-                            order.shipping?.lifecycle_status
-                          )}`}
-                        >
-                          {getLifecycleDisplayName(
-                            order.shipping?.lifecycle_status || 'ready_to_ship'
-                          )}
                         </span>
                       </td>
 
@@ -561,20 +524,20 @@ export default function AdminOrdersDashboard() {
                             </button>
                           )}
 
-                          {/* Edit Address */}
+                          {/* View Shipping Address */}
                           <button
-                            onClick={() => handleEditAddress(order)}
+                            onClick={() => handleViewAddress(order)}
                             className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg"
-                            title="Edit Address"
+                            title="View Shipping Address"
                           >
                             <FiMapPin />
                           </button>
 
-                          {/* Contact Customer */}
+                          {/* View Contact Info */}
                           <button
                             onClick={() => handleContactCustomer(order)}
-                            className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg"
-                            title="Call Customer"
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
+                            title="View Contact Info"
                           >
                             <FiPhone />
                           </button>
@@ -623,14 +586,15 @@ export default function AdminOrdersDashboard() {
         />
       )}
 
-      {showEditAddressModal && selectedOrder && (
-        <EditAddressModal
+      {/* View Contact Modal */}
+      {showContactModal && selectedOrder && (
+        <ViewContactModal
           order={selectedOrder}
+          isOpen={showContactModal}
           onClose={() => {
-            setShowEditAddressModal(false);
+            setShowContactModal(false);
             setSelectedOrder(null);
           }}
-          onSuccess={fetchOrders}
         />
       )}
 

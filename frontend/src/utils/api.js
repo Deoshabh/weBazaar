@@ -210,6 +210,7 @@ export const adminAPI = {
   getUserById: (id) => api.get(`/admin/users/${id}`),
   updateUserRole: (id, role) => api.patch(`/admin/users/${id}/role`, { role }),
   toggleUserBlock: (id) => api.patch(`/admin/users/${id}/toggle-block`),
+  createAdmin: (data) => api.post("/admin/users/create-admin", data),
 
   // Categories
   getAllCategories: () => api.get("/admin/categories"),
@@ -232,7 +233,6 @@ export const adminAPI = {
 
   // Media
   getUploadUrl: (data) => api.post("/admin/media/upload-url", data),
-  uploadMedia: (formData) => api.post("/admin/media/upload", formData),
   deleteMedia: (key) => api.delete("/admin/media", { data: { key } }),
 
   // Stats
