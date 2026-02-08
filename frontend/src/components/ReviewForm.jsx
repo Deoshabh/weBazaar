@@ -187,7 +187,11 @@ export default function ReviewForm({ productId, onReviewSubmitted, onCancel }) {
         />
         <p className="text-xs text-primary-500 mt-1">{comment.length}/2000 characters</p>
       </div>
- - Max 2)
+
+      {/* Photo Upload */}
+      <div>
+        <label className="block text-sm font-medium text-primary-700 mb-2">
+          Add Photos <span className="text-primary-500">(Optional - Max 2)</span>
         </label>
         <div className="space-y-3">
           {photoPreviews.length > 0 && (
