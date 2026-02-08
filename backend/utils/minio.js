@@ -40,44 +40,58 @@ let isInitialized = false;
 async function initializeBucket() {
   if (isInitialized) return;
 
-  console.log("🪣 Initializing MinIO client...");
-  console.log("📡 Endpoint:", MINIO_ENDPOINT);
-  console.log("🔐 SSL:", MINIO_USE_SSL);
+  try {
+    console.log("🪣 Initializing MinIO client...");
+    console.log("📡 Endpoint:", MINIO_ENDPOINT);
+    console.log("🔐 Port:", MINIO_PORT);
+    console.log("🔐 SSL:", MINIO_USE_SSL);
+    console.log("🔑 Access Key:", MINIO_ACCESS_KEY ? "***" + MINIO_ACCESS_KEY.slice(-4) : "NOT SET");
 
-  minioClient = new Minio.Client({
-    endPoint: MINIO_ENDPOINT,
-    port: Number(MINIO_PORT),
-    useSSL: MINIO_USE_SSL === "true",
-    accessKey: MINIO_ACCESS_KEY,
-    secretKey: MINIO_SECRET_KEY,
-  });
+    minioClient = new Minio.Client({
+      endPoint: MINIO_ENDPOINT,
+      port: Number(MINIO_PORT),
+      useSSL: MINIO_USE_SSL === "true",
+      accessKey: MINIO_ACCESS_KEY,
+      secretKey: MINIO_SECRET_KEY,
+    });
 
-  // Check bucket
-  const exists = await minioClient.bucketExists(MINIO_BUCKET);
-  if (!exists) {
-    await minioClient.makeBucket(MINIO_BUCKET, REGION);
-    console.log(`✅ Bucket created: ${MINIO_BUCKET}`);
-  } else {
-    console.log(`✅ Bucket exists: ${MINIO_BUCKET}`);
+    console.log(`🔍 Testing connection to ${MINIO_USE_SSL === "true" ? "https" : "http"}://${MINIO_ENDPOINT}:${MINIO_PORT}`);
+
+    // Check bucket
+    const exists = await minioClient.bucketExists(MINIO_BUCKET);
+    if (!exists) {
+      console.log(`📦 Bucket '${MINIO_BUCKET}' does not exist, creating...`);
+      await minioClient.makeBucket(MINIO_BUCKET, REGION);
+      console.log(`✅ Bucket created: ${MINIO_BUCKET}`);
+    } else {
+      console.log(`✅ Bucket exists: ${MINIO_BUCKET}`);
+    }
+
+    // Public read policy
+    const policy = {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Principal: { AWS: ["*"] },
+          Action: ["s3:GetObject"],
+          Resource: [`arn:aws:s3:::${MINIO_BUCKET}/*`],
+        },
+      ],
+    };
+
+    await minioClient.setBucketPolicy(MINIO_BUCKET, JSON.stringify(policy));
+
+    console.log("✅ MinIO bucket policy set (public read)");
+    isInitialized = true;
+  } catch (error) {
+    console.error("❌ MinIO initialization failed:");
+    console.error("  Error Code:", error.code);
+    console.error("  Error Message:", error.message);
+    console.error("  Status Code:", error.statusCode);
+    console.error("  Full Error:", JSON.stringify(error, null, 2));
+    throw error;
   }
-
-  // Public read policy
-  const policy = {
-    Version: "2012-10-17",
-    Statement: [
-      {
-        Effect: "Allow",
-        Principal: { AWS: ["*"] },
-        Action: ["s3:GetObject"],
-        Resource: [`arn:aws:s3:::${MINIO_BUCKET}/*`],
-      },
-    ],
-  };
-
-  await minioClient.setBucketPolicy(MINIO_BUCKET, JSON.stringify(policy));
-
-  console.log("✅ MinIO bucket policy set (public read)");
-  isInitialized = true;
 }
 
 /**
