@@ -147,6 +147,162 @@ async function exampleWithErrorHandling(token, action) {
   }
 }
 
+/**
+ * Example 6: Using account identifiers for better bot detection
+ * Sends unique user identifier to improve assessment accuracy
+ */
+async function exampleWithAccountId(token, action, userEmail) {
+  const score = await createAssessment({
+    token: token,
+    recaptchaAction: action,
+    userInfo: {
+      accountId: userEmail, // Can be email, username, or user ID
+    },
+  });
+
+  return score;
+}
+
+/**
+ * Example 7: Using phone number for enhanced verification
+ * Phone number must be in E.164 format (e.g., +1234567890)
+ */
+async function exampleWithPhoneNumber(token, action, phoneNumber) {
+  const score = await createAssessment({
+    token: token,
+    recaptchaAction: action,
+    userInfo: {
+      accountId: "user@example.com",
+      phoneNumber: phoneNumber, // Must be E.164 format: +<country><number>
+    },
+  });
+
+  return score;
+}
+
+/**
+ * Example 8: Complete user assessment with all available data
+ * Provides maximum context for accurate bot detection
+ */
+async function exampleWithCompleteUserInfo(token, action, user) {
+  const score = await createAssessment({
+    token: token,
+    recaptchaAction: action,
+    userInfo: {
+      // Unique account identifier - use most stable identifier
+      accountId: user.email || user.username || user.id,
+      // Phone number in E.164 format (optional but recommended)
+      phoneNumber: user.phoneNumber, // e.g., "+11234567890"
+    },
+  });
+
+  return score;
+}
+
+/**
+ * Example 9: Login flow with user information
+ * Typical authentication endpoint with reCAPTCHA and user data
+ */
+async function exampleLoginWithReCAPTCHA(req, res) {
+  const { email, password, recaptchaToken } = req.body;
+
+  try {
+    // Verify user exists (pseudo code)
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Still verify reCAPTCHA even for non-existent accounts to detect patterns
+      await createAssessment({
+        token: recaptchaToken,
+        recaptchaAction: "LOGIN",
+        userInfo: {
+          accountId: email,
+        },
+      });
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Verify reCAPTCHA with account information
+    const score = await createAssessment({
+      token: recaptchaToken,
+      recaptchaAction: "LOGIN",
+      userInfo: {
+        accountId: user.email,
+        phoneNumber: user.phoneNumber, // If available
+      },
+    });
+
+    if (score === null || score < 0.5) {
+      return res.status(403).json({
+        message: "Security check failed. Please try again later.",
+        score: score,
+      });
+    }
+
+    // Verify password and continue with login
+    const passwordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!passwordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Login successful
+    const token = generateToken(user);
+    return res.json({
+      success: true,
+      user,
+      token,
+      score, // For analytics
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+/**
+ * Example 10: Registration flow with phone verification
+ * New account creation with enhanced fraud detection
+ */
+async function exampleRegistrationWithPhoneNumber(req, res) {
+  const { email, password, phoneNumber, recaptchaToken } = req.body;
+
+  try {
+    // Verify reCAPTCHA with account information
+    const score = await createAssessment({
+      token: recaptchaToken,
+      recaptchaAction: "REGISTER",
+      userInfo: {
+        accountId: email,
+        phoneNumber: phoneNumber, // E.164 format: +11234567890
+      },
+    });
+
+    if (score === null || score < 0.6) {
+      return res.status(403).json({
+        message: "Account creation blocked by security checks",
+        score: score,
+      });
+    }
+
+    // Create user account
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      email,
+      passwordHash: hashedPassword,
+      phoneNumber,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      user,
+      score, // For analytics
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 // Export examples for testing
 module.exports = {
   exampleBasicUsage,
@@ -154,6 +310,11 @@ module.exports = {
   exampleExpressRoute,
   exampleActionBasedThresholds,
   exampleWithErrorHandling,
+  exampleWithAccountId,
+  exampleWithPhoneNumber,
+  exampleWithCompleteUserInfo,
+  exampleLoginWithReCAPTCHA,
+  exampleRegistrationWithPhoneNumber,
 };
 
 /**
@@ -163,12 +324,52 @@ module.exports = {
  * const { createAssessment } = require('./middleware/recaptcha');
  * const score = await createAssessment({ token, recaptchaAction: 'LOGIN' });
  *
- * Option 2: Use verifyRecaptcha middleware (our wrapper)
+ * Option 2: Use createAssessment with user information
+ * const score = await createAssessment({
+ *   token,
+ *   recaptchaAction: 'LOGIN',
+ *   userInfo: {
+ *     accountId: user.email,        // Unique identifier (email, username, ID, etc.)
+ *     phoneNumber: user.phoneNumber // Optional: E.164 format (+1234567890)
+ *   }
+ * });
+ *
+ * Option 3: Use verifyRecaptcha middleware (our wrapper)
  * const { verifyRecaptcha } = require('./middleware/recaptcha');
  * router.post('/login', verifyRecaptcha('LOGIN', 0.5), loginController);
+ * // Automatically extracts userInfo from req.user or req.body.userInfo
  *
- * Option 3: Use verifyRecaptchaToken for custom logic
+ * Option 4: Use verifyRecaptchaToken for custom logic
  * const { verifyRecaptchaToken } = require('./middleware/recaptcha');
- * const result = await verifyRecaptchaToken(token, 'LOGIN', 0.5);
+ * const result = await verifyRecaptchaToken(
+ *   token,
+ *   'LOGIN',
+ *   0.5,
+ *   {
+ *     accountId: user.email,
+ *     phoneNumber: user.phoneNumber
+ *   }
+ * );
  * if (result.success) { ... }
+ *
+ * Phone Number Format:
+ * - Must be in E.164 format: +<country_code><number>
+ * - Examples:
+ *   - US: +11234567890
+ *   - UK: +441234567890
+ *   - India: +919876543210
+ *   - Canada: +14165551234
+ *
+ * Account ID Guidelines:
+ * - Use most stable identifier (email, username, or user ID)
+ * - Must be consistent across requests for same user
+ * - Used to detect patterns of abuse
+ *
+ * reCAPTCHA Scores & Actions:
+ * - LOGIN: 0.5 (balanced)
+ * - REGISTER: 0.6 (stricter - prevent account farming)
+ * - CHECKOUT: 0.7 (very strict - prevent payment fraud)
+ * - ADD_TO_CART: 0.3 (lenient - browsing action)
+ * - FORGOT_PASSWORD: 0.5 (balanced security)
+ * - CONTACT_FORM: 0.5 (balanced)
  */

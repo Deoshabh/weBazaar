@@ -49,13 +49,52 @@ function initializeRecaptchaClient() {
 }
 
 /**
+ * Build userInfo object for reCAPTCHA assessment
+ * Includes account identifiers and phone numbers for more accurate bot detection
+ * @param {Object} userInfo - User information
+ * @param {string} userInfo.accountId - Unique account identifier (username, email, or user ID)
+ * @param {string} userInfo.phoneNumber - User's phone number in E.164 format (e.g., +1234567890)
+ * @returns {Object|undefined} userInfo object for request or undefined if no info provided
+ */
+function buildUserInfo(userInfo) {
+  if (!userInfo) return undefined;
+
+  const info = {};
+
+  // Add account ID if provided
+  if (userInfo.accountId) {
+    info.accountId = userInfo.accountId;
+  }
+
+  // Add phone number if provided (must be in E.164 format)
+  if (userInfo.phoneNumber) {
+    info.userIds = [
+      {
+        phoneNumber: userInfo.phoneNumber,
+      },
+    ];
+  }
+
+  // Return undefined if no info was added
+  return Object.keys(info).length > 0 ? info : undefined;
+}
+
+/**
  * Verify reCAPTCHA token with Google
  * @param {string} token - The reCAPTCHA token from frontend
  * @param {string} expectedAction - Expected action name (e.g., 'LOGIN', 'REGISTER')
  * @param {number} minScore - Minimum score threshold (0.0 to 1.0)
+ * @param {Object} userInfo - User information for better bot detection
+ * @param {string} userInfo.accountId - Unique account identifier (username, email, or user ID)
+ * @param {string} userInfo.phoneNumber - User's phone number in E.164 format (e.g., +1234567890)
  * @returns {Promise<Object>} Verification result
  */
-async function verifyRecaptchaToken(token, expectedAction, minScore = 0.5) {
+async function verifyRecaptchaToken(
+  token,
+  expectedAction,
+  minScore = 0.5,
+  userInfo = null,
+) {
   const client = initializeRecaptchaClient();
 
   // If client is not initialized (credentials not configured), skip verification
@@ -79,14 +118,25 @@ async function verifyRecaptchaToken(token, expectedAction, minScore = 0.5) {
     const projectPath = client.projectPath(process.env.GOOGLE_CLOUD_PROJECT_ID);
 
     // Build the assessment request (following Google's official pattern)
+    const event = {
+      token: token,
+      siteKey:
+        process.env.RECAPTCHA_SITE_KEY ||
+        "6LcbjmUsAAAAAHVeGta063p2ii-OlYGQqOBPfmQl",
+    };
+
+    // Add user information if provided (for better bot detection)
+    const builtUserInfo = buildUserInfo(userInfo);
+    if (builtUserInfo) {
+      event.userInfo = builtUserInfo;
+      console.log(
+        `ℹ️  reCAPTCHA assessment includes user info: accountId=${userInfo.accountId || "n/a"}, phoneNumber=${userInfo.phoneNumber ? "provided" : "n/a"}`,
+      );
+    }
+
     const request = {
       assessment: {
-        event: {
-          token: token,
-          siteKey:
-            process.env.RECAPTCHA_SITE_KEY ||
-            "6LcbjmUsAAAAAHVeGta063p2ii-OlYGQqOBPfmQl",
-        },
+        event: event,
       },
       parent: projectPath,
     };
@@ -163,6 +213,9 @@ async function verifyRecaptchaToken(token, expectedAction, minScore = 0.5) {
  * @param {string} params.recaptchaKey - The reCAPTCHA key associated with the site/app
  * @param {string} params.token - The generated token obtained from the client
  * @param {string} params.recaptchaAction - Action name corresponding to the token
+ * @param {Object} params.userInfo - User information for better bot detection
+ * @param {string} params.userInfo.accountId - Unique account identifier
+ * @param {string} params.userInfo.phoneNumber - User's phone number in E.164 format
  * @returns {Promise<number|null>} The reCAPTCHA score (0.0 to 1.0) or null if failed
  */
 async function createAssessment({
@@ -171,6 +224,7 @@ async function createAssessment({
     "6LcbjmUsAAAAAHVeGta063p2ii-OlYGQqOBPfmQl",
   token = "",
   recaptchaAction = "",
+  userInfo = null,
 }) {
   const client = initializeRecaptchaClient();
 
@@ -182,12 +236,20 @@ async function createAssessment({
   const projectPath = client.projectPath(projectID);
 
   // Build the assessment request
+  const event = {
+    token: token,
+    siteKey: recaptchaKey,
+  };
+
+  // Add user information if provided (for better bot detection)
+  const builtUserInfo = buildUserInfo(userInfo);
+  if (builtUserInfo) {
+    event.userInfo = builtUserInfo;
+  }
+
   const request = {
     assessment: {
-      event: {
-        token: token,
-        siteKey: recaptchaKey,
-      },
+      event: event,
     },
     parent: projectPath,
   };
@@ -241,10 +303,22 @@ const verifyRecaptcha = (expectedAction, minScore = 0.5, optional = false) => {
         return next();
       }
 
+      // Extract user information from request if available
+      // Support both req.user (from auth middleware) and custom fields
+      const userInfo =
+        req.body.userInfo ||
+        (req.user
+          ? {
+              accountId: req.user.email || req.user.id,
+              phoneNumber: req.user.phoneNumber,
+            }
+          : null);
+
       const result = await verifyRecaptchaToken(
         token,
         expectedAction,
         minScore,
+        userInfo,
       );
 
       // If verification was skipped (not configured), allow request to continue
@@ -296,4 +370,5 @@ module.exports = {
   verifyRecaptchaToken,
   createAssessment,
   initializeRecaptchaClient,
+  buildUserInfo,
 };
