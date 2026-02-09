@@ -5,11 +5,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { FiStar, FiEye, FiEyeOff, FiTrash2, FiSearch, FiFilter, FiCheck, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { adminAPI } from '@/utils/api';
 
 export default function AdminReviewsPage() {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
@@ -58,27 +58,20 @@ export default function AdminReviewsPage() {
     try {
       setLoading(true);
       
-      const params = new URLSearchParams({
-        page: pageToLoad.toString(),
-        limit: '20',
+      const params = {
+        page: pageToLoad,
+        limit: 20,
         sort: sortByToLoad,
         order: sortOrderToLoad,
-      });
+      };
 
-      if (searchToLoad) params.append('search', searchToLoad);
-      if (filtersToLoad.rating) params.append('rating', filtersToLoad.rating);
-      if (filtersToLoad.isHidden) params.append('isHidden', filtersToLoad.isHidden);
-      if (filtersToLoad.verifiedPurchase) params.append('verifiedPurchase', filtersToLoad.verifiedPurchase);
+      if (searchToLoad) params.search = searchToLoad;
+      if (filtersToLoad.rating) params.rating = filtersToLoad.rating;
+      if (filtersToLoad.isHidden) params.isHidden = filtersToLoad.isHidden;
+      if (filtersToLoad.verifiedPurchase) params.verifiedPurchase = filtersToLoad.verifiedPurchase;
 
-      const response = await fetch(`${API_URL}/admin/reviews?${params}`, {
-        credentials: 'include',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch reviews');
-      }
+      const response = await adminAPI.getAllReviews(params);
+      const data = response.data;
 
       setReviews(data.reviews);
       setStats(data.stats);
@@ -89,7 +82,7 @@ export default function AdminReviewsPage() {
     } finally {
       setLoading(false);
     }
-  }, [API_URL, page, sortBy, sortOrder]);
+  }, [page, sortBy, sortOrder]);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'admin') {
@@ -110,19 +103,9 @@ export default function AdminReviewsPage() {
 
   const handleToggleHidden = async (reviewId, currentHiddenState) => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/admin/reviews/${reviewId}/toggle-hidden`, {
-        method: 'PATCH',
-        credentials: 'include',
-      });
+      const response = await adminAPI.toggleReviewHidden(reviewId);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to toggle review visibility');
-      }
-
-      toast.success(data.message);
+      toast.success(response.data.message || 'Review visibility updated');
       fetchReviews();
     } catch (error) {
       console.error('Toggle hidden error:', error);
@@ -136,17 +119,7 @@ export default function AdminReviewsPage() {
     }
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/admin/reviews/${reviewId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete review');
-      }
+      const response = await adminAPI.deleteReview(reviewId);
 
       toast.success('Review deleted successfully');
       fetchReviews();
@@ -163,24 +136,12 @@ export default function AdminReviewsPage() {
     }
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/admin/reviews/bulk-hide`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          reviewIds: selectedReviews,
-          hide,
-        }),
+      const response = await adminAPI.bulkHideReviews({
+        reviewIds: selectedReviews,
+        hide,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update reviews');
-      }
-
-      toast.success(data.message);
+      toast.success(response.data.message || 'Reviews updated');
       setSelectedReviews([]);
       fetchReviews();
     } catch (error) {
@@ -200,23 +161,11 @@ export default function AdminReviewsPage() {
     }
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/admin/reviews/bulk-delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          reviewIds: selectedReviews,
-        }),
+      const response = await adminAPI.bulkDeleteReviews({
+        reviewIds: selectedReviews,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete reviews');
-      }
-
-      toast.success(data.message);
+      toast.success(response.data.message || 'Reviews deleted');
       setSelectedReviews([]);
       fetchReviews();
     } catch (error) {

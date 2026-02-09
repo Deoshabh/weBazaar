@@ -241,6 +241,17 @@ export const adminAPI = {
   deleteCoupon: (id) => api.delete(`/admin/coupons/${id}`),
   toggleCouponStatus: (id) => api.patch(`/admin/coupons/${id}/toggle`),
 
+  // Reviews
+  getAllReviews: (params) => api.get("/admin/reviews", { params }),
+  getReviewById: (id) => api.get(`/admin/reviews/${id}`),
+  getReviewStats: () => api.get("/admin/reviews/stats"),
+  toggleReviewHidden: (id) => api.patch(`/admin/reviews/${id}/toggle-hidden`),
+  updateReviewNotes: (id, data) =>
+    api.patch(`/admin/reviews/${id}/notes`, data),
+  deleteReview: (id) => api.delete(`/admin/reviews/${id}`),
+  bulkHideReviews: (data) => api.post("/admin/reviews/bulk-hide", data),
+  bulkDeleteReviews: (data) => api.post("/admin/reviews/bulk-delete", data),
+
   // Filters - Removed manual filter management (filters now auto-generated from products)
   // Brand filters: auto-populated from product.brand field
   // Material filters: auto-extracted from product.materialAndCare field

@@ -378,30 +378,80 @@ exports.firebaseLogin = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid Firebase token" });
     }
 
-    // Check if user exists by Firebase UID, email, or phone
-    let user = await User.findOne({
-      $or: [
-        { firebaseUid: decodedToken.uid },
-        { email: decodedToken.email || email },
-        { phone: decodedToken.phone_number || phoneNumber },
-      ],
+    // ✅ SECURITY FIX: Prioritize Firebase UID for user lookup
+    // Firebase UID is the source of truth for OAuth-based logins
+    // Email matching is unreliable because:
+    // - Multiple Gmail accounts can use the same business domain
+    // - Users can change their email
+    // - Different OAuth providers may use same email
+    //
+    // LOOKUP ORDER:
+    // 1. firebaseUid (primary, unique identifier from Firebase)
+    // 2. email (secondary, for linking existing email-based accounts)
+    // 3. phone (tertiary, if available)
+
+    console.log(`🔐 Firebase Login Lookup:`, {
+      firebaseUid: decodedToken.uid,
+      email: decodedToken.email || email,
+      phone: decodedToken.phone_number || phoneNumber,
     });
+
+    // IMPORTANT: Look up by Firebase UID FIRST
+    let user = await User.findOne({ firebaseUid: decodedToken.uid });
+
+    // If not found by UID, check email (for first-time logins or account linking)
+    // But only if the email matches EXACTLY (case-insensitive)
+    if (!user && decodedToken.email) {
+      user = await User.findOne({
+        email: { $regex: `^${decodedToken.email}$`, $options: "i" }, // Case-insensitive exact match
+      });
+
+      // If found by email, MUST link the Firebase UID to this account
+      if (user && !user.firebaseUid) {
+        console.log(
+          `ℹ️  Linking Firebase UID to existing email account: ${decodedToken.email}`,
+        );
+        user.firebaseUid = decodedToken.uid;
+        await user.save();
+      } else if (user) {
+        // Email matched but already has different firebaseUid - SECURITY ISSUE
+        // This prevents account takeover
+        console.warn(
+          `⚠️  SECURITY: Email matched but different firebaseUid found. Possible account hijack attempt.`,
+          {
+            foundUid: user.firebaseUid,
+            incomingUid: decodedToken.uid,
+            email: decodedToken.email,
+          },
+        );
+
+        // Reject to prevent account confusion
+        return res.status(403).json({
+          message:
+            "Account security check failed. Please contact support if this is your account.",
+          error: "FIREBASE_UID_MISMATCH",
+        });
+      }
+    }
 
     // Create new user if doesn't exist
     if (!user) {
+      console.log(`✅ Creating new Firebase user: ${decodedToken.email}`);
       user = await User.create({
         name: displayName || decodedToken.name || "User",
         email: decodedToken.email || email,
         phone: decodedToken.phone_number || phoneNumber,
-        firebaseUid: decodedToken.uid,
+        firebaseUid: decodedToken.uid, // Always set Firebase UID
         profilePicture: photoURL || decodedToken.picture,
         role: "customer",
         emailVerified: decodedToken.email_verified || false,
         phoneVerified: !!decodedToken.phone_number,
-        authProvider: decodedToken.firebase.sign_in_provider, // 'phone', 'password', etc.
+        authProvider: decodedToken.firebase.sign_in_provider, // 'phone', 'password', google.com, etc.
       });
     } else {
-      // Update existing user with Firebase data if not already set
+      // Update existing user with Firebase data
+      console.log(`✅ Logging in existing user: ${user.email}`);
+
       if (!user.firebaseUid) {
         user.firebaseUid = decodedToken.uid;
       }
@@ -416,6 +466,13 @@ exports.firebaseLogin = async (req, res, next) => {
         if (!user.phone) {
           user.phone = decodedToken.phone_number;
         }
+      }
+      // Update authProvider if coming from OAuth
+      if (
+        decodedToken.firebase.sign_in_provider &&
+        decodedToken.firebase.sign_in_provider !== "password"
+      ) {
+        user.authProvider = decodedToken.firebase.sign_in_provider;
       }
       await user.save();
     }

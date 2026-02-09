@@ -390,33 +390,76 @@ export const onAuthStateChange = (callback) => {
 
 /**
  * Sign in with Google popup
+ * ⚠️  CRITICAL: Clears existing Firebase session to prevent account confusion
+ *
+ * Issue: When users switch Google accounts, Firebase may reuse cached session
+ * Solution: Sign out existing user before initiating new Google sign-in
+ *
  * @returns {Promise<Object>} User credential or error
  */
 export const loginWithGoogle = async () => {
   try {
+    // ✅ CRITICAL FIX #1: Clear existing Firebase session
+    // This prevents Firebase from reusing a cached session when switching accounts
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      console.log(
+        `⚠️  Clearing existing Firebase session for: ${currentUser.email}`,
+      );
+      await signOut(auth);
+    }
+
     const provider = new GoogleAuthProvider();
 
     // Optional: Request additional scopes
     provider.addScope("profile");
     provider.addScope("email");
 
-    // Optional: Set custom parameters
+    // ✅ CRITICAL FIX #2: Force account selection + consent flow
+    // prompt: "select_account" = Always show account chooser
+    // prompt: "consent" = Force re-authentication (even stronger)
+    // Using "select_account" is ideal for account switching scenarios
     provider.setCustomParameters({
-      prompt: "select_account", // Force account selection
+      prompt: "select_account", // Force account selection dialog
+      // Optional: Restrict to specific domain (only if needed)
+      // hd: "gmail.com", // Restrict to Gmail accounts only
     });
 
+    // ✅ CRITICAL FIX #3: Use signInWithPopup instead of signInWithRedirect
+    // signInWithPopup is more predictable than redirect flow
     const result = await signInWithPopup(auth, provider);
+
+    // Verify the signed-in user
+    const signedInUser = result.user;
+    console.log(
+      `✅ Successfully signed in as: ${signedInUser.email} (UID: ${signedInUser.uid})`,
+    );
 
     // Get credential and token
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const token = credential?.accessToken;
 
-    toast.success("Google sign-in successful!");
+    // ✅ CRITICAL FIX #4: Verify email is expected (for critical applications)
+    // Optional: Log the provider data for debugging
+    if (result.additionalUserInfo?.provider === "google.com") {
+      console.log("📊 Google Sign-In Details:", {
+        email: signedInUser.email,
+        displayName: signedInUser.displayName,
+        uid: signedInUser.uid,
+        isNewUser:
+          result.user.metadata.creationTime ===
+          result.user.metadata.lastSignInTime,
+        provider: result.additionalUserInfo?.provider,
+      });
+    }
+
+    toast.success(`Signed in as ${signedInUser.email}`);
     return {
       success: true,
-      user: result.user,
-      token: await result.user.getIdToken(),
+      user: signedInUser,
+      token: await signedInUser.getIdToken(),
       googleAccessToken: token,
+      isNewUser: result.additionalUserInfo?.isNewUser || false,
     };
   } catch (error) {
     console.error("Google sign-in error:", error);

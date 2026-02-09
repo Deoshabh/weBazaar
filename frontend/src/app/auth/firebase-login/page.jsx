@@ -23,10 +23,23 @@ export default function FirebaseLoginPage() {
   /**
    * Handle successful Firebase authentication
    * Sync Firebase user with backend
+   * 
+   * ✅ SECURITY CHECKS:
+   * - Verify email returned from Firebase isn't empty
+   * - Validate backend response includes correct user email
+   * - Reject if email mismatch between Firebase and backend
    */
   const handleFirebaseSuccess = async (result) => {
     try {
       const { user, token } = result;
+
+      // ✅ SECURITY CHECK #1: Verify Firebase user email
+      if (!user?.email) {
+        toast.error("Unable to retrieve your email from Google. Please try again.");
+        return;
+      }
+
+      console.log(`📱 Firebase user authenticated: ${user.email} (UID: ${user.uid})`);
 
       // Get reCAPTCHA token for backend verification
       const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.LOGIN);
@@ -42,14 +55,45 @@ export default function FirebaseLoginPage() {
         recaptchaToken
       });
 
-      // Update auth context with backend user data
+      // ✅ SECURITY CHECK #2: Verify returned user email matches Firebase
       if (response.data?.user) {
+        const backendUserEmail = response.data.user.email;
+        console.log(`🔐 Backend returned user: ${backendUserEmail}`);
+
+        // CRITICAL: Email must match between Firebase and backend
+        if (backendUserEmail !== user.email) {
+          console.error(`⚠️  EMAIL MISMATCH:`, {
+            firebaseEmail: user.email,
+            backendEmail: backendUserEmail,
+            firebaseUid: user.uid,
+            backendId: response.data.user.id,
+          });
+
+          toast.error(
+            `Email mismatch detected. Firebase: ${user.email}, Backend: ${backendUserEmail}. Please contact support.`,
+          );
+          return;
+        }
+
+        // ✅ ALL CHECKS PASSED: Update auth context
         updateUser(response.data.user);
-        toast.success('Authentication successful!');
+        toast.success(`Logged in as ${user.email}`);
         router.push('/');
+      } else {
+        toast.error('Failed to sync with server. Please try again.');
       }
     } catch (error) {
       console.error('Backend sync error:', error);
+      
+      // Check if error is FIREBASE_UID_MISMATCH (account hijack prevention)
+      if (error.response?.data?.error === 'FIREBASE_UID_MISMATCH') {
+        toast.error(
+          'Account security check failed. This email is already linked to another account. ' +
+          'If this is your account, please contact support.'
+        );
+        return;
+      }
+
       toast.error('Failed to sync with server. Please try again.');
     }
   };
