@@ -17,32 +17,20 @@ const {
   firebaseLogin,
 } = require("../controllers/authController");
 
-// Public auth routes with reCAPTCHA protection
-router.post(
-  "/register",
-  verifyRecaptcha("REGISTER", 0.5, true),
-  validateRequest(registerSchema),
-  register,
-);
-router.post(
-  "/login",
-  verifyRecaptcha("LOGIN", 0.5, true),
-  validateRequest(loginSchema),
-  login,
-);
+// Public auth routes
+// TODO: Re-enable reCAPTCHA protection once credentials are configured
+// router.post("/register", verifyRecaptcha("REGISTER", 0.5, true), validateRequest(registerSchema), register);
+// router.post("/login", verifyRecaptcha("LOGIN", 0.5, true), validateRequest(loginSchema), login);
+// router.post("/forgot-password", verifyRecaptcha("FORGOT_PASSWORD", 0.5, true), forgotPassword);
+// router.post("/firebase-login", verifyRecaptcha("LOGIN", 0.5, true), firebaseLogin);
+
+router.post("/register", validateRequest(registerSchema), register);
+router.post("/login", validateRequest(loginSchema), login);
 router.post("/refresh", refresh);
 router.post("/logout", logout);
-router.post(
-  "/forgot-password",
-  verifyRecaptcha("FORGOT_PASSWORD", 0.5, true),
-  forgotPassword,
-);
+router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
-router.post(
-  "/firebase-login",
-  verifyRecaptcha("LOGIN", 0.5, true),
-  firebaseLogin,
-);
+router.post("/firebase-login", firebaseLogin);
 
 // Protected auth routes
 router.get("/me", authenticate, getCurrentUser);
