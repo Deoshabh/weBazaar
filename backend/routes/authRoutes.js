@@ -13,6 +13,7 @@ const {
   changePassword,
   forgotPassword,
   resetPassword,
+  firebaseLogin,
 } = require("../controllers/authController");
 
 // Public auth routes
@@ -22,6 +23,7 @@ router.post("/refresh", refresh);
 router.post("/logout", logout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+router.post("/firebase-login", firebaseLogin);
 
 // Protected auth routes
 router.get("/me", authenticate, getCurrentUser);

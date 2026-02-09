@@ -100,6 +100,30 @@ export default function LoginPage() {
               </button>
             </form>
 
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-primary-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-primary-500">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <Link
+                  href="/auth/firebase-login"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-primary-300 rounded-lg hover:bg-primary-50 transition-colors"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.89 15.67L2.9 12.81 2 9.95l1.9-1.27L3.13 5.18 4.18 3.13l3.5 1.05 2.77-1.9 2.77 1.9 3.5-1.05 1.05 2.05-.77 3.5 1.9 1.27-.9 2.86-.99 2.86-2.95.77-2.77 1.9-2.77-1.9-2.95-.77z"/>
+                  </svg>
+                  <span className="font-medium">Firebase Authentication</span>
+                  <span className="text-xs text-primary-500">(Email & Phone)</span>
+                </Link>
+              </div>
+            </div>
+
             <div className="mt-6 text-center">
               <p className="text-sm text-primary-600">
                 Don&apos;t have an account?{' '}

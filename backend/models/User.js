@@ -19,7 +19,39 @@ const userSchema = new mongoose.Schema(
 
     passwordHash: {
       type: String,
-      required: true,
+      required: false, // Optional for Firebase users
+    },
+
+    // Firebase Authentication fields
+    firebaseUid: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null values while maintaining uniqueness
+    },
+
+    authProvider: {
+      type: String,
+      enum: ["local", "phone", "password", "google", "facebook"],
+      default: "local",
+    },
+
+    phone: {
+      type: String,
+      sparse: true, // Allows null values while maintaining uniqueness
+    },
+
+    profilePicture: {
+      type: String,
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    phoneVerified: {
+      type: Boolean,
+      default: false,
     },
 
     role: {

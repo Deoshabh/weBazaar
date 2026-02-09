@@ -2,6 +2,7 @@ const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const admin = require("../config/firebase");
 
 /* =====================
    Helpers
@@ -280,8 +281,8 @@ exports.forgotPassword = async (req, res, next) => {
     if (process.env.NODE_ENV !== "production") {
       console.log(
         `Password reset requested for ${email}. Token expires at ${new Date(
-          user.resetPasswordExpires
-        ).toISOString()}`
+          user.resetPasswordExpires,
+        ).toISOString()}`,
       );
     }
 
@@ -341,6 +342,106 @@ exports.resetPassword = async (req, res, next) => {
 
     res.json({ message: "Password reset successfully" });
   } catch (err) {
+    next(err);
+  }
+};
+
+/* =====================
+   Firebase Login
+===================== */
+exports.firebaseLogin = async (req, res, next) => {
+  try {
+    const { firebaseToken, email, phoneNumber, displayName, photoURL, uid } =
+      req.body;
+
+    if (!firebaseToken) {
+      return res.status(400).json({ message: "Firebase token is required" });
+    }
+
+    // Verify Firebase ID token
+    let decodedToken;
+    try {
+      decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    } catch (error) {
+      console.error("Firebase token verification error:", error);
+      return res.status(401).json({ message: "Invalid Firebase token" });
+    }
+
+    // Check if user exists by Firebase UID, email, or phone
+    let user = await User.findOne({
+      $or: [
+        { firebaseUid: decodedToken.uid },
+        { email: decodedToken.email || email },
+        { phone: decodedToken.phone_number || phoneNumber },
+      ],
+    });
+
+    // Create new user if doesn't exist
+    if (!user) {
+      user = await User.create({
+        name: displayName || decodedToken.name || "User",
+        email: decodedToken.email || email,
+        phone: decodedToken.phone_number || phoneNumber,
+        firebaseUid: decodedToken.uid,
+        profilePicture: photoURL || decodedToken.picture,
+        role: "customer",
+        emailVerified: decodedToken.email_verified || false,
+        phoneVerified: !!decodedToken.phone_number,
+        authProvider: decodedToken.firebase.sign_in_provider, // 'phone', 'password', etc.
+      });
+    } else {
+      // Update existing user with Firebase data if not already set
+      if (!user.firebaseUid) {
+        user.firebaseUid = decodedToken.uid;
+      }
+      if (!user.profilePicture && (photoURL || decodedToken.picture)) {
+        user.profilePicture = photoURL || decodedToken.picture;
+      }
+      if (decodedToken.email_verified) {
+        user.emailVerified = true;
+      }
+      if (decodedToken.phone_number) {
+        user.phoneVerified = true;
+        if (!user.phone) {
+          user.phone = decodedToken.phone_number;
+        }
+      }
+      await user.save();
+    }
+
+    // Check if user is blocked
+    if (user.isBlocked) {
+      return res.status(403).json({ message: "Your account has been blocked" });
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user, req.ip);
+
+    // Set refresh token cookie and return access token
+    res
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+      .json({
+        message: "Firebase authentication successful",
+        accessToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          profilePicture: user.profilePicture,
+          emailVerified: user.emailVerified,
+          phoneVerified: user.phoneVerified,
+        },
+      });
+  } catch (err) {
+    console.error("Firebase login error:", err);
     next(err);
   }
 };
