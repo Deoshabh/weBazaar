@@ -70,7 +70,7 @@ export default function AdminReviewsPage() {
       if (filtersToLoad.isHidden) params.append('isHidden', filtersToLoad.isHidden);
       if (filtersToLoad.verifiedPurchase) params.append('verifiedPurchase', filtersToLoad.verifiedPurchase);
 
-      const response = await fetch(`${API_URL}/api/v1/admin/reviews?${params}`, {
+      const response = await fetch(`${API_URL}/admin/reviews?${params}`, {
         credentials: 'include',
       });
 
@@ -111,7 +111,7 @@ export default function AdminReviewsPage() {
   const handleToggleHidden = async (reviewId, currentHiddenState) => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/v1/admin/reviews/${reviewId}/toggle-hidden`, {
+      const response = await fetch(`${API_URL}/admin/reviews/${reviewId}/toggle-hidden`, {
         method: 'PATCH',
         credentials: 'include',
       });
@@ -137,7 +137,7 @@ export default function AdminReviewsPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/v1/admin/reviews/${reviewId}`, {
+      const response = await fetch(`${API_URL}/admin/reviews/${reviewId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -164,7 +164,7 @@ export default function AdminReviewsPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/v1/admin/reviews/bulk-hide`, {
+      const response = await fetch(`${API_URL}/admin/reviews/bulk-hide`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -201,7 +201,7 @@ export default function AdminReviewsPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/v1/admin/reviews/bulk-delete`, {
+      const response = await fetch(`${API_URL}/admin/reviews/bulk-delete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
