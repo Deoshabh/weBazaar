@@ -7,8 +7,9 @@ import { adminAPI, categoryAPI, productAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import AdminLayout from '@/components/AdminLayout';
 import ColorPicker from '@/components/ColorPicker';
+import ImageUploadWithEditor from '@/components/ImageUploadWithEditor';
 import toast from 'react-hot-toast';
-import { FiUpload, FiX, FiPlus, FiMinus } from 'react-icons/fi';
+import { FiPlus, FiMinus } from 'react-icons/fi';
 
 function ProductFormContent() {
   const router = useRouter();
@@ -146,37 +147,10 @@ function ProductFormContent() {
     }
   };
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (images.length + files.length > 5) {
-      toast.error('Maximum 5 images allowed');
-      return;
-    }
-    
-    setImages([...images, ...files]);
-    
-    // Create previews
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (index) => {
-    // Check if it's an existing image or new image
-    if (index < existingImages.length) {
-      // Remove from existing images
-      setExistingImages(existingImages.filter((_, i) => i !== index));
-    } else {
-      // Remove from new images
-      const newImageIndex = index - existingImages.length;
-      setImages(images.filter((_, i) => i !== newImageIndex));
-    }
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+  const handleImagesChange = ({ images: newImages, imagePreviews: newPreviews, existingImages: newExistingImages }) => {
+    setImages(newImages);
+    setImagePreviews(newPreviews);
+    setExistingImages(newExistingImages);
   };
 
   const handleSizeChange = (e) => {
@@ -386,48 +360,14 @@ function ProductFormContent() {
           </div>
         ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Product Images */}
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-primary-900 mb-4">Product Images</h2>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4">
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative aspect-square">
-                  <Image
-                    src={preview}
-                    alt={`Preview ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
-                    className="object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
-                  >
-                    <FiX className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              
-              {images.length < 5 && (
-                <label className="aspect-square border-2 border-dashed border-primary-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors touch-manipulation">
-                  <FiUpload className="w-8 h-8 text-primary-400 mb-2" />
-                  <span className="text-xs sm:text-sm text-primary-600">Add Image</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </div>
-            <p className="text-xs sm:text-sm text-primary-500">
-              Upload up to 5 images. First image will be the main product image.
-            </p>
-          </div>
+          {/* Product Images with Editor */}
+          <ImageUploadWithEditor
+            images={images}
+            imagePreviews={imagePreviews}
+            existingImages={existingImages}
+            onImagesChange={handleImagesChange}
+            maxImages={5}
+          />
 
           {/* Basic Information */}
           <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
@@ -553,41 +493,65 @@ function ProductFormContent() {
                   placeholder="e.g., 3999"
                 />
                 <p className="text-xs text-primary-500 mt-1">
-                  Original price for discount display
+                  Optional - Original price before discount (higher than actual price)
                 </p>
               </div>
               
               {/* Final Price Preview */}
               {formData.price && (
                 <div className="sm:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-2">Final Customer Price Preview</h4>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
+                  <h4 className="text-sm font-semibold text-blue-900 mb-3">💰 Final Customer Price Preview</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
                       <span className="text-blue-700">Base Price:</span>
                       <span className="font-medium text-blue-900">₹{parseFloat(formData.price || 0).toLocaleString('en-IN')}</span>
                     </div>
                     {formData.gstPercentage > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-blue-700">GST ({formData.gstPercentage}%):</span>
-                        <span className="font-medium text-blue-900">₹{(parseFloat(formData.price || 0) * parseFloat(formData.gstPercentage || 0) / 100).toLocaleString('en-IN')}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-blue-700">+ GST ({formData.gstPercentage}%):</span>
+                        <span className="font-medium text-blue-900">₹{(parseFloat(formData.price || 0) * parseFloat(formData.gstPercentage || 0) / 100).toFixed(2)}</span>
                       </div>
                     )}
                     {formData.averageDeliveryCost > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-blue-700">Delivery Cost:</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-blue-700">+ Delivery Cost:</span>
                         <span className="font-medium text-blue-900">₹{parseFloat(formData.averageDeliveryCost || 0).toLocaleString('en-IN')}</span>
                       </div>
                     )}
-                    <div className="flex justify-between pt-2 border-t border-blue-300">
+                    <div className="flex justify-between items-center pt-2 border-t border-blue-300">
                       <span className="text-blue-900 font-semibold">Total Customer Price:</span>
                       <span className="font-bold text-blue-900 text-lg">
                         ₹{(
                           parseFloat(formData.price || 0) +
                           (parseFloat(formData.price || 0) * parseFloat(formData.gstPercentage || 0) / 100) +
                           parseFloat(formData.averageDeliveryCost || 0)
-                        ).toLocaleString('en-IN')}
+                        ).toFixed(2)}
                       </span>
                     </div>
+                    
+                    {/* Discount Display Preview */}
+                    {formData.comparePrice && parseFloat(formData.comparePrice) > (parseFloat(formData.price || 0) + (parseFloat(formData.price || 0) * parseFloat(formData.gstPercentage || 0) / 100) + parseFloat(formData.averageDeliveryCost || 0)) && (
+                      <div className="mt-3 pt-3 border-t border-blue-300">
+                        <p className="text-xs font-semibold text-blue-900 mb-2">🎉 Discount Display to Customers:</p>
+                        <div className="bg-white rounded-lg p-3 border border-blue-300">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl font-bold text-green-600">
+                              ₹{(
+                                parseFloat(formData.price || 0) +
+                                (parseFloat(formData.price || 0) * parseFloat(formData.gstPercentage || 0) / 100) +
+                                parseFloat(formData.averageDeliveryCost || 0)
+                              ).toFixed(0)}
+                            </span>
+                            <span className="text-gray-500 line-through text-sm">
+                              ₹{parseFloat(formData.comparePrice || 0).toLocaleString('en-IN')}
+                            </span>
+                            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                              {Math.round(((parseFloat(formData.comparePrice || 0) - (parseFloat(formData.price || 0) + (parseFloat(formData.price || 0) * parseFloat(formData.gstPercentage || 0) / 100) + parseFloat(formData.averageDeliveryCost || 0))) / parseFloat(formData.comparePrice || 1)) * 100)}% OFF
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

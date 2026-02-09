@@ -167,9 +167,25 @@ export default function ProductDetailPage() {
               <h1 className="font-serif text-4xl lg:text-5xl font-bold text-primary-900 mb-4">
                 {product.name}
               </h1>
-              <p className="text-3xl font-bold text-brand-brown">
-                ₹{product.price?.toLocaleString()}
-              </p>
+              
+              {/* Price with Discount Display */}
+              {product.comparePrice && product.comparePrice > product.price ? (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-3xl font-bold text-green-600">
+                    ₹{product.price?.toLocaleString('en-IN')}
+                  </p>
+                  <p className="text-xl text-gray-500 line-through">
+                    ₹{product.comparePrice?.toLocaleString('en-IN')}
+                  </p>
+                  <span className="bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-full">
+                    {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}% OFF
+                  </span>
+                </div>
+              ) : (
+                <p className="text-3xl font-bold text-brand-brown">
+                  ₹{product.price?.toLocaleString('en-IN')}
+                </p>
+              )}
             </div>
 
             {/* Description */}

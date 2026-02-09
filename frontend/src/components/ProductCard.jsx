@@ -145,18 +145,38 @@ export default function ProductCard({ product }) {
 
           {/* Price */}
           <div className="mt-auto">
-            <div className="flex items-center justify-between">
-              <p className="text-base sm:text-lg font-bold text-primary-800">
-                {`\u20B9${(product.price ?? 0).toLocaleString('en-IN')}`}
-              </p>
-
-              {/* Sizes Available */}
-              {product.sizes && product.sizes.length > 0 && (
-                <p className="text-[10px] sm:text-xs text-primary-600">
-                  {product.sizes.length} sizes
+            {/* Price with Discount */}
+            {product.comparePrice && product.comparePrice > product.price ? (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-lg sm:text-xl font-bold text-green-600">
+                    ₹{(product.price ?? 0).toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-sm text-gray-500 line-through">
+                    ₹{(product.comparePrice ?? 0).toLocaleString('en-IN')}
+                  </span>
+                  <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                    {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}% OFF
+                  </span>
+                </div>
+                {product.sizes && product.sizes.length > 0 && (
+                  <p className="text-[10px] sm:text-xs text-primary-600">
+                    {product.sizes.length} sizes available
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <p className="text-base sm:text-lg font-bold text-primary-800">
+                  {`\u20B9${(product.price ?? 0).toLocaleString('en-IN')}`}
                 </p>
-              )}
-            </div>
+                {product.sizes && product.sizes.length > 0 && (
+                  <p className="text-[10px] sm:text-xs text-primary-600">
+                    {product.sizes.length} sizes
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

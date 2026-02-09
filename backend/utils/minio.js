@@ -7,7 +7,7 @@ const Minio = require("minio");
  * Supports: RustFS, MinIO, AWS S3, or any S3-compatible storage
  * Uses ONLY environment variables
  * No silent fallbacks in production
- * 
+ *
  * Note: Despite using "MINIO_*" env var names, this works with ANY S3-compatible storage
  */
 const {
@@ -27,7 +27,9 @@ if (
   !MINIO_SECRET_KEY ||
   !MINIO_BUCKET
 ) {
-  throw new Error("❌ Missing required S3 storage environment variables (MINIO_*)");
+  throw new Error(
+    "❌ Missing required S3 storage environment variables (MINIO_*)",
+  );
 }
 
 const REGION = MINIO_REGION || "us-east-1";
