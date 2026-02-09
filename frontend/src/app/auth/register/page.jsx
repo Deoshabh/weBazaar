@@ -9,6 +9,8 @@ import { FiMail, FiLock, FiUser, FiArrowLeft } from 'react-icons/fi';
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
+  const PASSWORD_POLICY_MESSAGE =
+    'Password must be at least 8 characters and include uppercase, lowercase, and a number';
   
   const [formData, setFormData] = useState({
     name: '',
@@ -27,24 +29,40 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    const normalizedName = formData.name.trim();
+    const normalizedEmail = formData.email.trim().toLowerCase();
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (normalizedName.length < 2) {
+      setError('Name must be at least 2 characters');
+      return;
+    }
+
+    if (
+      formData.password.length < 8 ||
+      !/[A-Z]/.test(formData.password) ||
+      !/[a-z]/.test(formData.password) ||
+      !/[0-9]/.test(formData.password)
+    ) {
+      setError(PASSWORD_POLICY_MESSAGE);
       return;
     }
 
     setLoading(true);
 
     const { confirmPassword, ...registerData } = formData;
+    registerData.name = normalizedName;
+    registerData.email = normalizedEmail;
     const result = await register(registerData);
     
     if (result.success) {
       router.push('/');
+    } else if (result.error) {
+      setError(result.error);
     }
     
     setLoading(false);
@@ -87,6 +105,7 @@ export default function RegisterPage() {
                     placeholder="John Doe"
                   />
                 </div>
+                <p className="text-xs text-primary-500 mt-1">{PASSWORD_POLICY_MESSAGE}</p>
               </div>
 
               <div>
@@ -121,7 +140,7 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    minLength={6}
+                    minLength={8}
                     className="input pl-10"
                     placeholder="••••••••"
                   />
@@ -141,7 +160,7 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    minLength={6}
+                    minLength={8}
                     className="input pl-10"
                     placeholder="••••••••"
                   />
