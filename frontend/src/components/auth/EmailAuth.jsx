@@ -32,9 +32,9 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
     try {
       // Get reCAPTCHA token
       const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.LOGIN);
-      
+
       const result = await loginWithEmail(formData.email, formData.password, recaptchaToken);
-      
+
       if (result.success) {
         if (onSuccess) {
           onSuccess(result);
@@ -69,14 +69,14 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
     try {
       // Get reCAPTCHA token
       const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.REGISTER);
-      
+
       const result = await registerWithEmail(
         formData.email,
         formData.password,
         formData.displayName,
         recaptchaToken
       );
-      
+
       if (result.success) {
         setMode('verify');
       }
@@ -95,9 +95,9 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
     try {
       // Get reCAPTCHA token
       const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.FORGOT_PASSWORD);
-      
+
       const result = await resetPassword(formData.email, recaptchaToken);
-      
+
       if (result.success) {
         setMode('login');
       }
@@ -118,7 +118,7 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
   // Login Form
   if (mode === 'login') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-slide-up">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-primary-900 mb-2">Sign In with Email</h2>
           <p className="text-primary-600">Enter your email and password</p>
@@ -194,7 +194,7 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
   // Register Form
   if (mode === 'register') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-slide-up">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-primary-900 mb-2">Create Account</h2>
           <p className="text-primary-600">Sign up with your email</p>
@@ -302,7 +302,7 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
   // Reset Password Form
   if (mode === 'reset') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-slide-up">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-primary-900 mb-2">Reset Password</h2>
           <p className="text-primary-600">Enter your email to receive a reset link</p>
@@ -348,7 +348,7 @@ export default function EmailAuth({ onSuccess, mode: initialMode = 'login' }) {
   // Email Verification Notice
   if (mode === 'verify') {
     return (
-      <div className="space-y-6 text-center">
+      <div className="space-y-6 text-center animate-slide-up">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
           <FiCheck className="w-8 h-8 text-green-600" />
         </div>
