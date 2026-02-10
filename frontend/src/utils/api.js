@@ -258,16 +258,25 @@ export const cartAPI = {
   get: () => api.get("/cart"),
   getCart: () => api.get("/cart"),
   add: (data) => api.post("/cart", data),
+  addToCart: (data) => api.post("/cart", data),
   update: (itemId, data) => api.put(`/cart/${itemId}`, data),
   remove: (itemId) => api.delete(`/cart/${itemId}`),
+  removeFromCart: (productId, size) =>
+    api.delete(
+      `/cart/${encodeURIComponent(productId)}/${encodeURIComponent(size)}`,
+    ),
   clear: () => api.delete("/cart"),
-  sync: (cartItems) => api.post("/cart/sync", { cartItems }), // For syncing local cart after login
+  clearCart: () => api.delete("/cart"),
+  sync: (cartItems) => api.post("/cart/sync", { cartItems }),
 };
 
 export const wishlistAPI = {
   getWishlist: () => api.get("/wishlist"),
   get: () => api.get("/wishlist"),
-  add: (productId) => api.post("/wishlist", { productId }),
-  remove: (productId) => api.delete(`/wishlist/${productId}`),
+  add: (productId) => api.post("/wishlist/toggle", { productId }),
+  addToWishlist: (productId) => api.post("/wishlist/toggle", { productId }),
+  remove: (productId) => api.post("/wishlist/toggle", { productId }),
+  removeFromWishlist: (productId) =>
+    api.post("/wishlist/toggle", { productId }),
   check: (productId) => api.get(`/wishlist/check/${productId}`),
 };
