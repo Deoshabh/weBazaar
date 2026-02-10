@@ -82,9 +82,11 @@ exports.register = async (req, res, next) => {
         message: "Registered successfully",
         accessToken,
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,
+          phone: user.phone || "",
           role: user.role,
         },
       });
@@ -125,9 +127,11 @@ exports.login = async (req, res, next) => {
         message: "Login successful",
         accessToken,
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,
+          phone: user.phone || "",
           role: user.role,
         },
       });
@@ -168,9 +172,11 @@ exports.refresh = async (req, res, next) => {
     res.json({
       accessToken: newAccessToken,
       user: {
+        _id: user._id,
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone || "",
         role: user.role,
       },
     });
@@ -190,10 +196,14 @@ exports.getCurrentUser = async (req, res, next) => {
     }
 
     res.json({
+      _id: user._id,
       id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone || "",
       role: user.role,
+      profilePicture: user.profilePicture || "",
+      authProvider: user.authProvider,
     });
   } catch (err) {
     next(err);
