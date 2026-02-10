@@ -221,9 +221,12 @@ export const addressAPI = {
   getAddresses: () => api.get("/user/addresses"),
   getById: (id) => api.get(`/user/addresses/${id}`),
   create: (data) => api.post("/user/addresses", data),
-  update: (id, data) => api.put(`/user/addresses/${id}`, data),
+  addAddress: (data) => api.post("/user/addresses", data),
+  update: (id, data) => api.patch(`/user/addresses/${id}`, data),
+  updateAddress: (id, data) => api.patch(`/user/addresses/${id}`, data),
   delete: (id) => api.delete(`/user/addresses/${id}`),
-  setDefault: (id) => api.put(`/user/addresses/${id}/default`),
+  deleteAddress: (id) => api.delete(`/user/addresses/${id}`),
+  setDefault: (id) => api.patch(`/user/addresses/${id}/default`),
 };
 
 export const couponAPI = {
@@ -246,8 +249,8 @@ export const contactAPI = {
 
 export const userAPI = {
   getProfile: () => api.get("/user/profile"),
-  updateProfile: (data) => api.put("/user/profile", data),
-  changePassword: (data) => api.put("/user/change-password", data),
+  updateProfile: (data) => api.patch("/user/profile", data),
+  changePassword: (data) => api.post("/auth/change-password", data),
   uploadAvatar: (formData) =>
     api.post("/user/avatar", formData, {
       headers: { "Content-Type": "multipart/form-data" },
