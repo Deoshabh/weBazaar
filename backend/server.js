@@ -13,10 +13,47 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
-const mongoSanitize = require("express-mongo-sanitize");
 const { initializeBucket } = require("./utils/minio");
 const { logger, log } = require("./utils/logger");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
+
+// ===============================
+// NoSQL injection sanitizer (Express 5 compatible)
+// express-mongo-sanitize is NOT compatible with Express 5
+// because req.query is read-only in Express 5.
+// ===============================
+function sanitizeValue(val) {
+  if (typeof val === "string") return val;
+  if (val === null || val === undefined) return val;
+  if (Array.isArray(val)) return val.map(sanitizeValue);
+  if (typeof val === "object") {
+    const clean = {};
+    for (const key of Object.keys(val)) {
+      if (key.startsWith("$")) continue; // strip MongoDB operators
+      clean[key] = sanitizeValue(val[key]);
+    }
+    return clean;
+  }
+  return val;
+}
+
+function mongoSanitize(req, _res, next) {
+  if (req.body && typeof req.body === "object") {
+    req.body = sanitizeValue(req.body);
+  }
+  // req.query is read-only in Express 5, sanitize via params instead
+  if (req.params && typeof req.params === "object") {
+    for (const key of Object.keys(req.params)) {
+      if (
+        typeof req.params[key] === "string" &&
+        req.params[key].startsWith("$")
+      ) {
+        req.params[key] = "";
+      }
+    }
+  }
+  next();
+}
 
 // ===============================
 // App init
@@ -66,7 +103,6 @@ app.use(
 // Middleware
 // ===============================
 app.use(helmet()); // Security headers
-app.use(mongoSanitize()); // Prevent NoSQL injection
 app.use(logger); // HTTP request logging
 app.use(
   express.json({
@@ -78,6 +114,7 @@ app.use(
   }),
 );
 app.use(cookieParser());
+app.use(mongoSanitize); // NoSQL injection protection (after body parser)
 
 app.use(
   rateLimit({
