@@ -204,6 +204,10 @@ export const adminAPI = {
   // Stats
   getAdminStats: () => api.get("/admin/stats"),
   getStats: () => api.get("/admin/stats"),
+
+  // Site Settings
+  getSettingHistory: (key, limit) => 
+    api.get(`/admin/settings/${key}/history`, { params: { limit } }),
 };
 
 export const categoryAPI = {
