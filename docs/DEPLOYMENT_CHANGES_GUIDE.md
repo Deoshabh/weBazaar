@@ -181,7 +181,7 @@ curl -I -X OPTIONS \
 # 4. Verify Node version
 docker exec <backend-container> node --version
 
-# 5. Test rate limiting on auth (should get 429 after 10 requests)
+# 5. Test rate limiting on auth (should get 429 after 10 request)
 for i in $(seq 1 15); do
   curl -s -o /dev/null -w "%{http_code}\n" \
     -X POST https://api.radeo.in/api/v1/auth/login \
