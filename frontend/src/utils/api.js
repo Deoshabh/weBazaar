@@ -207,6 +207,7 @@ export const adminAPI = {
 
 export const categoryAPI = {
   getAllCategories: () => api.get("/products/categories"),
+  getNavbarCategories: () => api.get("/products/categories"),
   getCategoryBySlug: (slug) => api.get(`/products/categories/${slug}`),
 };
 
@@ -248,6 +249,7 @@ export const userAPI = {
 
 export const cartAPI = {
   get: () => api.get("/cart"),
+  getCart: () => api.get("/cart"),
   add: (data) => api.post("/cart", data),
   update: (itemId, data) => api.put(`/cart/${itemId}`, data),
   remove: (itemId) => api.delete(`/cart/${itemId}`),
@@ -256,6 +258,7 @@ export const cartAPI = {
 };
 
 export const wishlistAPI = {
+  getWishlist: () => api.get("/wishlist"),
   get: () => api.get("/wishlist"),
   add: (productId) => api.post("/wishlist", { productId }),
   remove: (productId) => api.delete(`/wishlist/${productId}`),

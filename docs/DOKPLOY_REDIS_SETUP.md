@@ -47,6 +47,7 @@ Once deployed, check the backend logs. You should see:
 ```
 
 Instead of the old error:
+
 ```
 ❌ Redis Connection Error: Error: getaddrinfo ENOTFOUND valkey
 ```
