@@ -208,6 +208,8 @@ export const adminAPI = {
   // Site Settings
   getSettingHistory: (key, limit) =>
     api.get(`/admin/settings/${key}/history`, { params: { limit } }),
+  updateSetting: (key, value) => api.put(`/admin/settings/${key}`, { value }),
+  resetSetting: (key) => api.post(`/admin/settings/${key}/reset`),
 };
 
 export const categoryAPI = {
@@ -231,20 +233,26 @@ export const addressAPI = {
 
 export const couponAPI = {
   validate: (code) => api.post("/coupons/validate", { code }),
-  getAll: () => api.get("/coupons"), // Public coupons if any
+  validateCoupon: (code) => api.post("/coupons/validate", { code }),
+  getAll: () => api.get("/coupons"),
 };
 
 export const orderAPI = {
   create: (data) => api.post("/orders", data),
-  getAll: (params) => api.get("/orders", { params }),
-  getMyOrders: (params) => api.get("/orders", { params }),
+  createOrder: (data) => api.post("/orders", data),
+  getAll: (params) => api.get("/orders/my", { params }),
+  getMyOrders: (params) => api.get("/orders/my", { params }),
   getById: (id) => api.get(`/orders/${id}`),
-  verifyPayment: (data) => api.post("/orders/verify-payment", data),
-  cancel: (id) => api.post(`/orders/${id}/cancel`),
+  getOrderById: (id) => api.get(`/orders/${id}`),
+  createRazorpayOrder: (id) => api.post(`/orders/${id}/razorpay`),
+  verifyRazorpayPayment: (id, data) => api.post(`/orders/${id}/razorpay/verify`, data),
+  cancel: (id) => api.patch(`/orders/${id}/cancel`),
+  cancelOrder: (id) => api.patch(`/orders/${id}/cancel`),
 };
 
 export const contactAPI = {
   submit: (data) => api.post("/contact", data),
+  submitMessage: (data) => api.post("/contact", data),
 };
 
 export const userAPI = {
