@@ -1,0 +1,8 @@
+services:
+  valkey:
+    image: redis:7-alpine
+    container_name: valkey-local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ro6k0egdepp8tc8dvwmibnjsbuzkbvyz

@@ -67,6 +67,9 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - MINIO_BUCKET=${MINIO_BUCKET}
       - MINIO_REGION=${MINIO_REGION:-us-east-1}
+      - REDIS_HOST=valkey
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-ro6k0egdepp8tc8dvwmibnjsbuzkbvyz}
 
     # Expose port (no need to publish, Traefik will route)
     expose:
@@ -237,6 +240,37 @@ services:
       - "traefik.http.routers.minio-api.middlewares=minio-cors"
 
   # ============================================
+  # VALKEY / REDIS CACHE
+  # ============================================
+  valkey:
+    image: redis:7-alpine
+    container_name: valkey-production
+    restart: unless-stopped
+
+    # Command with password
+    command: redis-server --requirepass ${REDIS_PASSWORD:-ro6k0egdepp8tc8dvwmibnjsbuzkbvyz}
+
+    # Persistent volume
+    volumes:
+      - valkey-data:/data
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Network
+    networks:
+      - traefik-network
+
+    # Internal only, no port expose (backend will connect via Docker DNS)
+    expose:
+      - "6379"
+
+  # ============================================
   # HTTP to HTTPS REDIRECT MIDDLEWARE (Global)
   # ============================================
   # This is applied globally to redirect all HTTP traffic to HTTPS
@@ -247,6 +281,8 @@ services:
 # ============================================
 volumes:
   letsencrypt:
+  valkey-data:
+    driver: local
     driver: local
   minio-data:
     driver: local

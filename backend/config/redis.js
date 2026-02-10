@@ -13,7 +13,10 @@ const getRedisConfig = () => {
             const delay = Math.min(times * 50, 2000);
             return delay;
         },
-        maxRetriesPerRequest: 3
+        maxRetriesPerRequest: 3,
+        enableReadyCheck: false,
+        enableOfflineQueue: true,
+        lazyConnect: true
     };
 };
 
@@ -24,7 +27,13 @@ redis.on('connect', () => {
 });
 
 redis.on('error', (err) => {
-    console.error('❌ Redis Connection Error:', err);
+    console.error('❌ Redis Connection Error:', err.message);
+    console.log('⚠️  Redis is unavailable. App will continue without caching.');
+});
+
+// Gracefully handle Redis connection failures
+redis.on('reconnecting', () => {
+    console.log('🔄 Attempting to reconnect to Redis...');
 });
 
 module.exports = redis;
