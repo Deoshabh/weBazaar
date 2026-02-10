@@ -56,6 +56,14 @@ async function initializeBucket() {
       MINIO_ACCESS_KEY ? "***" + MINIO_ACCESS_KEY.slice(-4) : "NOT SET",
     );
 
+    // ⚠️ Security Warning: Allow skipping SSL verification for self-signed certs
+    if (process.env.MINIO_SKIP_SSL_VERIFY === "true") {
+      console.warn(
+        "⚠️  SECURITY WARNING: SSL verification is disabled for MinIO connection (MINIO_SKIP_SSL_VERIFY=true)",
+      );
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    }
+
     minioClient = new Minio.Client({
       endPoint: MINIO_ENDPOINT,
       port: Number(MINIO_PORT),
