@@ -102,7 +102,14 @@ app.use(
 // ===============================
 // Middleware
 // ===============================
-app.use(helmet()); // Security headers
+app.use(
+  helmet({
+    // Allow cross-origin requests from frontend (radeo.in → api.radeo.in)
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    // API server doesn't serve HTML — disable CSP
+    contentSecurityPolicy: false,
+  }),
+);
 app.use(logger); // HTTP request logging
 app.use(
   express.json({
