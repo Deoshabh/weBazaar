@@ -33,6 +33,7 @@ const orderSchema = new mongoose.Schema(
     items: [orderItemSchema],
 
     subtotal: Number,
+    shippingCost: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
     total: Number,
     totalAmount: Number, // Same as total, for frontend clarity
@@ -132,7 +133,7 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["confirmed", "processing", "shipped", "delivered", "cancelled"],
+      enum: ["pending_payment", "confirmed", "processing", "shipped", "delivered", "cancelled"],
       default: "confirmed",
     },
 

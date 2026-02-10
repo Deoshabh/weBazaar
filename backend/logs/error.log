@@ -11,3 +11,18 @@ S3Error: S3 API Requests must be made to API port.
     at async initializeBucket (E:\Projects\Shoes Website 2026\backend\utils\minio.js:56:18)
     at async startServer (E:\Projects\Shoes Website 2026\backend\server.js:129:5)
 
+[2026-02-10T17:52:03.476Z] ERROR: Fatal startup error
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+
+[2026-02-10T17:52:41.693Z] ERROR: Fatal startup error
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+
+[2026-02-10T18:23:14.355Z] ERROR: Fatal startup error
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+
