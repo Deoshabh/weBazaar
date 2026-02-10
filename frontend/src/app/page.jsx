@@ -38,6 +38,14 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Define activeBanners BEFORE using it in callbacks
+  const activeBanners = useMemo(() => {
+    const allBanners = settings.banners || [];
+    return allBanners
+      .filter((banner) => banner.isActive)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+  }, [settings.banners]);
+
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % (activeBanners.length || 1));
   }, [activeBanners.length]);
@@ -63,13 +71,6 @@ export default function Home() {
   );
   const madeToOrder = settings.homeSections?.madeToOrder || {};
   const newsletter = settings.homeSections?.newsletter || {};
-
-  const activeBanners = useMemo(() => {
-    const allBanners = settings.banners || [];
-    return allBanners
-      .filter((banner) => banner.isActive)
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-  }, [settings.banners]);
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
