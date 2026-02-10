@@ -19,6 +19,7 @@ const siteSettingsSchema = new mongoose.Schema(
         title: { type: String },
         subtitle: { type: String },
         link: { type: String },
+        buttonText: { type: String, default: 'Shop Now' },
         isActive: { type: Boolean, default: true },
         order: { type: Number, default: 0 },
       },

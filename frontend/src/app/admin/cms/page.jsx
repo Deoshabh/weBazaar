@@ -143,7 +143,8 @@ export default function AdminCMSPage() {
                 imageUrl: '',
                 title: 'New Banner',
                 subtitle: 'Banner Subtitle',
-                link: '/',
+                link: '/products',
+                buttonText: 'Shop Now',
                 isActive: true,
                 order: banners.length,
                 _isNew: true, // Internal flag
@@ -395,7 +396,18 @@ export default function AdminCMSPage() {
                                                         value={banner.link}
                                                         onChange={(e) => handleBannerChange(index, 'link', e.target.value)}
                                                         className="input w-full text-sm"
-                                                        placeholder="/products/new-arrivals"
+                                                        placeholder="/products?category=running"
+                                                    />
+                                                    <p className="text-xs text-gray-400 mt-1">Example: <code>/products?category=running</code> to filter by category.</p>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-semibold text-gray-500 uppercase">Button Text</label>
+                                                    <input
+                                                        type="text"
+                                                        value={banner.buttonText}
+                                                        onChange={(e) => handleBannerChange(index, 'buttonText', e.target.value)}
+                                                        className="input w-full text-sm"
+                                                        placeholder="Shop Now"
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-4 pt-2">

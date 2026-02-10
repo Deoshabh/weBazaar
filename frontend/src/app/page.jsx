@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { productAPI } from '@/utils/api';
 import ProductCard from '@/components/ProductCard';
@@ -36,6 +36,22 @@ export default function Home() {
 
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % (activeBanners.length || 1));
+  }, [activeBanners.length]);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + (activeBanners.length || 1)) % (activeBanners.length || 1));
+  }, [activeBanners.length]);
+
+  // Auto-play carousel
+  useEffect(() => {
+    if (activeBanners.length <= 1) return;
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [activeBanners.length, nextSlide]);
 
   const hero = settings.heroSection || {};
   const trustBadges = (settings.trustBadges || [])
@@ -120,33 +136,81 @@ export default function Home() {
       <JsonLd data={generateOrganizationJsonLd()} />
 
       {activeBanners.length > 0 && (
-        <section className="section-padding pb-6 bg-primary-50">
-          <div className="container-custom grid grid-cols-1 md:grid-cols-2 gap-4">
-            {activeBanners.map((banner) => (
+        <section className="relative bg-primary-900 overflow-hidden">
+          <div className="relative h-[400px] md:h-[500px] lg:h-[600px] w-full">
+            {activeBanners.map((banner, index) => (
               <div
-                key={banner.id || banner.title}
-                className="relative rounded-2xl overflow-hidden min-h-[220px] flex items-end p-8 text-white"
-                style={{
-                  backgroundImage: (banner.imageUrl || banner.image)
-                    ? `linear-gradient(90deg, rgba(17,24,39,0.65), rgba(17,24,39,0.2)), url(${banner.imageUrl || banner.image})`
-                    : 'linear-gradient(135deg, #1f2937, #7c2d12)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
+                key={banner.id || index}
+                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
               >
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">{banner.title}</h2>
-                  {banner.subtitle && <p className="text-white/90 mb-4">{banner.subtitle}</p>}
-                  {/* banner.link is the main link, but if buttonText exists we can use it there too */
-                    banner.link && (
-                      <Link href={banner.link} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-primary-900 font-semibold hover:bg-primary-100 transition-colors">
+                {/* Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${banner.imageUrl || banner.image})`
+                  }}
+                >
+                  <div className="absolute inset-0 bg-black/40" /> {/* Overlay */}
+                </div>
+
+                {/* Content */}
+                <div className="relative z-20 container-custom h-full flex items-center">
+                  <div className="max-w-2xl text-white animate-fade-in-up">
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+                      {banner.title}
+                    </h2>
+                    {banner.subtitle && (
+                      <p className="text-lg md:text-xl text-white/90 mb-8 max-w-lg">
+                        {banner.subtitle}
+                      </p>
+                    )}
+                    {banner.link && (
+                      <Link
+                        href={banner.link}
+                        className="btn bg-white text-primary-900 hover:bg-brand-brown hover:text-white border-none px-8 py-3 text-lg"
+                      >
                         {banner.buttonText || 'Shop Now'}
-                        <FiArrowRight className="w-4 h-4" />
+                        <FiArrowRight className="w-5 h-5 ml-2" />
                       </Link>
                     )}
+                  </div>
                 </div>
               </div>
             ))}
+
+            {/* Navigation Arrows */}
+            {activeBanners.length > 1 && (
+              <>
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all"
+                  aria-label="Previous slide"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all"
+                  aria-label="Next slide"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+
+                {/* Dots */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+                  {activeBanners.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-3 h-3 rounded-full transition-all ${index === currentSlide ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'
+                        }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </section>
       )}
