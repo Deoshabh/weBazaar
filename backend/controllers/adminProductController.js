@@ -6,25 +6,21 @@ const { invalidateCache } = require("../utils/cache");
 // @access  Private/Admin
 exports.getAllProducts = async (req, res) => {
   try {
-    console.log("📦 Admin: Fetching all products...");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || "";
 
-    const page = parseInt(req.query.page) || 0; // 0 = return all (backward compatible)
-    const limit = parseInt(req.query.limit) || 0;
-
-    let products;
-    if (page > 0 && limit > 0) {
-      const skip = (page - 1) * limit;
-      products = await Product.find({})
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
-    } else {
-      products = await Product.find({}).sort({ createdAt: -1 });
+    const filter = {};
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
     }
 
-    console.log(
-      `✅ Admin: Found ${products.length} products (including inactive)`,
-    );
+    const total = await Product.countDocuments(filter);
+    const skip = (page - 1) * limit;
+    const products = await Product.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     // Map products to include status for frontend compatibility
     const productsWithStatus = products.map((product) => ({
@@ -32,7 +28,12 @@ exports.getAllProducts = async (req, res) => {
       status: product.isActive ? "active" : "inactive",
     }));
 
-    res.json(productsWithStatus);
+    res.json({
+      products: productsWithStatus,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     console.error("Get all products error:", error);
     res.status(500).json({ message: "Server error" });
@@ -251,15 +252,17 @@ exports.createProduct = async (req, res) => {
         .status(400)
         .json({ message: "Product with this slug already exists" });
     }
+    const isDevEnv = process.env.NODE_ENV === "development";
     res.status(500).json({
       message: "Server error",
-      error: error.message,
-      details: error.errors
-        ? Object.keys(error.errors).map((key) => ({
+      ...(isDevEnv && { error: error.message }),
+      ...(isDevEnv &&
+        error.errors && {
+          details: Object.keys(error.errors).map((key) => ({
             field: key,
             message: error.errors[key].message,
-          }))
-        : undefined,
+          })),
+        }),
     });
   }
 };
@@ -516,6 +519,7 @@ exports.deleteProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete product error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    const isDevEnv = process.env.NODE_ENV === "development";
+    res.status(500).json({ message: "Server error", ...(isDevEnv && { error: error.message }) });
   }
 };

@@ -23,7 +23,7 @@ export const WishlistProvider = ({ children }) => {
   const fetchWishlist = async () => {
     try {
       setLoading(true);
-      const response = await wishlistAPI.getWishlist();
+      const response = await wishlistAPI.get();
       // Backend returns wishlist object directly: {_id, user, products: [...]}
       console.log('📦 Wishlist API response:', response.data);
       setWishlist(response.data?.products || []);
@@ -36,7 +36,7 @@ export const WishlistProvider = ({ children }) => {
 
   const addToWishlist = async (productId) => {
     try {
-      const response = await wishlistAPI.addToWishlist(productId);
+      const response = await wishlistAPI.add(productId);
       // Backend returns wishlist object directly: {_id, user, products: [...]}
       setWishlist(response.data?.products || []);
       toast.success('Added to wishlist!');
@@ -50,7 +50,7 @@ export const WishlistProvider = ({ children }) => {
 
   const removeFromWishlist = async (productId) => {
     try {
-      const response = await wishlistAPI.removeFromWishlist(productId);
+      const response = await wishlistAPI.remove(productId);
       // Backend returns wishlist object directly: {_id, user, products: [...]}
       setWishlist(response.data?.products || []);
       toast.success('Removed from wishlist');

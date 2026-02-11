@@ -21,10 +21,10 @@ export default function AddressWorkflowExample({ onAddressAdded }) {
    */
   const handleAddressSubmit = (validatedAddress) => {
     console.log("✅ Validated address:", validatedAddress);
-    
+
     // Store pending address
     setPendingAddress(validatedAddress);
-    
+
     // Show confirmation modal
     setShowForm(false);
     setShowConfirmation(true);
@@ -35,14 +35,14 @@ export default function AddressWorkflowExample({ onAddressAdded }) {
    */
   const handleConfirmAddress = async () => {
     try {
-      const response = await addressAPI.addAddress(pendingAddress);
-      
+      const response = await addressAPI.create(pendingAddress);
+
       toast.success("Address saved successfully!");
-      
+
       // Close modal
       setShowConfirmation(false);
       setPendingAddress(null);
-      
+
       // Notify parent component
       if (onAddressAdded) {
         onAddressAdded(response.data.address);

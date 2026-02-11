@@ -39,7 +39,7 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      await contactAPI.submitMessage(formData);
+      await contactAPI.submit(formData);
       toast.success("Message sent successfully! We'll get back to you soon.");
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {

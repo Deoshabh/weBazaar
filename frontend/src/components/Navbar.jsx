@@ -170,9 +170,11 @@ export default function Navbar() {
                     >
                       {category.image?.url ? (
                         <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                          <img
+                          <Image
                             src={category.image.url}
                             alt={category.name}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-200"
                           />
                         </div>

@@ -1,4 +1,20 @@
 const Cart = require("../models/Cart");
+const Product = require("../models/Product");
+
+// Helper: build consistent cart response
+function buildCartResponse(cart) {
+  const items = cart.items || [];
+  return {
+    items,
+    totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
+    totalAmount: items.reduce((sum, item) => {
+      if (item.product && item.product.price) {
+        return sum + item.product.price * item.quantity;
+      }
+      return sum;
+    }, 0),
+  };
+}
 
 // GET /api/v1/cart
 exports.getCart = async (req, res) => {
@@ -11,23 +27,7 @@ exports.getCart = async (req, res) => {
       cart = await Cart.create({ user: req.user.id, items: [] });
     }
 
-    // Always return consistent structure
-    const response = {
-      items: cart.items || [],
-      totalItems: cart.items
-        ? cart.items.reduce((sum, item) => sum + item.quantity, 0)
-        : 0,
-      totalAmount: cart.items
-        ? cart.items.reduce((sum, item) => {
-            if (item.product && item.product.price) {
-              return sum + item.product.price * item.quantity;
-            }
-            return sum;
-          }, 0)
-        : 0,
-    };
-
-    res.json(response);
+    res.json(buildCartResponse(cart));
   } catch (error) {
     console.error("Error fetching cart:", error);
     res.status(500).json({ message: "Cart operation failed" });
@@ -37,7 +37,7 @@ exports.getCart = async (req, res) => {
 // POST /api/v1/cart
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, size, quantity } = req.body;
+    const { productId, size, quantity, color } = req.body;
 
     // Validate required fields
     if (!productId || !size) {
@@ -49,6 +49,21 @@ exports.addToCart = async (req, res) => {
     const qty = parseInt(quantity) || 1;
     if (qty < 1) {
       return res.status(400).json({ message: "Quantity must be at least 1" });
+    }
+
+    // Validate product existence, status, and stock
+    const product = await Product.findById(productId);
+    if (!product || !product.isActive) {
+      return res
+        .status(404)
+        .json({ message: "Product not found or unavailable" });
+    }
+
+    const sizeEntry = product.sizes?.find((s) => s.size === size);
+    if (!sizeEntry) {
+      return res
+        .status(400)
+        .json({ message: `Size "${size}" is not available for this product` });
     }
 
     // Find or create cart
@@ -63,42 +78,119 @@ exports.addToCart = async (req, res) => {
       cart.items = [];
     }
 
-    // Check if item already exists with same product and size
+    // Check if item already exists with same product, size, and color
+    const itemColor = color || "";
     const existingItemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === productId && item.size === size,
+      (item) =>
+        item.product.toString() === productId &&
+        item.size === size &&
+        (item.color || "") === itemColor,
     );
 
+    // Check stock against requested quantity
+    if (sizeEntry.stock < qty) {
+      return res.status(400).json({
+        message: `Insufficient stock for size ${size}. Only ${sizeEntry.stock} available.`,
+      });
+    }
+
     if (existingItemIndex > -1) {
-      // Update quantity
-      cart.items[existingItemIndex].quantity = qty;
+      // Update quantity (increment)
+      const newQuantity = cart.items[existingItemIndex].quantity + qty;
+      
+      // Check stock again for the new total quantity
+      if (sizeEntry.stock < newQuantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for size ${size}. Only ${sizeEntry.stock} available.`,
+        });
+      }
+      
+      cart.items[existingItemIndex].quantity = newQuantity;
     } else {
       // Add new item
-      cart.items.push({ product: productId, size, quantity: qty });
+      cart.items.push({ product: productId, size, color: itemColor, quantity: qty });
     }
 
     await cart.save();
     await cart.populate("items.product");
 
-    // Return consistent response format
-    const response = {
-      items: cart.items || [],
-      totalItems: cart.items
-        ? cart.items.reduce((sum, item) => sum + item.quantity, 0)
-        : 0,
-      totalAmount: cart.items
-        ? cart.items.reduce((sum, item) => {
-            if (item.product && item.product.price) {
-              return sum + item.product.price * item.quantity;
-            }
-            return sum;
-          }, 0)
-        : 0,
-    };
-
-    res.json(response);
+    res.json(buildCartResponse(cart));
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ message: "Cart operation failed" });
+  }
+};
+
+// PUT /api/v1/cart/items
+exports.updateCartItemQuantity = async (req, res) => {
+  try {
+    const { productId, size, quantity } = req.body;
+
+    if (!productId || !size || quantity === undefined) {
+      return res.status(400).json({ message: "Product ID, size, and quantity are required" });
+    }
+
+    const newQty = parseInt(quantity);
+    if (newQty < 0) {
+      return res.status(400).json({ message: "Quantity cannot be negative" });
+    }
+
+    let cart = await Cart.findOne({ user: req.user.id });
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Remove item if quantity is 0
+    if (newQty === 0) {
+      const decodedSize = decodeURIComponent(size);
+      cart.items = cart.items.filter(
+        (item) =>
+          !(
+            item.product.toString() === productId &&
+            item.size === decodedSize
+          ),
+      );
+    } else {
+      // Update quantity
+      const itemIndex = cart.items.findIndex(
+        (item) =>
+          item.product.toString() === productId &&
+          item.size === size
+      );
+
+      if (itemIndex > -1) {
+        // Verify stock before updating
+        const product = await Product.findById(productId);
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        const sizeEntry = product.sizes?.find((s) => s.size === size);
+        if (!sizeEntry) {
+           // Keep existing quantity if size not found (edge case) or remove? 
+           // Safest to error out or remove. Let's error for now.
+           return res.status(400).json({ message: "Size no longer available" });
+        }
+
+        if (sizeEntry.stock < newQty) {
+          return res.status(400).json({
+            message: `Insufficient stock for size ${size}. Only ${sizeEntry.stock} available.`,
+          });
+        }
+
+        cart.items[itemIndex].quantity = newQty;
+      } else {
+        return res.status(404).json({ message: "Item not found in cart" });
+      }
+    }
+
+    await cart.save();
+    await cart.populate("items.product");
+
+    res.json(buildCartResponse(cart));
+  } catch (error) {
+    console.error("Error updating cart quantity:", error);
+    res.status(500).json({ message: "Cart update failed" });
   }
 };
 
@@ -120,31 +212,20 @@ exports.removeFromCart = async (req, res) => {
       cart = await Cart.create({ user: req.user.id, items: [] });
     }
 
-    // Remove item with matching product and size
+    // Remove item with matching product, size, and color
+    const decodedSize = decodeURIComponent(size);
     cart.items = cart.items.filter(
-      (item) => !(item.product.toString() === productId && item.size === size),
+      (item) =>
+        !(
+          item.product.toString() === productId &&
+          item.size === decodedSize
+        ),
     );
 
     await cart.save();
     await cart.populate("items.product");
 
-    // Return consistent response format
-    const response = {
-      items: cart.items || [],
-      totalItems: cart.items
-        ? cart.items.reduce((sum, item) => sum + item.quantity, 0)
-        : 0,
-      totalAmount: cart.items
-        ? cart.items.reduce((sum, item) => {
-            if (item.product && item.product.price) {
-              return sum + item.product.price * item.quantity;
-            }
-            return sum;
-          }, 0)
-        : 0,
-    };
-
-    res.json(response);
+    res.json(buildCartResponse(cart));
   } catch (error) {
     console.error("Error removing from cart:", error);
     res.status(500).json({ message: "Cart operation failed" });

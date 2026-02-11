@@ -27,7 +27,7 @@ export default function OrderDetailPage() {
   const fetchOrder = useCallback(async () => {
     try {
       setLoadingOrder(true);
-      const response = await orderAPI.getOrderById(params.id);
+      const response = await orderAPI.getById(params.id);
       // Backend returns {order: {...}}
       console.log('📦 Order Details API response:', response.data);
       setOrder(response.data.order);
@@ -51,7 +51,7 @@ export default function OrderDetailPage() {
 
     try {
       setCancelling(true);
-      await orderAPI.cancelOrder(params.id);
+      await orderAPI.cancel(params.id);
       toast.success('Order cancelled successfully');
       fetchOrder(); // Refresh order data
     } catch (error) {
@@ -227,11 +227,10 @@ export default function OrderDetailPage() {
                     return (
                       <div key={step.status} className="flex flex-col items-center">
                         <div
-                          className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all ${
-                            isComplete
+                          className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all ${isComplete
                               ? 'bg-brand-brown border-brand-brown text-white'
                               : 'bg-white border-primary-200 text-primary-400'
-                          }`}
+                            }`}
                         >
                           <Icon />
                         </div>

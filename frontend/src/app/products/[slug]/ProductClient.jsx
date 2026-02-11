@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { getColorName } from '@/components/ColorPicker';
-import { FiHeart, FiShoppingCart, FiAward, FiTruck, FiShield, FiCheck } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart, FiAward, FiTruck, FiShield, FiCheck, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import ProductMetadata from '@/components/ProductMetadata';
 import ReviewSection from '@/components/ReviewSection';
@@ -36,6 +36,35 @@ export default function ProductClient({ product }) {
     const [selectedImage, setSelectedImage] = useState(0);
     const [activeTab, setActiveTab] = useState('description');
 
+    // Filter images based on selected color
+    const filteredImages = useMemo(() => {
+        if (!product?.images) return [];
+
+        if (!selectedColor) return product.images;
+
+        const normalize = (c) => c?.toLowerCase().trim();
+        const targetColor = normalize(selectedColor);
+
+        // Images specifically for this color
+        const colorSpecific = product.images.filter(img => normalize(img.color) === targetColor);
+
+        // Images with no color (common/neutral)
+        const neutral = product.images.filter(img => !img.color);
+
+        // If we have specific images for this color, prioritize them
+        if (colorSpecific.length > 0) {
+            return [...colorSpecific, ...neutral];
+        }
+
+        // Fallback to all images if no specific ones found
+        return product.images;
+    }, [product, selectedColor]);
+
+    // Reset selected image when color changes
+    useEffect(() => {
+        setSelectedImage(0);
+    }, [selectedColor]);
+
     if (!product) {
         return null;
     }
@@ -52,7 +81,7 @@ export default function ProductClient({ product }) {
             return;
         }
 
-        await addToCart(product._id, selectedSize);
+        await addToCart(product._id, selectedSize, selectedColor || '');
     };
 
     const handleBuyNow = async () => {
@@ -67,7 +96,7 @@ export default function ProductClient({ product }) {
             return;
         }
 
-        const result = await addToCart(product._id, selectedSize);
+        const result = await addToCart(product._id, selectedSize, selectedColor || '');
         if (result.success) {
             router.push('/cart');
         }
@@ -85,6 +114,14 @@ export default function ProductClient({ product }) {
 
     const inWishlist = isInWishlist(product._id);
 
+    const nextImage = () => {
+        setSelectedImage((prev) => (prev + 1) % filteredImages.length);
+    };
+
+    const prevImage = () => {
+        setSelectedImage((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
+    };
+
     return (
         <>
             <ProductMetadata product={product} />
@@ -94,21 +131,41 @@ export default function ProductClient({ product }) {
                         {/* Image Gallery */}
                         <div className="space-y-4">
                             {/* Main Image */}
-                            <div className="relative aspect-square bg-white rounded-lg overflow-hidden">
+                            <div className="relative aspect-square bg-white rounded-lg overflow-hidden group">
                                 <Image
-                                    src={product.images[selectedImage]?.url || product.images[selectedImage] || '/placeholder.jpg'}
+                                    src={filteredImages[selectedImage]?.url || filteredImages[selectedImage] || '/placeholder.jpg'}
                                     alt={product.name}
                                     fill
                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                    className="object-cover"
+                                    className="object-cover transition-transform duration-500 hover:scale-110 cursor-zoom-in"
                                     priority
                                 />
+
+                                {/* Navigation Arrows */}
+                                {filteredImages.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-primary-900 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                                            aria-label="Previous image"
+                                        >
+                                            <FiChevronLeft className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-primary-900 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                                            aria-label="Next image"
+                                        >
+                                            <FiChevronRight className="w-5 h-5" />
+                                        </button>
+                                    </>
+                                )}
                             </div>
 
                             {/* Thumbnail Images */}
-                            {product.images && product.images.length > 1 && (
+                            {filteredImages.length > 1 && (
                                 <div className="grid grid-cols-4 gap-4">
-                                    {product.images.map((image, idx) => (
+                                    {filteredImages.map((image, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedImage(idx)}
@@ -180,8 +237,8 @@ export default function ProductClient({ product }) {
                                                     key={idx}
                                                     onClick={() => setSelectedColor(color)}
                                                     className={`relative w-12 h-12 rounded-full border-3 transition-all ${selectedColor === color
-                                                            ? 'border-brand-brown ring-2 ring-brand-brown ring-offset-2 scale-110'
-                                                            : 'border-primary-300 hover:border-brand-brown hover:scale-105'
+                                                        ? 'border-brand-brown ring-2 ring-brand-brown ring-offset-2 scale-110'
+                                                        : 'border-primary-300 hover:border-brand-brown hover:scale-105'
                                                         }`}
                                                     style={{ backgroundColor: colorValue }}
                                                     title={colorName}
@@ -212,10 +269,10 @@ export default function ProductClient({ product }) {
                                                     onClick={() => setSelectedSize(sizeValue)}
                                                     disabled={stock !== null && stock === 0}
                                                     className={`px-6 py-3 border-2 rounded-lg font-medium transition-all ${selectedSize === sizeValue
-                                                            ? 'border-brand-brown bg-brand-brown text-white'
-                                                            : stock === 0
-                                                                ? 'border-primary-200 bg-primary-100 text-primary-400 cursor-not-allowed'
-                                                                : 'border-primary-200 hover:border-brand-brown'
+                                                        ? 'border-brand-brown bg-brand-brown text-white'
+                                                        : stock === 0
+                                                            ? 'border-primary-200 bg-primary-100 text-primary-400 cursor-not-allowed'
+                                                            : 'border-primary-200 hover:border-brand-brown'
                                                         }`}
                                                 >
                                                     {sizeValue}
@@ -245,8 +302,8 @@ export default function ProductClient({ product }) {
                                     onClick={handleBuyNow}
                                     disabled={!product.inStock}
                                     className={`flex-1 text-lg py-4 ${product.inStock
-                                            ? 'btn btn-primary'
-                                            : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
+                                        ? 'btn btn-primary'
+                                        : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
                                         }`}
                                 >
                                     {product.inStock ? 'Buy Now' : 'Out of Stock'}
@@ -255,8 +312,8 @@ export default function ProductClient({ product }) {
                                     onClick={handleAddToCart}
                                     disabled={!product.inStock}
                                     className={`flex-1 text-lg py-4 flex items-center justify-center gap-2 ${product.inStock
-                                            ? 'btn btn-secondary'
-                                            : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
+                                        ? 'btn btn-secondary'
+                                        : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
                                         }`}
                                 >
                                     <FiShoppingCart />
@@ -318,8 +375,8 @@ export default function ProductClient({ product }) {
                                 <button
                                     onClick={() => setActiveTab('description')}
                                     className={`pb-4 font-medium transition-colors ${activeTab === 'description'
-                                            ? 'border-b-2 border-brand-brown text-brand-brown'
-                                            : 'text-primary-600 hover:text-primary-900'
+                                        ? 'border-b-2 border-brand-brown text-brand-brown'
+                                        : 'text-primary-600 hover:text-primary-900'
                                         }`}
                                 >
                                     Description
@@ -327,8 +384,8 @@ export default function ProductClient({ product }) {
                                 <button
                                     onClick={() => setActiveTab('specifications')}
                                     className={`pb-4 font-medium transition-colors ${activeTab === 'specifications'
-                                            ? 'border-b-2 border-brand-brown text-brand-brown'
-                                            : 'text-primary-600 hover:text-primary-900'
+                                        ? 'border-b-2 border-brand-brown text-brand-brown'
+                                        : 'text-primary-600 hover:text-primary-900'
                                         }`}
                                 >
                                     Specifications
@@ -336,8 +393,8 @@ export default function ProductClient({ product }) {
                                 <button
                                     onClick={() => setActiveTab('care')}
                                     className={`pb-4 font-medium transition-colors ${activeTab === 'care'
-                                            ? 'border-b-2 border-brand-brown text-brand-brown'
-                                            : 'text-primary-600 hover:text-primary-900'
+                                        ? 'border-b-2 border-brand-brown text-brand-brown'
+                                        : 'text-primary-600 hover:text-primary-900'
                                         }`}
                                 >
                                     Care Instructions
@@ -345,8 +402,8 @@ export default function ProductClient({ product }) {
                                 <button
                                     onClick={() => setActiveTab('reviews')}
                                     className={`pb-4 font-medium transition-colors ${activeTab === 'reviews'
-                                            ? 'border-b-2 border-brand-brown text-brand-brown'
-                                            : 'text-primary-600 hover:text-primary-900'
+                                        ? 'border-b-2 border-brand-brown text-brand-brown'
+                                        : 'text-primary-600 hover:text-primary-900'
                                         }`}
                                 >
                                     Reviews

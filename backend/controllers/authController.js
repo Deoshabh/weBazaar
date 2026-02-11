@@ -3,6 +3,7 @@ const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const admin = require("../config/firebase");
+const { log } = require("../utils/logger");
 
 /* =====================
    Helpers
@@ -421,13 +422,9 @@ exports.firebaseLogin = async (req, res, next) => {
     let decodedToken;
     try {
       decodedToken = await admin.auth().verifyIdToken(firebaseToken);
-      console.log(`✅ Firebase token verified for UID: ${decodedToken.uid}`);
+      log.debug("Firebase token verified", { uid: decodedToken.uid });
     } catch (error) {
-      console.error("Firebase token verification error:", {
-        code: error.code,
-        message: error.message,
-        tokenLength: firebaseToken.length,
-      });
+      log.error("Firebase token verification failed", error);
       return res.status(401).json({
         message: "Invalid Firebase token",
         error: "FIREBASE_TOKEN_INVALID",
@@ -448,10 +445,9 @@ exports.firebaseLogin = async (req, res, next) => {
     // 2. email (secondary, for linking existing email-based accounts)
     // 3. phone (tertiary, if available)
 
-    console.log(`🔐 Firebase Login Lookup:`, {
+    log.debug("Firebase Login Lookup", {
       firebaseUid: decodedToken.uid,
       email: decodedToken.email || email,
-      phone: decodedToken.phone_number || phoneNumber,
     });
 
     // IMPORTANT: Look up by Firebase UID FIRST
@@ -466,22 +462,15 @@ exports.firebaseLogin = async (req, res, next) => {
 
       // If found by email, MUST link the Firebase UID to this account
       if (user && !user.firebaseUid) {
-        console.log(
-          `ℹ️  Linking Firebase UID to existing email account: ${decodedToken.email}`,
-        );
+        log.info("Linking Firebase UID to existing email account");
         user.firebaseUid = decodedToken.uid;
         await user.save();
       } else if (user) {
         // Email matched but already has different firebaseUid - SECURITY ISSUE
         // This prevents account takeover
-        console.warn(
-          `⚠️  SECURITY: Email matched but different firebaseUid found. Possible account hijack attempt.`,
-          {
-            foundUid: user.firebaseUid,
-            incomingUid: decodedToken.uid,
-            email: decodedToken.email,
-          },
-        );
+        log.warn("SECURITY: Email matched but different firebaseUid found", {
+          email: decodedToken.email,
+        });
 
         // Reject to prevent account confusion
         return res.status(403).json({
@@ -494,7 +483,7 @@ exports.firebaseLogin = async (req, res, next) => {
 
     // Create new user if doesn't exist
     if (!user) {
-      console.log(`✅ Creating new Firebase user: ${decodedToken.email}`);
+      log.debug("Creating new Firebase user");
       user = await User.create({
         name: displayName || decodedToken.name || "User",
         email: decodedToken.email || email,
@@ -510,7 +499,7 @@ exports.firebaseLogin = async (req, res, next) => {
       });
     } else {
       // Update existing user with Firebase data
-      console.log(`✅ Logging in existing user: ${user.email}`);
+      log.debug("Logging in existing user");
 
       if (!user.firebaseUid) {
         user.firebaseUid = decodedToken.uid;

@@ -203,7 +203,6 @@ export const adminAPI = {
 
   // Stats
   getAdminStats: () => api.get("/admin/stats"),
-  getStats: () => api.get("/admin/stats"),
 
   // Site Settings
   getSettingHistory: (key, limit) =>
@@ -220,38 +219,28 @@ export const categoryAPI = {
 
 export const addressAPI = {
   getAll: () => api.get("/user/addresses"),
-  getAddresses: () => api.get("/user/addresses"),
   create: (data) => api.post("/user/addresses", data),
-  addAddress: (data) => api.post("/user/addresses", data),
   update: (id, data) => api.patch(`/user/addresses/${id}`, data),
-  updateAddress: (id, data) => api.patch(`/user/addresses/${id}`, data),
   delete: (id) => api.delete(`/user/addresses/${id}`),
-  deleteAddress: (id) => api.delete(`/user/addresses/${id}`),
   setDefault: (id) => api.patch(`/user/addresses/${id}/default`),
 };
 
 export const couponAPI = {
   validate: (code) => api.post("/coupons/validate", { code }),
-  validateCoupon: (code) => api.post("/coupons/validate", { code }),
 };
 
 export const orderAPI = {
   create: (data) => api.post("/orders", data),
-  createOrder: (data) => api.post("/orders", data),
   getAll: (params) => api.get("/orders/my", { params }),
-  getMyOrders: (params) => api.get("/orders/my", { params }),
   getById: (id) => api.get(`/orders/${id}`),
-  getOrderById: (id) => api.get(`/orders/${id}`),
   createRazorpayOrder: (id) => api.post(`/orders/${id}/razorpay`),
   verifyRazorpayPayment: (id, data) =>
     api.post(`/orders/${id}/razorpay/verify`, data),
   cancel: (id) => api.patch(`/orders/${id}/cancel`),
-  cancelOrder: (id) => api.patch(`/orders/${id}/cancel`),
 };
 
 export const contactAPI = {
   submit: (data) => api.post("/contact", data),
-  submitMessage: (data) => api.post("/contact", data),
 };
 
 export const userAPI = {
@@ -262,23 +251,17 @@ export const userAPI = {
 
 export const cartAPI = {
   get: () => api.get("/cart"),
-  getCart: () => api.get("/cart"),
   add: (data) => api.post("/cart", data),
-  addToCart: (data) => api.post("/cart", data),
-  removeFromCart: (productId, size) =>
+  update: (data) => api.put("/cart/items", data),
+  remove: (productId, size) =>
     api.delete(
       `/cart/${encodeURIComponent(productId)}/${encodeURIComponent(size)}`,
     ),
   clear: () => api.delete("/cart"),
-  clearCart: () => api.delete("/cart"),
 };
 
 export const wishlistAPI = {
-  getWishlist: () => api.get("/wishlist"),
   get: () => api.get("/wishlist"),
   add: (productId) => api.post("/wishlist/toggle", { productId }),
-  addToWishlist: (productId) => api.post("/wishlist/toggle", { productId }),
   remove: (productId) => api.post("/wishlist/toggle", { productId }),
-  removeFromWishlist: (productId) =>
-    api.post("/wishlist/toggle", { productId }),
 };

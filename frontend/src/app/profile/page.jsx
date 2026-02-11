@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
   const fetchAddresses = async () => {
     try {
-      const response = await addressAPI.getAddresses();
+      const response = await addressAPI.getAll();
       // Backend returns array directly, not wrapped
       console.log('📦 Addresses API response:', response.data);
       const addressesData = Array.isArray(response.data) ? response.data : (response.data.addresses || []);
@@ -78,10 +78,10 @@ export default function ProfilePage() {
     e.preventDefault();
     try {
       if (editingAddressId) {
-        await addressAPI.updateAddress(editingAddressId, addressForm);
+        await addressAPI.update(editingAddressId, addressForm);
         toast.success('Address updated successfully!');
       } else {
-        await addressAPI.addAddress(addressForm);
+        await addressAPI.create(addressForm);
         toast.success('Address added successfully!');
       }
       fetchAddresses();
@@ -96,7 +96,7 @@ export default function ProfilePage() {
   const handleDeleteAddress = async (addressId) => {
     if (confirm('Are you sure you want to delete this address?')) {
       try {
-        await addressAPI.deleteAddress(addressId);
+        await addressAPI.delete(addressId);
         toast.success('Address deleted successfully!');
         fetchAddresses();
       } catch (error) {

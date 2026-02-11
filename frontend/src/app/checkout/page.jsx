@@ -12,8 +12,8 @@ import { FiMapPin, FiPlus, FiEdit2, FiTag, FiCreditCard, FiDollarSign } from 're
 export default function CheckoutPage() {
   const router = useRouter();
   const { isAuthenticated, user, loading } = useAuth();
-  const { cart, fetchCart, cartCount, cartTotal } = useCart();
-  
+  const { cart, loading: cartLoading, fetchCart, cartCount, cartTotal } = useCart();
+
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
@@ -42,7 +42,7 @@ export default function CheckoutPage() {
 
   const fetchAddresses = async () => {
     try {
-      const response = await addressAPI.getAddresses();
+      const response = await addressAPI.getAll();
       // Backend returns array directly, not wrapped
       const addressList = Array.isArray(response.data) ? response.data : (response.data.addresses || []);
       console.log('📦 Addresses in checkout:', addressList.length);
@@ -55,19 +55,19 @@ export default function CheckoutPage() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !cartLoading) {
       fetchAddresses();
       if (cartCount === 0) {
         toast.error('Your cart is empty');
         router.push('/cart');
       }
     }
-  }, [isAuthenticated, cartCount, router]);
+  }, [isAuthenticated, cartLoading, cartCount, router]);
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
     try {
-      await addressAPI.addAddress(addressForm);
+      await addressAPI.create(addressForm);
       toast.success('Address added successfully!');
       fetchAddresses();
       setShowAddressForm(false);
@@ -93,11 +93,11 @@ export default function CheckoutPage() {
     }
 
     try {
-      const response = await couponAPI.validateCoupon(couponCode);
+      const response = await couponAPI.validate(couponCode);
       const coupon = response.data.coupon;
-      
+
       let discountAmount = 0;
-      if (coupon.type === 'percentage') {
+      if (coupon.type === 'percent') {
         discountAmount = (cart.subtotal * coupon.value) / 100;
         if (coupon.maxDiscount) {
           discountAmount = Math.min(discountAmount, coupon.maxDiscount);
@@ -155,7 +155,7 @@ export default function CheckoutPage() {
         couponCode: appliedCoupon?.code,
       };
 
-      const response = await orderAPI.createOrder(orderData);
+      const response = await orderAPI.create(orderData);
       const order = response.data.order;
 
       if (paymentMethod === 'razorpay') {
@@ -229,7 +229,7 @@ export default function CheckoutPage() {
       console.error('Order creation error:', error.response?.data || error);
       const errorMessage = error.response?.data?.message || 'Failed to place order';
       const errorField = error.response?.data?.field;
-      
+
       if (errorField) {
         toast.error(`${errorMessage} (Field: ${errorField})`);
       } else {
@@ -361,11 +361,10 @@ export default function CheckoutPage() {
                     <div
                       key={address._id}
                       onClick={() => setSelectedAddress(address)}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedAddress?._id === address._id
-                          ? 'border-brand-brown bg-brand-brown bg-opacity-5'
-                          : 'border-primary-200 hover:border-primary-400'
-                      }`}
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedAddress?._id === address._id
+                        ? 'border-brand-brown bg-brand-brown bg-opacity-5'
+                        : 'border-primary-200 hover:border-primary-400'
+                        }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -404,11 +403,10 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div
                   onClick={() => setPaymentMethod('razorpay')}
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === 'razorpay'
-                      ? 'border-brand-brown bg-brand-brown bg-opacity-5'
-                      : 'border-primary-200 hover:border-primary-400'
-                  }`}
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${paymentMethod === 'razorpay'
+                    ? 'border-brand-brown bg-brand-brown bg-opacity-5'
+                    : 'border-primary-200 hover:border-primary-400'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -428,11 +426,10 @@ export default function CheckoutPage() {
 
                 <div
                   onClick={() => setPaymentMethod('cod')}
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === 'cod'
-                      ? 'border-brand-brown bg-brand-brown bg-opacity-5'
-                      : 'border-primary-200 hover:border-primary-400'
-                  }`}
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${paymentMethod === 'cod'
+                    ? 'border-brand-brown bg-brand-brown bg-opacity-5'
+                    : 'border-primary-200 hover:border-primary-400'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

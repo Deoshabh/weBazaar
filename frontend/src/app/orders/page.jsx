@@ -30,7 +30,7 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     try {
       setLoadingOrders(true);
-      const response = await orderAPI.getMyOrders();
+      const response = await orderAPI.getAll();
       // Backend returns {orders: [...]}
       console.log('📦 User Orders API response:', response.data);
       setOrders(response.data.orders || []);
@@ -106,11 +106,10 @@ export default function OrdersPage() {
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm sm:text-base transition-colors touch-manipulation ${
-                  filter === status
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm sm:text-base transition-colors touch-manipulation ${filter === status
                     ? 'bg-primary-900 text-white'
                     : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-                }`}
+                  }`}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
@@ -176,7 +175,7 @@ export default function OrdersPage() {
                       </Link>
                     </div>
                   </div>
-                  
+
                   {/* Shipping Info - NEW */}
                   {order.shipping?.awb_code && (
                     <div className="mt-3 pt-3 border-t border-primary-200">

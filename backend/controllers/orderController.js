@@ -1,5 +1,7 @@
+const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Product = require("../models/Product");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
@@ -52,7 +54,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // Validate product availability and stock
+    // Validate product availability and per-size stock
     for (const item of cart.items) {
       if (!item.product) {
         return res.status(400).json({
@@ -70,12 +72,15 @@ exports.createOrder = async (req, res) => {
           message: `"${item.product.name}" is currently out of stock.`,
         });
       }
-      if (
-        item.product.stock !== undefined &&
-        item.product.stock < item.quantity
-      ) {
+
+      // Check per-size stock
+      const sizeEntry = item.product.sizes?.find(
+        (s) => s.size === item.size,
+      );
+      const availableStock = sizeEntry ? sizeEntry.stock : item.product.stock;
+      if (availableStock !== undefined && availableStock < item.quantity) {
         return res.status(400).json({
-          message: `Insufficient stock for "${item.product.name}". Only ${item.product.stock} available.`,
+          message: `Insufficient stock for "${item.product.name}" (size ${item.size}). Only ${availableStock} available.`,
         });
       }
     }
@@ -97,6 +102,7 @@ exports.createOrder = async (req, res) => {
         name: item.product.name,
         image: primaryImage,
         size: item.size,
+        color: item.color || "",
         quantity: item.quantity,
         price: item.product.price,
       };
@@ -145,43 +151,86 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    const total = subtotal - discount;
+    // Calculate shipping cost (server-side, mirrors frontend logic)
+    const shippingCost = subtotal > 1000 ? 0 : 50;
+    const total = subtotal + shippingCost - discount;
 
-    // Create order
-    const order = await Order.create({
-      orderId: generateOrderId(),
-      user: req.user.id,
-      items: orderItems,
-      subtotal,
-      discount,
-      total,
-      totalAmount: total, // Store total as totalAmount for frontend
-      coupon: couponData,
-      shippingAddress: {
-        fullName: shippingAddress.fullName.trim(),
-        // Strip country code prefix (+91, 91, 0) to get bare 10-digit number
-        phone: shippingAddress.phone
-          .trim()
-          .replace(/[\s\-()]/g, "")
-          .replace(/^(\+?91|0)/, ""),
-        addressLine1: shippingAddress.addressLine1.trim(),
-        addressLine2: shippingAddress.addressLine2?.trim() || "",
-        city: shippingAddress.city.trim(),
-        state: shippingAddress.state.trim(),
-        postalCode: shippingAddress.postalCode.trim(),
-        country: shippingAddress.country || "India",
-      },
-      payment: {
-        method: paymentMethod || "cod",
-        status: "pending",
-      },
-      status: "confirmed",
-      fulfillmentType: "made_to_order",
-    });
+    // === Transactional order creation ===
+    const session = await mongoose.startSession();
+    let order;
 
-    // Clear cart after order creation
-    cart.items = [];
-    await cart.save();
+    try {
+      await session.withTransaction(async () => {
+        // 1. Decrement stock for each item atomically
+        for (const item of cart.items) {
+          const result = await Product.updateOne(
+            {
+              _id: item.product._id,
+              "sizes.size": item.size,
+              "sizes.stock": { $gte: item.quantity },
+            },
+            {
+              $inc: {
+                "sizes.$.stock": -item.quantity,
+                stock: -item.quantity,
+              },
+            },
+            { session },
+          );
+
+          if (result.modifiedCount === 0) {
+            throw new Error(
+              `Insufficient stock for "${item.product.name}" (size ${item.size}). Please update your cart.`,
+            );
+          }
+        }
+
+        // 2. Create order
+        const [createdOrder] = await Order.create(
+          [
+            {
+              orderId: generateOrderId(),
+              user: req.user.id,
+              items: orderItems,
+              subtotal,
+              discount,
+              shippingCost,
+              total,
+              totalAmount: total,
+              coupon: couponData,
+              shippingAddress: {
+                fullName: shippingAddress.fullName.trim(),
+                phone: shippingAddress.phone
+                  .trim()
+                  .replace(/[\s\-()]/g, "")
+                  .replace(/^(\+?91|0)/, ""),
+                addressLine1: shippingAddress.addressLine1.trim(),
+                addressLine2: shippingAddress.addressLine2?.trim() || "",
+                city: shippingAddress.city.trim(),
+                state: shippingAddress.state.trim(),
+                postalCode: shippingAddress.postalCode.trim(),
+                country: shippingAddress.country || "India",
+              },
+              payment: {
+                method: paymentMethod || "cod",
+                status: "pending",
+              },
+              status: "confirmed",
+              fulfillmentType: "made_to_order",
+            },
+          ],
+          { session },
+        );
+
+        order = createdOrder;
+
+        // 3. Clear cart
+        cart.items = [];
+        await cart.save({ session });
+      });
+    } finally {
+      session.endSession();
+    }
 
     // Return created order
     res.status(201).json({
@@ -190,6 +239,11 @@ exports.createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error("Create order error:", error);
+
+    // Stock-related errors from transaction
+    if (error.message && error.message.includes("Insufficient stock")) {
+      return res.status(400).json({ message: error.message });
+    }
 
     // Return useful validation messages instead of generic 500
     if (error.name === "ValidationError") {

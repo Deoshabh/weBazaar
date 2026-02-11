@@ -105,6 +105,10 @@ const productSchema = new mongoose.Schema(
           type: Number,
           default: 0,
         },
+        color: {
+          type: String,
+          trim: true, // Optional: matches a value in the colors array
+        },
       },
     ],
     isActive: {
@@ -129,7 +133,6 @@ const productSchema = new mongoose.Schema(
 
 // Indexes for performance
 productSchema.index({ name: 1 });
-productSchema.index({ slug: 1 });
 productSchema.index({ category: 1 });
 productSchema.index({ brand: 1 });
 productSchema.index({ price: 1 });

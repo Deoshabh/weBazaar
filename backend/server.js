@@ -42,7 +42,16 @@ function mongoSanitize(req, _res, next) {
   if (req.body && typeof req.body === "object") {
     req.body = sanitizeValue(req.body);
   }
-  // req.query is read-only in Express 5, sanitize via params instead
+  // req.query is read-only in Express 5 — clone, sanitize, and expose as req.sanitizedQuery
+  if (req.query && typeof req.query === "object") {
+    try {
+      req.sanitizedQuery = sanitizeValue(JSON.parse(JSON.stringify(req.query)));
+    } catch {
+      req.sanitizedQuery = {};
+    }
+  } else {
+    req.sanitizedQuery = {};
+  }
   if (req.params && typeof req.params === "object") {
     for (const key of Object.keys(req.params)) {
       if (

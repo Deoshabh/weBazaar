@@ -23,7 +23,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await cartAPI.getCart();
+      const response = await cartAPI.get();
       // Backend returns {items, totalItems, totalAmount} directly, not wrapped in {cart: {...}}
       console.log('📦 Cart API response:', response.data);
       setCart(response.data);
@@ -34,9 +34,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const addToCart = async (productId, size, quantity = 1) => {
+  const addToCart = async (productId, size, color = '', quantity = 1) => {
     try {
-      const response = await cartAPI.addToCart({ productId, size, quantity });
+      const response = await cartAPI.add({ productId, size, color, quantity });
       // Backend returns {items, totalItems, totalAmount} directly
       setCart(response.data);
       toast.success('Added to cart!');
@@ -50,7 +50,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (productId, size) => {
     try {
-      const response = await cartAPI.removeFromCart(productId, size);
+      const response = await cartAPI.remove(productId, size);
       // Backend returns {items, totalItems, totalAmount} directly
       setCart(response.data);
       toast.success('Removed from cart');
@@ -64,7 +64,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      await cartAPI.clearCart();
+      await cartAPI.clear();
       setCart(null);
       toast.success('Cart cleared');
       return { success: true };
@@ -87,11 +87,24 @@ export const CartProvider = ({ children }) => {
     }, 0);
   };
 
+  const updateItemQuantity = async (productId, size, quantity) => {
+    try {
+      const response = await cartAPI.update({ productId, size, quantity });
+      setCart(response.data);
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to update quantity';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
   const value = {
     cart,
     loading,
     addToCart,
     removeFromCart,
+    updateItemQuantity,
     clearCart,
     fetchCart, // Export fetchCart method
     refreshCart: fetchCart,

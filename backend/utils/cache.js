@@ -34,27 +34,41 @@ exports.getOrSetCache = async (key, callback, ttl = 3600) => {
  * Invalidate cache by key pattern
  * @param {string} pattern - Key pattern (e.g., "products:*")
  */
-exports.invalidateCache = async (pattern) => {
-    try {
-        const stream = redis.scanStream({
-            match: pattern,
-            count: 100
-        });
+exports.invalidateCache = (pattern) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const stream = redis.scanStream({
+                match: pattern,
+                count: 100
+            });
 
-        stream.on('data', async (keys) => {
-            if (keys.length) {
-                const pipeline = redis.pipeline();
-                keys.forEach((key) => {
-                    pipeline.del(key);
-                });
-                await pipeline.exec();
-            }
-        });
+            stream.on('data', async (keys) => {
+                if (keys.length) {
+                    stream.pause();
+                    try {
+                        const pipeline = redis.pipeline();
+                        keys.forEach((key) => {
+                            pipeline.del(key);
+                        });
+                        await pipeline.exec();
+                    } catch (err) {
+                        console.error('Cache pipeline error:', err);
+                    }
+                    stream.resume();
+                }
+            });
 
-        stream.on('end', () => {
-            console.log(`🧹 Cache invalidated for pattern: ${pattern}`);
-        });
-    } catch (error) {
-        console.error('Cache Invalidation Error:', error);
-    }
+            stream.on('end', () => {
+                resolve();
+            });
+
+            stream.on('error', (err) => {
+                console.error('Cache Invalidation Error:', err);
+                resolve(); // Don't reject — cache errors shouldn't crash callers
+            });
+        } catch (error) {
+            console.error('Cache Invalidation Error:', error);
+            resolve();
+        }
+    });
 };
