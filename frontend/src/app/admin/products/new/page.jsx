@@ -49,8 +49,9 @@ function ProductFormContent() {
     category: '',
     brand: '',
     sku: '',
-    stock: '',
-    sizes: [],
+    stock: '', // This will now be a calculated total
+    sizes: [], // Array of size strings
+    sizeStocks: {}, // Object mapping size -> stock count
     colors: [],
     tags: '',
     isActive: true,
@@ -82,6 +83,22 @@ function ProductFormContent() {
       const response = await adminAPI.getProductById(productId);
       const product = response.data.product || response.data;
 
+      // Extract size stocks
+      const sizeStocks = {};
+      const sizes = [];
+
+      if (product.sizes && Array.isArray(product.sizes)) {
+        product.sizes.forEach(s => {
+          if (typeof s === 'object') {
+            sizes.push(s.size);
+            sizeStocks[s.size] = s.stock || 0;
+          } else {
+            sizes.push(s);
+            sizeStocks[s] = 0;
+          }
+        });
+      }
+
       // Populate form with existing data
       setFormData({
         name: product.name || '',
@@ -95,7 +112,8 @@ function ProductFormContent() {
         brand: product.brand || '',
         sku: product.sku || '',
         stock: product.stock || '',
-        sizes: product.sizes?.map(s => typeof s === 'object' ? s.size : s) || [],
+        sizes: sizes,
+        sizeStocks: sizeStocks,
         colors: product.colors || [],
         tags: product.tags?.join(', ') || '',
         isActive: product.isActive !== undefined ? product.isActive : true,
@@ -136,6 +154,7 @@ function ProductFormContent() {
 
   const handleChange = (e) => {
     isDirty.current = true;
+    setIsFormDirty(true);
     const { name, value, type, checked } = e.target;
 
     if (name === 'name') {
@@ -164,6 +183,7 @@ function ProductFormContent() {
 
   const handleImagesChange = ({ images: newImages, imagePreviews: newPreviews, existingImages: newExistingImages }) => {
     isDirty.current = true;
+    setIsFormDirty(true);
     setImages(newImages);
     setImagePreviews(newPreviews);
     setExistingImages(newExistingImages);
@@ -171,12 +191,46 @@ function ProductFormContent() {
 
   const handleSizeChange = (e) => {
     const value = e.target.value;
-    const sizes = value.split(',').map(s => s.trim()).filter(Boolean);
-    setFormData({ ...formData, sizes });
+    const newSizes = value.split(',').map(s => s.trim()).filter(Boolean);
+
+    // Preserve existing stock values for sizes that remain
+    const newSizeStocks = { ...formData.sizeStocks };
+
+    // Remove stocks for deleted sizes
+    Object.keys(newSizeStocks).forEach(size => {
+      if (!newSizes.includes(size)) {
+        delete newSizeStocks[size];
+      }
+    });
+
+    // Initialize stock for new sizes
+    newSizes.forEach(size => {
+      if (newSizeStocks[size] === undefined) {
+        newSizeStocks[size] = 0;
+      }
+    });
+
+    setFormData({
+      ...formData,
+      sizes: newSizes,
+      sizeStocks: newSizeStocks
+    });
+  };
+
+  const handleSizeStockChange = (size, value) => {
+    setFormData({
+      ...formData,
+      sizeStocks: {
+        ...formData.sizeStocks,
+        [size]: parseInt(value) || 0
+      }
+    });
+    setIsFormDirty(true);
   };
 
   const handleColorChange = (colors) => {
     setFormData({ ...formData, colors });
+    setIsFormDirty(true);
   };
 
   // Care Instructions CRUD handlers
@@ -280,6 +334,9 @@ function ProductFormContent() {
       const allImages = [...existingImages, ...uploadedImages];
 
       // Step 2: Prepare product data
+      // Calculate total stock from sizeStocks
+      const totalStock = formData.sizes.reduce((sum, size) => sum + (formData.sizeStocks[size] || 0), 0);
+
       const productData = {
         name: formData.name,
         slug: formData.slug,
@@ -288,6 +345,7 @@ function ProductFormContent() {
         price: Number(formData.price),
         images: allImages,
         featured: formData.isFeatured,
+        stock: totalStock, // Use calculated total stock
       };
 
       // Add optional fields if they exist
@@ -303,17 +361,10 @@ function ProductFormContent() {
         productData.sku = formData.sku;
       }
 
-      if (formData.stock) {
-        productData.stock = Number(formData.stock);
-      } else {
-        // Default stock to 100 if not specified
-        productData.stock = 100;
-      }
-
       if (formData.sizes && formData.sizes.length > 0) {
         productData.sizes = formData.sizes.map(size => ({
           size: size.toString(),
-          stock: formData.stock ? Math.floor(Number(formData.stock) / formData.sizes.length) : 0,
+          stock: formData.sizeStocks[size] || 0,
         }));
       }
 
@@ -322,7 +373,7 @@ function ProductFormContent() {
       }
 
       if (formData.tags) {
-        productData.tags = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+        productData.tags = formData.tags; // Already array from state
       }
 
       // Add specifications
@@ -347,6 +398,8 @@ function ProductFormContent() {
         await adminAPI.createProduct(productData);
         toast.success('Product created successfully', { id: 'create' });
       }
+      isDirty.current = false;
+      setIsFormDirty(false); // Reset global context
       router.push('/admin/products');
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -356,6 +409,9 @@ function ProductFormContent() {
       setLoading(false);
     }
   };
+
+  // Calculate total stock for display
+  const calculatedStock = formData.sizes.reduce((sum, size) => sum + (formData.sizeStocks[size] || 0), 0);
 
   return (
     <AdminLayout>
@@ -621,18 +677,18 @@ function ProductFormContent() {
 
                   <div>
                     <label className="block text-sm font-medium text-primary-900 mb-2">
-                      Stock Quantity *
+                      Total Stock Quantity
                     </label>
                     <input
                       type="number"
-                      name="stock"
-                      value={formData.stock}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                      placeholder="e.g., 50"
+                      value={calculatedStock}
+                      readOnly
+                      className="w-full px-4 py-2 border border-primary-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                      title="Calculated from individual specific stock sizes below"
                     />
+                    <p className="text-xs text-primary-500 mt-1">
+                      Auto-calculated from sizes section below
+                    </p>
                   </div>
                 </div>
               </div>
@@ -657,6 +713,31 @@ function ProductFormContent() {
                       Separate sizes with commas
                     </p>
                   </div>
+
+                  {/* Stock Per Size Section */}
+                  {formData.sizes.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <label className="block text-sm font-medium text-primary-900 mb-3">
+                        Stock per Size
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {formData.sizes.map(size => (
+                          <div key={size}>
+                            <label className="block text-xs text-primary-600 mb-1">
+                              Size {size}
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={formData.sizeStocks[size] || 0}
+                              onChange={(e) => handleSizeStockChange(size, e.target.value)}
+                              className="w-full px-3 py-1.5 border border-primary-300 rounded focus:ring-1 focus:ring-primary-900 text-sm"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-primary-900 mb-3">

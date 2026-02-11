@@ -18,6 +18,22 @@ export const CartProvider = ({ children }) => {
     } else {
       setCart(null);
     }
+
+    const handleStorageChange = (e) => {
+      // Listen for custom 'cartUpdated' event or specific localStorage changes
+      if (e.key === 'cartUpdated' || e.type === 'cartUpdated') {
+        if (isAuthenticated) fetchCart();
+      }
+    };
+
+    // Custom event listener for same-tab updates (if needed) and cross-tab storage events
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('cartUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdated', handleStorageChange);
+    };
   }, [isAuthenticated]);
 
   const fetchCart = async () => {
@@ -39,6 +55,10 @@ export const CartProvider = ({ children }) => {
       const response = await cartAPI.add({ productId, size, color, quantity });
       // Backend returns {items, totalItems, totalAmount} directly
       setCart(response.data);
+      // specific event for other components
+      window.dispatchEvent(new Event('cartUpdated'));
+      // trigger storage event for other tabs
+      localStorage.setItem('cartUpdated', Date.now().toString());
       toast.success('Added to cart!');
       return { success: true };
     } catch (error) {
@@ -53,6 +73,10 @@ export const CartProvider = ({ children }) => {
       const response = await cartAPI.remove(productId, size);
       // Backend returns {items, totalItems, totalAmount} directly
       setCart(response.data);
+      // specific event for other components
+      window.dispatchEvent(new Event('cartUpdated'));
+      // trigger storage event for other tabs
+      localStorage.setItem('cartUpdated', Date.now().toString());
       toast.success('Removed from cart');
       return { success: true };
     } catch (error) {
@@ -66,6 +90,10 @@ export const CartProvider = ({ children }) => {
     try {
       await cartAPI.clear();
       setCart(null);
+      // specific event for other components
+      window.dispatchEvent(new Event('cartUpdated'));
+      // trigger storage event for other tabs
+      localStorage.setItem('cartUpdated', Date.now().toString());
       toast.success('Cart cleared');
       return { success: true };
     } catch (error) {
@@ -91,6 +119,10 @@ export const CartProvider = ({ children }) => {
     try {
       const response = await cartAPI.update({ productId, size, quantity });
       setCart(response.data);
+      // specific event for other components
+      window.dispatchEvent(new Event('cartUpdated'));
+      // trigger storage event for other tabs
+      localStorage.setItem('cartUpdated', Date.now().toString());
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to update quantity';

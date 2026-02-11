@@ -4,7 +4,66 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiPercent, FiStar, FiEdit3, FiLayout } from 'react-icons/fi';
 
+import { useRouter } from 'next/navigation';
+import { AdminProvider, useAdmin } from '@/context/AdminContext';
+
+// Navigation Link Component that checks dirty state
+const AdminLink = ({ href, active, icon: Icon, label, className }) => {
+  const { isFormDirty } = useAdmin();
+  const router = useRouter();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    if (isFormDirty) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+        router.push(href);
+      }
+    } else {
+      router.push(href);
+    }
+  };
+
+  return (
+    <a href={href} onClick={handleClick} className={className}>
+      <Icon className="w-5 h-5" />
+      {label}
+    </a>
+  );
+};
+
+// Mobile Link Component
+const MobileAdminLink = ({ href, active, icon: Icon, label, className }) => {
+  const { isFormDirty } = useAdmin();
+  const router = useRouter();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    if (isFormDirty) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+        router.push(href);
+      }
+    } else {
+      router.push(href);
+    }
+  };
+
+  return (
+    <a href={href} onClick={handleClick} className={className}>
+      <Icon className="w-4 h-4" />
+      <span className="text-sm">{label}</span>
+    </a>
+  );
+};
+
 export default function AdminLayout({ children }) {
+  return (
+    <AdminProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AdminProvider>
+  );
+}
+
+function AdminLayoutContent({ children }) {
   const pathname = usePathname();
 
   const navItems = [
@@ -37,20 +96,19 @@ export default function AdminLayout({ children }) {
           <nav className="p-4">
             <ul className="space-y-2">
               {navItems.map((item) => {
-                const Icon = item.icon;
                 const active = isActive(item.href, item.exact);
                 return (
                   <li key={item.href}>
-                    <Link
+                    <AdminLink
                       href={item.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${active
+                      active={active}
+                      icon={item.icon}
+                      label={item.label}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${active
                         ? 'bg-primary-900 text-white'
                         : 'text-primary-700 hover:bg-primary-100'
                         }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {item.label}
-                    </Link>
+                    />
                   </li>
                 );
               })}
@@ -62,20 +120,19 @@ export default function AdminLayout({ children }) {
         <div className="lg:hidden fixed left-0 right-0 top-[80px] bg-white shadow-md z-40 overflow-x-auto">
           <nav className="flex p-2 gap-2">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const active = isActive(item.href, item.exact);
               return (
-                <Link
+                <MobileAdminLink
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${active
+                  active={active}
+                  icon={item.icon}
+                  label={item.label}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${active
                     ? 'bg-primary-900 text-white'
                     : 'text-primary-700 hover:bg-primary-100'
                     }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-sm">{item.label}</span>
-                </Link>
+                />
               );
             })}
           </nav>

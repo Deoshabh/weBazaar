@@ -146,6 +146,15 @@ app.use(
 // ===============================
 // Routes
 // ===============================
+
+// Middleware to fix double URL prefix issues (e.g. from proxy misconfiguration)
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api/v1/api/v1')) {
+    req.url = req.url.substring(7); // Remove the first '/api/v1'
+  }
+  next();
+});
+
 app.use("/api/health", require("./routes/healthRoutes")); // Health checks
 app.use("/api/v1/auth", require("./routes/authRoutes"));
 app.use("/api/v1/products", require("./routes/productRoutes"));

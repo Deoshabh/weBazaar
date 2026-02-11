@@ -11,7 +11,7 @@ import { FiFilter, FiX } from 'react-icons/fi';
 function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [materials, setMaterials] = useState([]);
@@ -20,7 +20,7 @@ function ProductsContent() {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
+
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedMaterials, setSelectedMaterials] = useState([]);
@@ -95,13 +95,13 @@ function ProductsContent() {
     try {
       setLoading(true);
       const params = {};
-      
+
       if (category) params.category = category;
       if (search) params.search = search;
       if (materials && materials.length > 0) params.material = materials[0]; // Backend supports single material for now
       if (colors && colors.length > 0) params.color = colors[0]; // Backend supports single color for now
       if (sizes && sizes.length > 0) params.size = sizes[0]; // Backend supports single size for now
-      
+
       // Price range filter
       if (priceMin !== undefined && priceMin !== null) {
         params.minPrice = priceMin;
@@ -109,7 +109,7 @@ function ProductsContent() {
       if (priceMax !== undefined && priceMax !== null) {
         params.maxPrice = priceMax;
       }
-      
+
       // Sorting
       if (sort && sort !== 'featured') {
         const sortMap = {
@@ -118,7 +118,7 @@ function ProductsContent() {
           'name-asc': { sortBy: 'name', order: 'asc' },
           'name-desc': { sortBy: 'name', order: 'desc' },
         };
-        
+
         if (sortMap[sort]) {
           params.sortBy = sortMap[sort].sortBy;
           params.order = sortMap[sort].order;
@@ -165,20 +165,20 @@ function ProductsContent() {
     }
 
     fetchProducts(
-      category, 
+      category,
       materialsParam ? materialsParam.split(',') : [],
       colorsParam ? colorsParam.split(',') : [],
       sizesParam ? sizesParam.split(',') : [],
       minPrice ? Number(minPrice) : undefined,
       maxPrice ? Number(maxPrice) : undefined,
-      sort, 
+      sort,
       search
     );
   }, [searchParams, fetchProducts]);
 
   const updateFilters = (key, value) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (value && (Array.isArray(value) ? value.length > 0 : true)) {
       if (Array.isArray(value)) {
         params.set(key, value.join(','));
@@ -188,7 +188,7 @@ function ProductsContent() {
     } else {
       params.delete(key);
     }
-    
+
     router.push(`/products?${params.toString()}`);
   };
 
@@ -249,7 +249,7 @@ function ProductsContent() {
             <p className="text-primary-600">
               {loading ? 'Loading...' : `${products.length} products found`}
             </p>
-            
+
             <div className="flex items-center gap-4">
               {/* Mobile Filter Button */}
               <button
@@ -375,7 +375,7 @@ function ProductsContent() {
                         />
                         <div
                           className="w-6 h-6 rounded-full border-2 border-gray-300 group-hover:border-brand-brown transition-colors flex-shrink-0"
-                          style={{ 
+                          style={{
                             backgroundColor: color,
                             borderColor: color === '#FFFFFF' ? '#d1d5db' : undefined
                           }}
@@ -505,7 +505,7 @@ function ProductsContent() {
                           />
                           <div
                             className="w-6 h-6 rounded-full border-2 border-gray-300 group-hover:border-brand-brown transition-colors flex-shrink-0"
-                            style={{ 
+                            style={{
                               backgroundColor: color,
                               borderColor: color === '#FFFFFF' ? '#d1d5db' : undefined
                             }}
@@ -541,7 +541,7 @@ function ProductsContent() {
                   Clear All Filters
                 </button>
                 <button onClick={() => setIsFilterOpen(false)} className="w-full btn btn-primary">
-                  Apply Filters
+                  Done
                 </button>
               </div>
             </div>

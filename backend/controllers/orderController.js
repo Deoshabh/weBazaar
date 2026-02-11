@@ -185,7 +185,26 @@ exports.createOrder = async (req, res) => {
           }
         }
 
-        // 2. Create order
+        // 2. Increment coupon usage if applicable
+        if (couponData && couponCode) {
+           const couponUpdateResult = await require("../models/Coupon").updateOne(
+            { 
+              code: couponCode.toUpperCase(), 
+              $or: [
+                { usageLimit: null },
+                { $expr: { $lt: ["$usedCount", "$usageLimit"] } }
+              ]
+            },
+            { $inc: { usedCount: 1 } },
+            { session }
+          );
+
+          if (couponUpdateResult.modifiedCount === 0) {
+             throw new Error("Coupon usage limit reached or coupon invalid");
+          }
+        }
+
+        // 3. Create order
         const [createdOrder] = await Order.create(
           [
             {
@@ -224,7 +243,7 @@ exports.createOrder = async (req, res) => {
 
         order = createdOrder;
 
-        // 3. Clear cart
+        // 4. Clear cart
         cart.items = [];
         await cart.save({ session });
       });
@@ -461,9 +480,34 @@ exports.cancelOrder = async (req, res) => {
       });
     }
 
-    // Update order status to cancelled
-    order.status = "cancelled";
-    await order.save();
+    // === Transactional order cancellation ===
+    const session = await mongoose.startSession();
+    
+    try {
+      await session.withTransaction(async () => {
+        // 1. Restore stock for each item
+        for (const item of order.items) {
+          if (item.product && item.size) { // check if product still exists
+             await Product.updateOne(
+              { _id: item.product, "sizes.size": item.size },
+              {
+                $inc: {
+                  "sizes.$.stock": item.quantity,
+                  stock: item.quantity,
+                },
+              },
+              { session }
+            );
+          }
+        }
+
+        // 2. Update order status to cancelled
+        order.status = "cancelled";
+        await order.save({ session });
+      });
+    } finally {
+      session.endSession();
+    }
 
     res.json({
       success: true,

@@ -20,6 +20,11 @@ export default function Navbar() {
   const { wishlistCount } = useWishlist();
   const { settings } = useSiteSettings();
 
+  // Hide navbar on admin routes
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
