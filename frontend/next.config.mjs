@@ -14,6 +14,11 @@ const nextConfig = {
         pathname: "/product-media/**",
       },
       {
+        protocol: "https",
+        hostname: "cdn.radeo.in",
+        pathname: "/product-media/**",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "9000",
