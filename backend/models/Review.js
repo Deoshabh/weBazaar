@@ -1,96 +1,76 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const reviewSchema = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-      index: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-    // Review content
-    rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5,
-    },
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 200,
-    },
-    comment: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 2000,
-    },
-    // Photo reviews (array of image URLs from MinIO) - Max 2 photos
-    photos: {
-      type: [String],
-      validate: {
-        validator: function (arr) {
-          return arr.length <= 2;
-        },
-        message: "Maximum 2 photos allowed per review",
-      },
-      default: [],
-    },
-    // Verified purchase flag
-    verifiedPurchase: {
-      type: Boolean,
-      default: false,
-    },
-    // Admin moderation
-    isHidden: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-    // Admin notes (private, not visible to users)
-    adminNotes: {
-      type: String,
-      trim: true,
-      maxlength: 500,
-    },
-    // Helpful votes
-    helpfulVotes: {
-      type: Number,
-      default: 0,
-    },
-    // Users who marked this review as helpful
-    helpfulBy: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+const reviewSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  {
-    timestamps: true,
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true
   },
-);
-
-// Compound index to prevent duplicate reviews from same user for same product
-reviewSchema.index({ product: 1, user: 1 }, { unique: true });
-
-// Virtual for photo count
-reviewSchema.virtual("photoCount").get(function () {
-  return this.photos ? this.photos.length : 0;
+  rating: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
+  title: {
+    type: String,
+    trim: true,
+    maxLength: 100
+  },
+  comment: {
+    type: String,
+    required: true,
+    trim: true,
+    maxLength: 1000
+  },
+  images: [{
+    url: String,
+    publicId: String // MinIO path or ID
+  }],
+  isVerifiedPurchase: {
+    type: Boolean,
+    default: false
+  },
+  helpfulVotes: {
+    type: Number,
+    default: 0
+  },
+  
+  // Moderation Fields
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending',
+    index: true
+  },
+  moderation_flag: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  isHidden: { // Manual override to hide
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  ai_tags: {
+    nsfw_score: Number, // 0.0 to 1.0 (NudeNet)
+    contains_prohibited_objects: Boolean, // YOLO
+    detected_objects: [String], // List of objects found
+    duplicate_hash: String, // Perceptual hash
+    is_duplicate: Boolean
+  }
+}, {
+  timestamps: true
 });
 
-// Ensure virtuals are included in JSON
-reviewSchema.set("toJSON", { virtuals: true });
-reviewSchema.set("toObject", { virtuals: true });
+// Compound index for efficient querying by product and status
+reviewSchema.index({ product: 1, status: 1 });
+reviewSchema.index({ user: 1, product: 1 }, { unique: true }); // One review per product per user
 
-const Review = mongoose.model("Review", reviewSchema);
-
-module.exports = Review;
+module.exports = mongoose.model('Review', reviewSchema);

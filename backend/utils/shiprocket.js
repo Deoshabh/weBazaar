@@ -7,6 +7,10 @@ class ShiprocketService {
     this.password = process.env.SHIPROCKET_PASSWORD;
     this.token = null;
     this.tokenExpiry = null;
+    
+    if (!this.email || !this.password) {
+      console.warn("⚠️ Shiprocket credentials (SHIPROCKET_EMAIL, SHIPROCKET_PASSWORD) are missing.");
+    }
   }
 
   /**
@@ -18,6 +22,10 @@ class ShiprocketService {
       // Check if token is still valid
       if (this.token && this.tokenExpiry && new Date() < this.tokenExpiry) {
         return this.token;
+      }
+
+      if (!this.email || !this.password) {
+        throw new Error("Shiprocket credentials are not configured.");
       }
 
       const response = await axios.post(`${this.baseURL}/auth/login`, {

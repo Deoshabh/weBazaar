@@ -7,14 +7,19 @@ const { generateSignedUploadUrl, deleteObject } = require("../utils/minio");
 exports.getUploadUrl = async (req, res) => {
   try {
     const { fileName, fileType, productSlug } = req.body;
+    
+    console.log("Values:" , req.body); // Debug log
 
     // Validate input
-    if (!fileName || !fileType || !productSlug) {
+    if (!fileName || !fileType) {
       return res.status(400).json({
         success: false,
-        message: "fileName, fileType, and productSlug are required",
+        message: "fileName and fileType are required",
       });
     }
+
+    // Use provided slug or default to 'uploads'
+    const folder = productSlug || 'uploads';
 
     // Validate file size (if provided)
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -33,7 +38,7 @@ exports.getUploadUrl = async (req, res) => {
 
     // Generate unique object key
     const timestamp = Date.now();
-    const key = `products/${productSlug}/${timestamp}-${sanitizedFileName}`;
+    const key = `products/${folder}/${timestamp}-${sanitizedFileName}`;
 
     // Generate signed URL
     const result = await generateSignedUploadUrl(key, fileType);

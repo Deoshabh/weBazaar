@@ -355,7 +355,17 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden pb-4 animate-slide-down">
+          <div
+            className="lg:hidden pb-4 animate-slide-down"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile Navigation"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setIsMobileMenuOpen(false);
+              }
+            }}
+          >
             {/* Mobile Search */}
             <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
