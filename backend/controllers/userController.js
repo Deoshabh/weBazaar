@@ -169,7 +169,7 @@ exports.deleteAddress = async (req, res) => {
     }
 
     const wasDefault = address.isDefault;
-    address.remove();
+    user.addresses.pull(id);
 
     // If deleted address was default, set first remaining as default
     if (wasDefault && user.addresses.length > 0) {
