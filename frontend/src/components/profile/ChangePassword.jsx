@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { updateUserPassword } from '@/utils/firebaseAuth';
+import { updateUserPassword, resetPassword } from '@/utils/firebaseAuth';
+import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function ChangePassword() {
+    const { user } = useAuth();
     const [passwords, setPasswords] = useState({
         newPassword: '',
         confirmPassword: '',
@@ -37,9 +39,36 @@ export default function ChangePassword() {
         }
     };
 
+    const handleReset = async () => {
+        if (!user?.email) return;
+        const loadingToast = toast.loading('Sending reset link...');
+        try {
+            const result = await resetPassword(user.email);
+            toast.dismiss(loadingToast);
+            if (result.success) {
+                toast.success("Password reset link sent to " + user.email);
+            } else {
+                toast.error(result.error || "Failed to send reset link");
+            }
+        } catch (error) {
+            toast.dismiss(loadingToast);
+            console.error(error);
+            toast.error("Failed to send reset link");
+        }
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-            <h2 className="text-xl font-bold text-primary-900 mb-6">Change Password</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-primary-900">Change Password</h2>
+                <button
+                    onClick={handleReset}
+                    type="button"
+                    className="text-sm text-brand-brown hover:text-brand-brown-dark underline"
+                >
+                    Forgot Password?
+                </button>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
                 <div>

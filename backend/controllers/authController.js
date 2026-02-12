@@ -558,6 +558,7 @@ exports.firebaseLogin = async (req, res, next) => {
           profilePicture: user.profilePicture,
           emailVerified: user.emailVerified,
           phoneVerified: user.phoneVerified,
+          authProvider: user.authProvider,
         },
       });
   } catch (err) {

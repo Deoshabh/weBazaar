@@ -38,11 +38,21 @@ export const AuthProvider = ({ children }) => {
               const response = await authAPI.getCurrentUser();
               setUser(response.data);
             } catch (err) {
-              // Backend session might be expired or not created yet (if just purely firebase logged in)
-              // In a robust app, we would silently sync here.
-              // For now, if we fail to get user but have firebase user, we might be in an inconsistent state
-              // unless the page handles the login sync explicitely (limitations of this hybrid approach).
-              console.log("Backend session check failed, but Firebase is logged in.");
+              console.log("Backend session expired/missing. Attempting auto-sync with Firebase...");
+              try {
+                const response = await authAPI.firebaseLogin({
+                  firebaseToken: token,
+                  email: firebaseUser.email,
+                  uid: firebaseUser.uid
+                });
+                const { accessToken, user: backendUser } = response.data;
+                Cookies.set('accessToken', accessToken, { expires: 1 });
+                setUser(backendUser);
+                console.log("Auto-sync successful");
+              } catch (syncErr) {
+                console.error("Failed to auto-sync backend session:", syncErr);
+                // If sync fails, we accept the user is effectively logged out from backend perspective
+              }
             }
           }
         } else {

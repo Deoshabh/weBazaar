@@ -225,7 +225,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Change Password - Only for Firebase Auth users (not OAuth) who can change password */}
-        {user?.authProvider === 'password' && (
+        {['password', 'local'].includes(user?.authProvider) && (
           <div className="mb-6">
             <ChangePassword />
           </div>
