@@ -346,6 +346,8 @@ function ProductFormContent() {
         description: formData.description,
         category: formData.category,
         price: Number(formData.price),
+        gstPercentage: Number(formData.gstPercentage) || 0,
+        averageDeliveryCost: Number(formData.averageDeliveryCost) || 0,
         images: allImages,
         featured: formData.isFeatured,
         stock: totalStock, // Use calculated total stock
