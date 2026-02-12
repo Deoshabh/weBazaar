@@ -6,10 +6,11 @@ const crypto = require('crypto');
 const path = require('path');
 
 // Initialize MinIO Client
+const useSSL = String(process.env.MINIO_USE_SSL).toLowerCase() === 'true';
 const minioClient = new Minio.Client({
   endPoint: process.env.MINIO_ENDPOINT || 'minio',
   port: parseInt(process.env.MINIO_PORT || '9000'),
-  useSSL: false,
+  useSSL: useSSL,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY
 });
