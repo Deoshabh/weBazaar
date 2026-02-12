@@ -4,9 +4,8 @@ nixPkgs = ["python3", "ffmpeg", "glib"]
 [phases.install]
 cmds = [
     "python3 -m venv /opt/venv",
-    "echo 'opencv-python' > /tmp/constraints.txt",
-    "/opt/venv/bin/pip install opencv-python-headless==4.9.0.80",
-    "PIP_CONSTRAINT=/tmp/constraints.txt /opt/venv/bin/pip install -r requirements.txt"
+    "/opt/venv/bin/pip install -r requirements.txt",
+    "/opt/venv/bin/pip install --force-reinstall --no-deps opencv-python-headless==4.9.0.80"
 ]
 
 [start]
