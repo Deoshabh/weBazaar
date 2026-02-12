@@ -10,6 +10,7 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   updateProfile,
+  updatePassword,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   PhoneAuthProvider,
@@ -52,6 +53,7 @@ export const registerWithEmail = async (email, password, displayName) => {
     return {
       success: true,
       user: userCredential.user,
+      token: await userCredential.user.getIdToken(),
       message: "Registration successful! Verification email sent.",
     };
   } catch (error) {
@@ -143,6 +145,36 @@ export const resetPassword = async (email) => {
     const message = errorMessages[error.code] || "Failed to send reset email.";
     toast.error(message);
 
+    return { success: false, error: message, code: error.code };
+  }
+};
+
+/**
+ * Update user password
+ * @param {string} newPassword - New password
+ * @returns {Promise<Object>} Success or error
+ */
+export const updateUserPassword = async (newPassword) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("No user logged in");
+    }
+
+    await updatePassword(user, newPassword);
+    toast.success("Password updated successfully!");
+    return { success: true, message: "Password updated" };
+  } catch (error) {
+    console.error("Update password error:", error);
+    
+    const errorMessages = {
+      "auth/requires-recent-login": "Please log out and log in again to change your password.",
+      "auth/weak-password": "Password should be at least 6 characters.",
+    };
+
+    const message = errorMessages[error.code] || "Failed to update password.";
+    toast.error(message);
+    
     return { success: false, error: message, code: error.code };
   }
 };

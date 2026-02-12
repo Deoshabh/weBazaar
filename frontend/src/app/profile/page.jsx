@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { userAPI, addressAPI } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { FiEdit2, FiSave, FiX, FiPlus, FiTrash2, FiMapPin } from 'react-icons/fi';
+import ChangePassword from '@/components/profile/ChangePassword';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -222,6 +223,13 @@ export default function ProfilePage() {
             </div>
           </form>
         </div>
+
+        {/* Change Password - Only for Firebase Auth users (not OAuth) who can change password */}
+        {user?.authProvider === 'password' && (
+          <div className="mb-6">
+            <ChangePassword />
+          </div>
+        )}
 
         {/* Addresses */}
         <div className="bg-white rounded-lg shadow-md p-6">

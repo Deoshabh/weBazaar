@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { loginWithGoogle } from '@/utils/firebaseAuth';
 import { useRecaptcha, RECAPTCHA_ACTIONS } from '@/utils/recaptcha';
 import toast from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 export default function FirebaseLoginPage() {
   const router = useRouter();
@@ -91,7 +92,10 @@ export default function FirebaseLoginPage() {
           return;
         }
 
-        // ✅ ALL CHECKS PASSED: Update auth context
+        // ✅ ALL CHECKS PASSED: Store token and update auth context
+        if (response.data.accessToken) {
+          Cookies.set('accessToken', response.data.accessToken, { expires: 1 });
+        }
         updateUser(response.data.user);
         toast.success(`Logged in as ${user.email}`);
         router.push('/');
@@ -105,7 +109,7 @@ export default function FirebaseLoginPage() {
         responseData: error.response?.data,
         errorCode: error.code,
       });
-      
+
       // Check if error is FIREBASE_UID_MISMATCH (account hijack prevention)
       if (error.response?.data?.error === 'FIREBASE_UID_MISMATCH') {
         toast.error(
@@ -126,10 +130,10 @@ export default function FirebaseLoginPage() {
    */
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    
+
     try {
       const result = await loginWithGoogle();
-      
+
       console.log(`🔐 Google Sign-In Result:`, {
         success: result?.success,
         hasUser: !!result?.user,
@@ -138,27 +142,27 @@ export default function FirebaseLoginPage() {
         errorCode: result?.code,
         errorMessage: result?.error,
       });
-      
+
       if (!result) {
         toast.error('No response from Google sign-in');
         setGoogleLoading(false);
         return;
       }
-      
+
       if (!result.success) {
         console.error('Google sign-in failed:', result.error);
         toast.error(result.error || 'Google sign-in failed');
         setGoogleLoading(false);
         return;
       }
-      
+
       if (!result.token) {
         console.error('⚠️  Google sign-in returned no token:', result);
         toast.error('Failed to get authentication token from Google');
         setGoogleLoading(false);
         return;
       }
-      
+
       await handleFirebaseSuccess(result);
     } catch (error) {
       console.error('Google sign-in exception:', error);
@@ -217,7 +221,7 @@ export default function FirebaseLoginPage() {
               ) : (
                 <PhoneAuth onSuccess={handleFirebaseSuccess} />
               )}
-              
+
               {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">

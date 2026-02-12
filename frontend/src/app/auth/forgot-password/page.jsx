@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { FiArrowLeft, FiMail } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 import { resetPassword } from '@/utils/firebaseAuth';
-import { toast } from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -16,72 +16,96 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await resetPassword(email);
-      setSubmitted(true);
-      toast.success('Password reset email sent! Check your inbox.');
+      const result = await resetPassword(email);
+      if (result.success) {
+        setSubmitted(true);
+      }
     } catch (error) {
-      toast.error(error.message || 'Failed to send reset email');
+      console.error('Forgot password error:', error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-primary-50 pt-24 flex items-center justify-center">
-      <div className="container-custom py-12">
-        <div className="max-w-md mx-auto">
-          <Link href="/auth/firebase-login" className="inline-flex items-center gap-2 text-primary-600 hover:text-brand-brown mb-8">
-            <FiArrowLeft />
-            Back to Login
-          </Link>
-
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h1 className="font-serif text-3xl font-bold text-primary-900 mb-2">Reset Password</h1>
-            <p className="text-primary-600 mb-8">Enter your email to receive a password reset link.</p>
-
-            {submitted ? (
-              <div className="space-y-4">
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                  <p className="font-medium mb-1">Email Sent!</p>
-                  <p className="text-sm">Check your inbox for a password reset link from Firebase.</p>
-                </div>
-                <Link 
-                  href="/auth/firebase-login" 
-                  className="block w-full text-center btn btn-primary"
-                >
-                  Back to Login
-                </Link>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-primary-900 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="input pl-10"
-                      placeholder="you@example.com"
-                    />
-                  </div>
-                  <p className="text-xs text-primary-500 mt-2">
-                    We&apos;ll send you a secure link to reset your password
-                  </p>
-                </div>
-
-                <button type="submit" disabled={loading} className="w-full btn btn-primary">
-                  {loading ? 'Sending...' : 'Send Reset Link'}
-                </button>
-              </form>
-            )}
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Forgot your password?
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Enter your email address and we&apos;ll send you a link to reset your password.
+          </p>
         </div>
+
+        {submitted ? (
+          <div className="text-center">
+            <div className="rounded-md bg-green-50 p-4 mb-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-green-800">
+                    Reset link sent
+                  </h3>
+                  <div className="mt-2 text-sm text-green-700">
+                    <p>
+                      Check your email for instructions to reset your password.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Link href="/auth/login" className="font-medium text-brand-brown hover:text-brand-brown-dark">
+                Return to log in
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="rounded-md shadow-sm -space-y-px">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-brand-brown focus:border-brand-brown focus:z-10 sm:text-sm"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-brown hover:bg-brand-brown-dark'
+                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-brown`}
+              >
+                {loading ? 'Sending...' : 'Send reset link'}
+              </button>
+            </div>
+
+            <div className="text-center">
+              <Link href="/auth/login" className="font-medium text-brand-brown hover:text-brand-brown-dark">
+                Back to log in
+              </Link>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

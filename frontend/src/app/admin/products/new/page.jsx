@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { adminAPI, categoryAPI, productAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
+import { useAdmin } from '@/context/AdminContext';
 import AdminLayout from '@/components/AdminLayout';
 import ColorPicker from '@/components/ColorPicker';
 import ImageUploadWithEditor from '@/components/ImageUploadWithEditor';
@@ -16,6 +17,7 @@ function ProductFormContent() {
   const searchParams = useSearchParams();
   const editProductId = searchParams?.get('edit');
   const { user } = useAuth();
+  const { setIsFormDirty } = useAdmin();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
