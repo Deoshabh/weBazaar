@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { adminAPI, categoryAPI, productAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
-import { useAdmin } from '@/context/AdminContext';
+
+import { useAdmin, AdminProvider } from '@/context/AdminContext';
 import AdminLayout from '@/components/AdminLayout';
 import ColorPicker from '@/components/ColorPicker';
 import ImageUploadWithEditor from '@/components/ImageUploadWithEditor';
@@ -941,7 +942,9 @@ export default function NewProductPage() {
           </div>
         </div>
       }>
-        <ProductFormContent />
+        <AdminProvider>
+          <ProductFormContent />
+        </AdminProvider>
       </Suspense>
     </AdminLayout>
   );
