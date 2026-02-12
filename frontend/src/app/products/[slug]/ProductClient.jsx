@@ -137,7 +137,7 @@ export default function ProductClient({ product }) {
                                     alt={product.name}
                                     fill
                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                    className="object-cover transition-transform duration-500 hover:scale-110 cursor-zoom-in"
+                                    className="object-contain transition-transform duration-500 hover:scale-110 cursor-zoom-in"
                                     priority
                                 />
 
@@ -177,7 +177,7 @@ export default function ProductClient({ product }) {
                                                 alt={`${product.name} ${idx + 1}`}
                                                 fill
                                                 sizes="(max-width: 1024px) 25vw, 12vw"
-                                                className="object-cover"
+                                                className="object-contain"
                                             />
                                         </button>
                                     ))}
