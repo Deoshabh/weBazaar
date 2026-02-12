@@ -59,16 +59,18 @@ async function initializeBucket() {
 
 
 
+    const useSSL = String(MINIO_USE_SSL).toLowerCase() === "true";
+
     minioClient = new Minio.Client({
       endPoint: MINIO_ENDPOINT,
       port: Number(MINIO_PORT),
-      useSSL: MINIO_USE_SSL === "true",
+      useSSL: useSSL,
       accessKey: MINIO_ACCESS_KEY,
       secretKey: MINIO_SECRET_KEY,
     });
 
     console.log(
-      `🔍 Testing connection to ${MINIO_USE_SSL === "true" ? "https" : "http"}://${MINIO_ENDPOINT}:${MINIO_PORT}`,
+      `🔍 Testing connection to ${useSSL ? "https" : "http"}://${MINIO_ENDPOINT}:${MINIO_PORT}`,
     );
 
     // Check bucket
@@ -170,7 +172,8 @@ function getPublicUrl(key) {
     const baseUrl = MINIO_PUBLIC_URL.replace(/\/$/, "");
     return `${baseUrl}/${MINIO_BUCKET}/${key}`;
   }
-  const protocol = MINIO_USE_SSL === "true" ? "https" : "http";
+  const useSSL = String(MINIO_USE_SSL).toLowerCase() === "true";
+  const protocol = useSSL ? "https" : "http";
   return `${protocol}://${MINIO_ENDPOINT}/${MINIO_BUCKET}/${key}`;
 }
 
