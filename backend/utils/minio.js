@@ -187,10 +187,21 @@ function getPublicUrl(key) {
 async function uploadBuffer(buffer, key, contentType) {
   requireInitialized();
 
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  const allowedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/svg+xml",
+    "video/mp4",
+    "video/mpeg",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
   if (!allowedTypes.includes(contentType.toLowerCase())) {
     throw new Error(
-      "Invalid file type. Only JPEG, PNG, and WebP images are allowed.",
+      "Invalid file type. Allowed types: Images, Videos, PDFs, Docs.",
     );
   }
 
