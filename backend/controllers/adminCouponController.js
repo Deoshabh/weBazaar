@@ -65,6 +65,7 @@ exports.createCoupon = async (req, res) => {
       value,
       minOrder: minOrder || 0,
       expiry: expiryDate,
+      validFrom: req.body.validFrom ? new Date(req.body.validFrom) : Date.now(),
       usageLimit: req.body.usageLimit || null,
     });
 
@@ -141,6 +142,10 @@ exports.updateCoupon = async (req, res) => {
       }
       coupon.expiry = expiryDate;
     }
+    
+    if (req.body.validFrom) {
+        coupon.validFrom = new Date(req.body.validFrom);
+    }
 
     // Check if new code conflicts with another coupon
     if (code && code.toUpperCase() !== coupon.code) {
@@ -213,8 +218,15 @@ exports.validateCoupon = async (req, res) => {
         .json({ message: "This coupon is no longer active" });
     }
 
+    const now = new Date();
+
+    // Check if coupon start date is valid
+    if (coupon.validFrom && new Date(coupon.validFrom) > now) {
+      return res.status(400).json({ message: "This coupon is not yet valid" });
+    }
+
     // Check if coupon is expired
-    if (new Date(coupon.expiry) < new Date()) {
+    if (new Date(coupon.expiry) < now) {
       return res.status(400).json({ message: "This coupon has expired" });
     }
 

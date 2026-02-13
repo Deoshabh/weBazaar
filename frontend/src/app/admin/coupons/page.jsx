@@ -109,8 +109,9 @@ export default function CouponsPage() {
         code: formData.code.toUpperCase(),
         minOrder: Number(formData.minPurchase) || 0,
         expiry: formData.validUntil,
+        validFrom: formData.validFrom,
         usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null,
-        // maxDiscount and validFrom are not supported by backend yet
+        // maxDiscount is not supported by backend yet
       };
 
       if (editMode) {

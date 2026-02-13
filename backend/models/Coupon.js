@@ -29,6 +29,10 @@ const couponSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    validFrom: {
+      type: Date,
+      default: Date.now,
+    },
     isActive: {
       type: Boolean,
       default: true,
