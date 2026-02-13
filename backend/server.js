@@ -2,7 +2,7 @@
 // Load environment variables FIRST
 // ===============================
 const dotenv = require("dotenv");
-dotenv.config({ override: true });
+dotenv.config();
 
 // ===============================
 // Imports
