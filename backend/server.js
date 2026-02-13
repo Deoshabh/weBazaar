@@ -79,14 +79,30 @@ app.set("trust proxy", 1);
 // ===============================
 // Database Connection
 // ===============================
+// ===============================
+// Database Connection (Resilient)
+// ===============================
+const connectDB = async (retries = 5) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await mongoose.connect(process.env.MONGO_URI);
+      log.success("MongoDB connected");
+      return;
+    } catch (err) {
+      if (i === retries - 1) {
+        log.error("Fatal: MongoDB connection failed after retries", err);
+        // We do NOT exit here to keep the server alive for health checks / other routes
+        // process.exit(1); 
+      } else {
+        log.error(`MongoDB connection failed (attempt ${i + 1}/${retries}). Retrying in 5s...`, err.message);
+        await new Promise((res) => setTimeout(res, 5000));
+      }
+    }
+  }
+};
+
 if (process.env.NODE_ENV !== "test") {
-  mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => log.success("MongoDB connected"))
-    .catch((err) => {
-      log.error("MongoDB connection error", err);
-      process.exit(1);
-    });
+  connectDB();
 }
 
 // ===============================
