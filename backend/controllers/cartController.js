@@ -232,6 +232,25 @@ exports.removeFromCart = async (req, res) => {
   }
 };
 
+// DELETE /api/v1/cart
+exports.clearCart = async (req, res) => {
+  try {
+    let cart = await Cart.findOne({ user: req.user.id });
+
+    if (!cart) {
+      cart = await Cart.create({ user: req.user.id, items: [] });
+    } else {
+      cart.items = [];
+      await cart.save();
+    }
+
+    res.json(buildCartResponse(cart));
+  } catch (error) {
+    console.error("Error clearing cart:", error);
+    res.status(500).json({ message: "Cart operation failed" });
+  }
+};
+
 // GET /api/v1/cart/validate
 exports.validateCart = async (req, res) => {
   try {
