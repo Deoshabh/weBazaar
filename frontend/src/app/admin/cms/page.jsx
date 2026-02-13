@@ -762,339 +762,220 @@ export default function AdminCMSPage() {
                             </div>
                         </div>
                     )}
-                    <p className="text-xs text-gray-400 mt-1">Use Tailwind CSS gradient classes (e.g. <code>from-primary-50 to-white</code>)</p>
-                </div>
-            </div>
-        </div>
-                            </div >
 
-        {/* Featured Products */ }
-        < div className = "bg-white rounded-lg shadow-md p-6" >
-                                <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-2 border-b">Featured Products</h3>
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={homeSections.featuredProducts?.enabled ?? true}
-                                            onChange={(e) => handleSectionChange('featuredProducts', 'enabled', e.target.checked)}
-                                            className="accent-primary-900"
+
+
+
+                    {/* Policies Tab */}
+                    {
+                        activeTab === 'policies' && (
+                            <div className="bg-white rounded-lg shadow-md p-6 space-y-6 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-primary-900">Policy & Page Content</h3>
+                                        <p className="text-sm text-gray-500">Edit detailed content for various site sections.</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={selectedPolicy}
+                                            onChange={(e) => setSelectedPolicy(e.target.value)}
+                                            className="input py-2"
+                                        >
+                                            <option value="shippingPolicy">Shipping Policy</option>
+                                            <option value="returnsPolicy">Returns Policy</option>
+                                            <option value="aboutPage">About Page</option>
+                                            <option value="faqPage">FAQ Page</option>
+                                            <option value="footerContent">Footer Content</option>
+                                        </select>
+                                        <button
+                                            onClick={() => {
+                                                try {
+                                                    const value = JSON.parse(document.getElementById('policy-editor').value);
+                                                    handleSaveAdvanced(selectedPolicy, value);
+                                                } catch (e) {
+                                                    toast.error('Invalid JSON format');
+                                                }
+                                            }}
+                                            disabled={saving}
+                                            className="btn btn-primary flex items-center gap-2"
+                                        >
+                                            <FiSave /> {saving ? 'Saving...' : 'Save Changes'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <textarea
+                                        id="policy-editor"
+                                        className="w-full h-[600px] font-mono text-sm p-4 border rounded-lg bg-gray-50 focus:bg-white transition-colors custom-scrollbar"
+                                        defaultValue={JSON.stringify(advancedSettings[selectedPolicy] || {}, null, 2)}
+                                        key={selectedPolicy}
+                                        spellCheck={false}
+                                    />
+                                    <div className="absolute top-2 right-4 text-xs text-gray-400 pointer-events-none">
+                                        JSON Editor
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    <span className="font-semibold text-yellow-600">Note:</span> Be careful when editing JSON structure. Ensure all quotes and commas are correct.
+                                </p>
+                            </div>
+                        )
+                    }
+
+                    {/* Contact Tab */}
+                    {
+                        activeTab === 'contact' && (
+                            <div className="bg-white rounded-lg shadow-md p-6 space-y-6 animate-fade-in">
+                                <h3 className="text-lg font-semibold text-primary-900 mb-6 border-b pb-2">Contact Information</h3>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-primary-900 mb-2">Business Address</label>
+                                        <textarea
+                                            rows={3}
+                                            className="input w-full"
+                                            value={advancedSettings.contactInfo?.address || ''}
+                                            onChange={(e) => setAdvancedSettings(prev => ({
+                                                ...prev,
+                                                contactInfo: { ...prev.contactInfo, address: e.target.value }
+                                            }))}
                                         />
-                                        <span className="font-medium">Enable Featured Products</span>
-                                    </label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Title</label>
-                                            <input type="text" value={homeSections.featuredProducts?.title || ''} onChange={(e) => handleSectionChange('featuredProducts', 'title', e.target.value)} className="input w-full" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Description</label>
-                                            <input type="text" value={homeSections.featuredProducts?.description || ''} onChange={(e) => handleSectionChange('featuredProducts', 'description', e.target.value)} className="input w-full" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Selection Strategy</label>
-                                            <select
-                                                value={homeSections.featuredProducts?.productSelection || 'latest'}
-                                                onChange={(e) => handleSectionChange('featuredProducts', 'productSelection', e.target.value)}
-                                                className="input w-full"
-                                            >
-                                                <option value="latest">Latest Products</option>
-                                                <option value="top-rated">Top Rated</option>
-                                                <option value="random">Random Selection</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Product Limit</label>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-primary-900 mb-2">Phone Number</label>
+                                        <input
+                                            type="text"
+                                            className="input w-full"
+                                            value={advancedSettings.contactInfo?.phone || ''}
+                                            onChange={(e) => setAdvancedSettings(prev => ({
+                                                ...prev,
+                                                contactInfo: { ...prev.contactInfo, phone: e.target.value }
+                                            }))}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-primary-900 mb-2">Email Address</label>
+                                        <input
+                                            type="email"
+                                            className="input w-full"
+                                            value={advancedSettings.contactInfo?.email || ''}
+                                            onChange={(e) => setAdvancedSettings(prev => ({
+                                                ...prev,
+                                                contactInfo: { ...prev.contactInfo, email: e.target.value }
+                                            }))}
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-2 grid grid-cols-3 gap-4 pt-4">
+                                        <label className="flex items-center gap-2 cursor-pointer">
                                             <input
-                                                type="number"
-                                                min="4" max="24"
-                                                value={homeSections.featuredProducts?.productLimit || 8}
-                                                onChange={(e) => handleSectionChange('featuredProducts', 'productLimit', Number(e.target.value))}
+                                                type="checkbox"
+                                                checked={advancedSettings.contactInfo?.showAddress ?? true}
+                                                onChange={(e) => setAdvancedSettings(prev => ({
+                                                    ...prev,
+                                                    contactInfo: { ...prev.contactInfo, showAddress: e.target.checked }
+                                                }))}
+                                                className="accent-primary-900"
+                                            />
+                                            <span className="text-sm">Show Address</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={advancedSettings.contactInfo?.showPhone ?? true}
+                                                onChange={(e) => setAdvancedSettings(prev => ({
+                                                    ...prev,
+                                                    contactInfo: { ...prev.contactInfo, showPhone: e.target.checked }
+                                                }))}
+                                                className="accent-primary-900"
+                                            />
+                                            <span className="text-sm">Show Phone</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={advancedSettings.contactInfo?.showEmail ?? true}
+                                                onChange={(e) => setAdvancedSettings(prev => ({
+                                                    ...prev,
+                                                    contactInfo: { ...prev.contactInfo, showEmail: e.target.checked }
+                                                }))}
+                                                className="accent-primary-900"
+                                            />
+                                            <span className="text-sm">Show Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 border-t flex justify-end">
+                                    <button
+                                        onClick={() => handleSaveAdvanced('contactInfo', advancedSettings.contactInfo)}
+                                        disabled={saving}
+                                        className="btn btn-primary flex items-center gap-2"
+                                    >
+                                        <FiSave /> {saving ? 'Saving...' : 'Save Contact Info'}
+                                    </button>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* System Tab */}
+                    {
+                        activeTab === 'system' && (
+                            <div className="bg-white rounded-lg shadow-md p-6 space-y-6 animate-fade-in">
+                                <h3 className="text-lg font-semibold text-primary-900 mb-6 border-b pb-2">System Settings</h3>
+
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                        <div>
+                                            <h4 className="font-medium text-primary-900">Maintenance Mode</h4>
+                                            <p className="text-sm text-gray-500">Temporarily disable the storefront for visitors.</p>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={advancedSettings.maintenanceMode?.enabled ?? false}
+                                                onChange={(e) => setAdvancedSettings(prev => ({
+                                                    ...prev,
+                                                    maintenanceMode: { ...prev.maintenanceMode, enabled: e.target.checked }
+                                                }))}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                        </label>
+                                    </div>
+
+                                    {advancedSettings.maintenanceMode?.enabled && (
+                                        <div className="p-4 border rounded-lg animate-fade-in">
+                                            <label className="block text-sm font-medium text-primary-900 mb-2">Maintenance Message</label>
+                                            <textarea
                                                 className="input w-full"
+                                                rows={2}
+                                                value={advancedSettings.maintenanceMode?.message || ''}
+                                                onChange={(e) => setAdvancedSettings(prev => ({
+                                                    ...prev,
+                                                    maintenanceMode: { ...prev.maintenanceMode, message: e.target.value }
+                                                }))}
                                             />
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
-                            </div >
 
-        {/* Made To Order */ }
-        < div className = "bg-white rounded-lg shadow-md p-6" >
-                                <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-2 border-b">Made to Order Section</h3>
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={homeSections.madeToOrder?.enabled ?? true}
-                                            onChange={(e) => handleSectionChange('madeToOrder', 'enabled', e.target.checked)}
-                                            className="accent-primary-900"
-                                        />
-                                        <span className="font-medium">Enable Section</span>
-                                    </label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Title</label>
-                                            <input type="text" value={homeSections.madeToOrder?.title || ''} onChange={(e) => handleSectionChange('madeToOrder', 'title', e.target.value)} className="input w-full" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Description</label>
-                                            <input type="text" value={homeSections.madeToOrder?.description || ''} onChange={(e) => handleSectionChange('madeToOrder', 'description', e.target.value)} className="input w-full" />
-                                        </div>
-                                    </div>
+                                <div className="pt-6 border-t flex justify-end">
+                                    <button
+                                        onClick={() => handleSaveAdvanced('maintenanceMode', advancedSettings.maintenanceMode)}
+                                        disabled={saving}
+                                        className="btn btn-primary flex items-center gap-2"
+                                    >
+                                        <FiSave /> {saving ? 'Saving...' : 'Save System Settings'}
+                                    </button>
                                 </div>
-                            </div >
-
-        {/* Newsletter */ }
-        < div className = "bg-white rounded-lg shadow-md p-6" >
-                                <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-2 border-b">Newsletter Section</h3>
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={homeSections.newsletter?.enabled ?? true}
-                                            onChange={(e) => handleSectionChange('newsletter', 'enabled', e.target.checked)}
-                                            className="accent-primary-900"
-                                        />
-                                        <span className="font-medium">Enable Newsletter</span>
-                                    </label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Title</label>
-                                            <input type="text" value={homeSections.newsletter?.title || ''} onChange={(e) => handleSectionChange('newsletter', 'title', e.target.value)} className="input w-full" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Description</label>
-                                            <input type="text" value={homeSections.newsletter?.description || ''} onChange={(e) => handleSectionChange('newsletter', 'description', e.target.value)} className="input w-full" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase">Button Text</label>
-                                            <input type="text" value={homeSections.newsletter?.buttonText || ''} onChange={(e) => handleSectionChange('newsletter', 'buttonText', e.target.value)} className="input w-full" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div >
-
-        <div className="pt-4 border-t flex justify-end">
-            <button
-                onClick={handleSaveSections}
-                disabled={saving}
-                className="btn btn-primary flex items-center gap-2"
-            >
-                <FiSave /> {saving ? 'Saving...' : 'Save Sections'}
-            </button>
-        </div>
-                        </div >
-                    )
-}
-
-{/* Policies Tab */ }
-{
-    activeTab === 'policies' && (
-        <div className="bg-white rounded-lg shadow-md p-6 space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h3 className="text-lg font-semibold text-primary-900">Policy & Page Content</h3>
-                    <p className="text-sm text-gray-500">Edit detailed content for various site sections.</p>
-                </div>
-                <div className="flex gap-2">
-                    <select
-                        value={selectedPolicy}
-                        onChange={(e) => setSelectedPolicy(e.target.value)}
-                        className="input py-2"
-                    >
-                        <option value="shippingPolicy">Shipping Policy</option>
-                        <option value="returnsPolicy">Returns Policy</option>
-                        <option value="aboutPage">About Page</option>
-                        <option value="faqPage">FAQ Page</option>
-                        <option value="footerContent">Footer Content</option>
-                    </select>
-                    <button
-                        onClick={() => {
-                            try {
-                                const value = JSON.parse(document.getElementById('policy-editor').value);
-                                handleSaveAdvanced(selectedPolicy, value);
-                            } catch (e) {
-                                toast.error('Invalid JSON format');
-                            }
-                        }}
-                        disabled={saving}
-                        className="btn btn-primary flex items-center gap-2"
-                    >
-                        <FiSave /> {saving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                </div>
-            </div>
-
-            <div className="relative">
-                <textarea
-                    id="policy-editor"
-                    className="w-full h-[600px] font-mono text-sm p-4 border rounded-lg bg-gray-50 focus:bg-white transition-colors custom-scrollbar"
-                    defaultValue={JSON.stringify(advancedSettings[selectedPolicy] || {}, null, 2)}
-                    key={selectedPolicy}
-                    spellCheck={false}
-                />
-                <div className="absolute top-2 right-4 text-xs text-gray-400 pointer-events-none">
-                    JSON Editor
-                </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-                <span className="font-semibold text-yellow-600">Note:</span> Be careful when editing JSON structure. Ensure all quotes and commas are correct.
-            </p>
-        </div>
-    )
-}
-
-{/* Contact Tab */ }
-{
-    activeTab === 'contact' && (
-        <div className="bg-white rounded-lg shadow-md p-6 space-y-6 animate-fade-in">
-            <h3 className="text-lg font-semibold text-primary-900 mb-6 border-b pb-2">Contact Information</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-primary-900 mb-2">Business Address</label>
-                    <textarea
-                        rows={3}
-                        className="input w-full"
-                        value={advancedSettings.contactInfo?.address || ''}
-                        onChange={(e) => setAdvancedSettings(prev => ({
-                            ...prev,
-                            contactInfo: { ...prev.contactInfo, address: e.target.value }
-                        }))}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">Phone Number</label>
-                    <input
-                        type="text"
-                        className="input w-full"
-                        value={advancedSettings.contactInfo?.phone || ''}
-                        onChange={(e) => setAdvancedSettings(prev => ({
-                            ...prev,
-                            contactInfo: { ...prev.contactInfo, phone: e.target.value }
-                        }))}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">Email Address</label>
-                    <input
-                        type="email"
-                        className="input w-full"
-                        value={advancedSettings.contactInfo?.email || ''}
-                        onChange={(e) => setAdvancedSettings(prev => ({
-                            ...prev,
-                            contactInfo: { ...prev.contactInfo, email: e.target.value }
-                        }))}
-                    />
-                </div>
-
-                <div className="md:col-span-2 grid grid-cols-3 gap-4 pt-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={advancedSettings.contactInfo?.showAddress ?? true}
-                            onChange={(e) => setAdvancedSettings(prev => ({
-                                ...prev,
-                                contactInfo: { ...prev.contactInfo, showAddress: e.target.checked }
-                            }))}
-                            className="accent-primary-900"
-                        />
-                        <span className="text-sm">Show Address</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={advancedSettings.contactInfo?.showPhone ?? true}
-                            onChange={(e) => setAdvancedSettings(prev => ({
-                                ...prev,
-                                contactInfo: { ...prev.contactInfo, showPhone: e.target.checked }
-                            }))}
-                            className="accent-primary-900"
-                        />
-                        <span className="text-sm">Show Phone</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={advancedSettings.contactInfo?.showEmail ?? true}
-                            onChange={(e) => setAdvancedSettings(prev => ({
-                                ...prev,
-                                contactInfo: { ...prev.contactInfo, showEmail: e.target.checked }
-                            }))}
-                            className="accent-primary-900"
-                        />
-                        <span className="text-sm">Show Email</span>
-                    </label>
-                </div>
-            </div>
-
-            <div className="pt-6 border-t flex justify-end">
-                <button
-                    onClick={() => handleSaveAdvanced('contactInfo', advancedSettings.contactInfo)}
-                    disabled={saving}
-                    className="btn btn-primary flex items-center gap-2"
-                >
-                    <FiSave /> {saving ? 'Saving...' : 'Save Contact Info'}
-                </button>
-            </div>
-        </div>
-    )
-}
-
-{/* System Tab */ }
-{
-    activeTab === 'system' && (
-        <div className="bg-white rounded-lg shadow-md p-6 space-y-6 animate-fade-in">
-            <h3 className="text-lg font-semibold text-primary-900 mb-6 border-b pb-2">System Settings</h3>
-
-            <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-                    <div>
-                        <h4 className="font-medium text-primary-900">Maintenance Mode</h4>
-                        <p className="text-sm text-gray-500">Temporarily disable the storefront for visitors.</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={advancedSettings.maintenanceMode?.enabled ?? false}
-                            onChange={(e) => setAdvancedSettings(prev => ({
-                                ...prev,
-                                maintenanceMode: { ...prev.maintenanceMode, enabled: e.target.checked }
-                            }))}
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </label>
-                </div>
-
-                {advancedSettings.maintenanceMode?.enabled && (
-                    <div className="p-4 border rounded-lg animate-fade-in">
-                        <label className="block text-sm font-medium text-primary-900 mb-2">Maintenance Message</label>
-                        <textarea
-                            className="input w-full"
-                            rows={2}
-                            value={advancedSettings.maintenanceMode?.message || ''}
-                            onChange={(e) => setAdvancedSettings(prev => ({
-                                ...prev,
-                                maintenanceMode: { ...prev.maintenanceMode, message: e.target.value }
-                            }))}
-                        />
-                    </div>
-                )}
-            </div>
-
-            <div className="pt-6 border-t flex justify-end">
-                <button
-                    onClick={() => handleSaveAdvanced('maintenanceMode', advancedSettings.maintenanceMode)}
-                    disabled={saving}
-                    className="btn btn-primary flex items-center gap-2"
-                >
-                    <FiSave /> {saving ? 'Saving...' : 'Save System Settings'}
-                </button>
-            </div>
-        </div>
-    )
-}
+                            </div>
+                        )
+                    }
 
                 </div >
             </div >
