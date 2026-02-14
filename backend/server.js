@@ -108,15 +108,25 @@ if (process.env.NODE_ENV !== "test") {
 // ===============================
 // CORS (Production safe)
 // ===============================
-const allowedOrigins = ["https://radeo.in", "https://www.radeo.in"];
+const allowedOrigins = [
+  "https://radeo.in",
+  "https://www.radeo.in",
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ...(process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [])
+];
 
 app.use(
   cors({
     origin(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
         return callback(null, true);
       }
+      
+      // Log blocked origin for debugging
+      console.log('Blocked by CORS:', origin);
       return callback(new Error("CORS not allowed"), false);
     },
     credentials: true,

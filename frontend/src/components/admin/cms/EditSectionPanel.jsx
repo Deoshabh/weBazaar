@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiCheck } from 'react-icons/fi';
 import { getTemplateByType } from '@/constants/section-registry';
+import ImageUploader from './ImageUploader';
 
 export default function EditSectionPanel({ section, onSave, onCancel }) {
     const [formData, setFormData] = useState({});
@@ -77,6 +78,14 @@ export default function EditSectionPanel({ section, onSave, onCancel }) {
                                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                                     ))}
                                 </select>
+                            )}
+
+                            {field.type === 'image' && (
+                                <ImageUploader
+                                    label={field.label}
+                                    value={formData[field.name] || ''}
+                                    onChange={(url) => handleChange(field.name, url)}
+                                />
                             )}
 
                             {field.help && (

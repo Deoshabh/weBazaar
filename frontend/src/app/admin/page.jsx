@@ -53,7 +53,9 @@ export default function AdminDashboard() {
         easing: 'easeOutExpo',
         duration: 2000,
         update: function (anim) {
-          nodeRef.current.innerHTML = format(anim.animations[0].currentValue);
+          if (nodeRef.current) {
+            nodeRef.current.innerHTML = format(anim.animations[0].currentValue);
+          }
         }
       });
 

@@ -19,7 +19,7 @@ export default function ProductCard({ product, priority = false }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
 
-  typeof product.category === 'object'
+  const categoryLabel = typeof product.category === 'object'
     ? product.category?.name
     : product.category;
 

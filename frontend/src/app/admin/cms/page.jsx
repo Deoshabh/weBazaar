@@ -16,11 +16,15 @@ export default function AdminCMSPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth();
     const { refreshSettings } = useSiteSettings();
 
-    const [activeTab, setActiveTab] = useState('branding'); // 'branding', 'banners'
+    const [activeTab, setActiveTab] = useState('announcement'); // Default to announcement
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     // Data State
+    // Note: Branding, Banners, HomeSections are now managed in Visual Editor
+    // We still fetch them to avoid breaking the API call structure if needed, or we can just ignore.
+
+    // Announcement Bar State
     const [branding, setBranding] = useState({
         logo: { url: '', alt: 'Logo' },
         favicon: { url: '' },
@@ -356,24 +360,6 @@ export default function AdminCMSPage() {
                     {/* Tabs */}
                     <div className="bg-white rounded-lg shadow-sm mb-6 flex overflow-x-auto">
                         <button
-                            onClick={() => setActiveTab('branding')}
-                            className={`px-6 py-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'branding'
-                                ? 'border-primary-900 text-primary-900 bg-primary-50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            <FiLayout className="inline mr-2" /> Branding
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('banners')}
-                            className={`px-6 py-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'banners'
-                                ? 'border-primary-900 text-primary-900 bg-primary-50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            <FiImage className="inline mr-2" /> Home Banners
-                        </button>
-                        <button
                             onClick={() => setActiveTab('announcement')}
                             className={`px-6 py-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'announcement'
                                 ? 'border-primary-900 text-primary-900 bg-primary-50'
@@ -381,15 +367,6 @@ export default function AdminCMSPage() {
                                 }`}
                         >
                             <span className="inline mr-2">📢</span> Announcement Bar
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('sections')}
-                            className={`px-6 py-4 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'sections'
-                                ? 'border-primary-900 text-primary-900 bg-primary-50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            <FiLayout className="inline mr-2" /> Home Sections
                         </button>
                         <button
                             onClick={() => setActiveTab('policies')}

@@ -40,6 +40,7 @@ export default function VisualEditorPage() {
     const [activeView, setActiveView] = useState('desktop');
     const [layout, setLayout] = useState([]);
     const [theme, setTheme] = useState(SITE_SETTINGS_DEFAULTS.theme);
+    const [branding, setBranding] = useState(SITE_SETTINGS_DEFAULTS.branding || {});
     const [activeTab, setActiveTab] = useState('layout');
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,11 +59,6 @@ export default function VisualEditorPage() {
                 // Map settings to layout format
                 const currentLayout = [];
                 if (settings.homeSections) {
-                    // Convert object to array for sortable layout
-                    // Note: This assumes a fixed mapping for now, or we need to reshape the data
-                    // For the Visual Editor to work fully dynamically, backend should store an array of sections.
-                    // For now, we map specific known keys to the layout.
-
                     const sections = settings.homeSections;
                     if (sections.heroSection) currentLayout.push({ id: 'hero', type: 'hero', enabled: sections.heroSection.enabled, data: sections.heroSection });
                     if (sections.featuredProducts) currentLayout.push({ id: 'products', type: 'products', enabled: sections.featuredProducts.enabled, data: sections.featuredProducts });
@@ -72,6 +68,7 @@ export default function VisualEditorPage() {
 
                 setLayout(currentLayout.length > 0 ? currentLayout : initialLayout);
                 setTheme(settings.theme || SITE_SETTINGS_DEFAULTS.theme);
+                setBranding(settings.branding || SITE_SETTINGS_DEFAULTS.branding || {});
             } catch (error) {
                 console.error("Failed to load settings:", error);
                 toast.error("Failed to load settings");
@@ -104,11 +101,6 @@ export default function VisualEditorPage() {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            // Reconstruct the settings object from layout array
-            // Note: This is a simplified mapping. Real drag-and-drop reordering 
-            // requires the backend to support an array of sections or an 'order' field.
-            // We will save the data back to their specific keys for now.
-
             const homeSections = {};
             layout.forEach(section => {
                 if (section.type === 'hero') homeSections.heroSection = { ...section.data, enabled: section.enabled };
@@ -119,7 +111,8 @@ export default function VisualEditorPage() {
 
             const updateData = {
                 homeSections,
-                theme
+                theme,
+                branding
             };
 
             await adminAPI.updateSettings(updateData);
@@ -219,6 +212,7 @@ export default function VisualEditorPage() {
                         {activeTab === 'theme' && (
                             <ThemeCustomizer
                                 theme={theme}
+                                branding={branding}
                                 onChange={(newTheme) => {
                                     setTheme(newTheme);
                                     // Inject into iframe
@@ -231,6 +225,7 @@ export default function VisualEditorPage() {
                                         if (newTheme.fontFamily) style.setProperty('--font-primary', newTheme.fontFamily);
                                     }
                                 }}
+                                onBrandingChange={setBranding}
                             />
                         )}
 

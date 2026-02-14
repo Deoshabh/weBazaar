@@ -135,7 +135,8 @@ function AdminLayoutContent({ children }) {
     { href: '/admin/users', icon: FiUsers, label: 'Users' },
     { href: '/admin/categories', icon: FiTag, label: 'Categories' },
     { href: '/admin/coupons', icon: FiPercent, label: 'Coupons' },
-    { href: '/admin/cms', icon: FiLayout, label: 'CMS & Settings' },
+    { href: '/admin/visual-editor', icon: FiEdit3, label: 'Theme Editor' },
+    { href: '/admin/cms', icon: FiSettings, label: 'Settings' },
   ];
 
   const isActive = (href, exact = false) => {
