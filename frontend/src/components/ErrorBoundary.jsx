@@ -2,6 +2,17 @@
 
 import React from 'react';
 import { FiAlertTriangle, FiRefreshCw } from 'react-icons/fi';
+import Honeybadger from '@honeybadger-io/nextjs';
+
+// Initialize Honeybadger
+if (typeof window !== 'undefined') {
+  Honeybadger.configure({
+    apiKey: process.env.NEXT_PUBLIC_HONEYBADGER_API_KEY,
+    environment: process.env.NODE_ENV,
+    enableUncaught: true,
+    enableUnhandledRejection: true,
+  });
+}
 
 /**
  * Error Boundary Component
@@ -24,9 +35,14 @@ class ErrorBoundary extends React.Component {
       errorInfo,
     });
 
-    // You can log error to an error reporting service here
+    // Report to Honeybadger
     if (typeof window !== 'undefined') {
-      // Example: Sentry, LogRocket, etc.
+      Honeybadger.notify(error, {
+        context: {
+          componentStack: errorInfo.componentStack,
+        },
+      });
+
       console.error('Error details:', {
         error: error.toString(),
         componentStack: errorInfo.componentStack,

@@ -1,3 +1,5 @@
+import { setupHoneybadger } from '@honeybadger-io/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -44,4 +46,10 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default setupHoneybadger(nextConfig, {
+  reportData: true,
+  silent: false,
+  apiKey: process.env.HONEYBADGER_API_KEY,
+  assetsUrl: process.env.NEXT_PUBLIC_ASSETS_URL || 'https://radeo.in',
+  revision: process.env.GIT_COMMIT_SHA,
+});
