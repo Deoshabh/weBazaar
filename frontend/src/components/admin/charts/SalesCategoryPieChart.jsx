@@ -2,23 +2,27 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
-const data = [
-    { name: 'Loafers', value: 400 },
-    { name: 'Oxfords', value: 300 },
-    { name: 'Boots', value: 300 },
-    { name: 'Sneakers', value: 200 },
-];
-
 const COLORS = ['#3B2F2F', '#5D4037', '#8D6E63', '#D7CCC8'];
 
-export default function SalesCategoryPieChart() {
+export default function SalesCategoryPieChart({ data }) {
+    // Use passed data or fallback
+    const chartData = data && data.length > 0 ? data : [];
+
+    if (!data) {
+        return (
+            <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center justify-center">
+                <p className="text-gray-400">Loading chart data...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Sales by Category</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
-                        data={data}
+                        data={chartData}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -27,7 +31,7 @@ export default function SalesCategoryPieChart() {
                         paddingAngle={5}
                         dataKey="value"
                     >
-                        {data.map((entry, index) => (
+                        {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>

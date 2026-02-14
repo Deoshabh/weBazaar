@@ -391,6 +391,12 @@ export const SITE_SETTINGS_DEFAULTS = {
     allowAdminAccess: true,
     allowedIPs: [],
   },
+  theme: {
+    primaryColor: '#3B2F2F',
+    secondaryColor: '#E5D3B3',
+    fontFamily: 'var(--font-inter)',
+    borderRadius: '0.5rem',
+  },
 };
 
 export const SITE_SETTING_KEYS = Object.keys(SITE_SETTINGS_DEFAULTS);

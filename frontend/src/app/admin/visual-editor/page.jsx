@@ -31,17 +31,56 @@ const initialLayout = [
     { id: '4', type: 'newsletter', enabled: true, data: {} },
 ];
 
+import { adminAPI } from '@/utils/api';
+import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
+
+// ... imports
+
 export default function VisualEditorPage() {
     const [activeView, setActiveView] = useState('desktop');
-    const [layout, setLayout] = useState(initialLayout);
-    const [theme, setTheme] = useState(null); // NEW: Theme State
-    const [activeTab, setActiveTab] = useState('layout'); // layout | theme
+    const [layout, setLayout] = useState([]);
+    const [theme, setTheme] = useState(SITE_SETTINGS_DEFAULTS.theme);
+    const [activeTab, setActiveTab] = useState('layout');
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [editingSectionId, setEditingSectionId] = useState(null);
     const [isAddingSection, setIsAddingSection] = useState(false);
 
     // Derived state
     const editingSection = layout.find(s => s.id === editingSectionId) || null;
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await adminAPI.getAllSettings();
+                const settings = response.data.settings || {};
+
+                // Map settings to layout format
+                const currentLayout = [];
+                if (settings.homeSections) {
+                    // Convert object to array for sortable layout
+                    // Note: This assumes a fixed mapping for now, or we need to reshape the data
+                    // For the Visual Editor to work fully dynamically, backend should store an array of sections.
+                    // For now, we map specific known keys to the layout.
+
+                    const sections = settings.homeSections;
+                    if (sections.heroSection) currentLayout.push({ id: 'hero', type: 'hero', enabled: sections.heroSection.enabled, data: sections.heroSection });
+                    if (sections.featuredProducts) currentLayout.push({ id: 'products', type: 'products', enabled: sections.featuredProducts.enabled, data: sections.featuredProducts });
+                    if (sections.madeToOrder) currentLayout.push({ id: 'madeToOrder', type: 'madeToOrder', enabled: sections.madeToOrder.enabled, data: sections.madeToOrder });
+                    if (sections.newsletter) currentLayout.push({ id: 'newsletter', type: 'newsletter', enabled: sections.newsletter.enabled, data: sections.newsletter });
+                }
+
+                setLayout(currentLayout.length > 0 ? currentLayout : initialLayout);
+                setTheme(settings.theme || SITE_SETTINGS_DEFAULTS.theme);
+            } catch (error) {
+                console.error("Failed to load settings:", error);
+                toast.error("Failed to load settings");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -64,15 +103,41 @@ export default function VisualEditorPage() {
 
     const handleSave = async () => {
         setIsSaving(true);
-        // Simulate API call for now
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast.success('Layout saved successfully!');
-        setIsSaving(false);
+        try {
+            // Reconstruct the settings object from layout array
+            // Note: This is a simplified mapping. Real drag-and-drop reordering 
+            // requires the backend to support an array of sections or an 'order' field.
+            // We will save the data back to their specific keys for now.
+
+            const homeSections = {};
+            layout.forEach(section => {
+                if (section.type === 'hero') homeSections.heroSection = { ...section.data, enabled: section.enabled };
+                if (section.type === 'products') homeSections.featuredProducts = { ...section.data, enabled: section.enabled };
+                if (section.type === 'madeToOrder') homeSections.madeToOrder = { ...section.data, enabled: section.enabled };
+                if (section.type === 'newsletter') homeSections.newsletter = { ...section.data, enabled: section.enabled };
+            });
+
+            const updateData = {
+                homeSections,
+                theme
+            };
+
+            await adminAPI.updateSettings(updateData);
+            toast.success('Layout and Theme saved successfully!');
+        } catch (error) {
+            console.error("Failed to save settings:", error);
+            toast.error("Failed to save settings");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
+    // ... rest of the handlers (handleDelete, etc. - ensure they update 'layout' state)
     const handleDelete = (id) => {
+        // visual delete only, effectively disables it until saved? 
+        // Or strictly removes from the list.
         setLayout(items => items.filter(item => item.id !== id));
-        toast.success('Section removed');
+        toast.success('Section removed (Save to apply)');
     };
 
     const handleToggle = (id) => {
@@ -81,7 +146,7 @@ export default function VisualEditorPage() {
 
     const handleEdit = (section) => {
         setEditingSectionId(section.id);
-        setIsAddingSection(false); // Close add panel if open
+        setIsAddingSection(false);
     };
 
     const handleUpdateSection = (id, newData) => {
@@ -91,8 +156,11 @@ export default function VisualEditorPage() {
     };
 
     const handleAddSection = (template) => {
+        // ... similar logic, but we need to ensure we don't duplicate unique sections
+        // if the backend structure enforces singletons (like 'hero').
+
         const newSection = {
-            id: `section-${Date.now()}`,
+            id: `section-${Date.now()}`, // Temporary ID
             type: template.type,
             enabled: true,
             data: { ...template.defaultData }
@@ -100,7 +168,7 @@ export default function VisualEditorPage() {
 
         setLayout(prev => [...prev, newSection]);
         setIsAddingSection(false);
-        setEditingSectionId(newSection.id); // Auto-open edit
+        setEditingSectionId(newSection.id);
         toast.success(`Added ${template.label}`);
     };
 

@@ -10,18 +10,18 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
-// Mock data for initial render (will replace with real API data)
-const data = [
-    { name: 'Jan', revenue: 4000 },
-    { name: 'Feb', revenue: 3000 },
-    { name: 'Mar', revenue: 2000 },
-    { name: 'Apr', revenue: 2780 },
-    { name: 'May', revenue: 1890 },
-    { name: 'Jun', revenue: 2390 },
-    { name: 'Jul', revenue: 3490 },
-];
+export default function RevenueChart({ data }) {
+    // Use passed data or fallback to empty array (but don't show mock data if real data is expected)
+    const chartData = data && data.length > 0 ? data : [];
 
-export default function RevenueChart() {
+    if (!data) {
+        return (
+            <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center justify-center">
+                <p className="text-gray-400">Loading chart data...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Revenue Overview</h3>
