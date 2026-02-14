@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import anime from 'animejs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiPercent, FiStar, FiEdit3, FiLayout, FiArrowLeft } from 'react-icons/fi';
+import { FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiPercent, FiStar, FiEdit3, FiLayout, FiArrowLeft, FiSettings } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 import { AdminProvider, useAdmin } from '@/context/AdminContext';
 import AdminCommandPalette from '@/components/admin/AdminCommandPalette';
