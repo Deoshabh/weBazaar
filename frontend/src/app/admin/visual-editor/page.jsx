@@ -46,6 +46,7 @@ export default function VisualEditorPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [editingSectionId, setEditingSectionId] = useState(null);
     const [isAddingSection, setIsAddingSection] = useState(false);
+    const [iframeLoading, setIframeLoading] = useState(true);
 
     // Derived state
     const editingSection = layout.find(s => s.id === editingSectionId) || null;
@@ -335,16 +336,25 @@ export default function VisualEditorPage() {
                     </div>
 
                     {/* Iframe / Preview Container */}
-                    <div className="flex-1 overflow-auto p-8 flex justify-center items-start">
+                    <div className="flex-1 overflow-auto p-8 flex justify-center items-start relative">
+                        {iframeLoading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20">
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="spinner w-10 h-10 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                                    <p className="text-sm text-gray-500 font-medium">Loading Preview...</p>
+                                </div>
+                            </div>
+                        )}
+
                         <div
-                            className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden ${activeView === 'mobile' ? 'w-[375px] h-[812px] rounded-[30px] border-[8px] border-gray-800' : 'w-full h-full max-w-[1280px] rounded-lg border border-gray-200'
+                            className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden relative ${activeView === 'mobile' ? 'w-[375px] h-[812px] rounded-[30px] border-[8px] border-gray-800' : 'w-full h-full max-w-[1280px] rounded-lg border border-gray-200'
                                 }`}
                         >
                             <iframe
                                 src="/"
-                                className="w-full h-full bg-white transition-all"
+                                className={`w-full h-full bg-white transition-opacity duration-300 ${iframeLoading ? 'opacity-0' : 'opacity-100'}`}
                                 title="Live Preview"
-                                style={{ pointerEvents: 'none' }}
+                                onLoad={() => setIframeLoading(false)}
                             />
                         </div>
                     </div>

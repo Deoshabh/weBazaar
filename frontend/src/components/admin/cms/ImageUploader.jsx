@@ -34,10 +34,10 @@ export default function ImageUploader({ value, onChange, label }) {
                 throw new Error(data.message || 'Failed to get upload URL');
             }
 
-            const { uploadUrl, publicUrl } = data.data;
+            const { signedUrl, publicUrl } = data.data;
 
             // 2. Upload to S3/MinIO
-            await axios.put(uploadUrl, file, {
+            await axios.put(signedUrl, file, {
                 headers: {
                     'Content-Type': file.type,
                 },
