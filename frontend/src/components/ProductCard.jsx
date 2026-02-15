@@ -1,6 +1,15 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { FiHeart, FiShoppingCart } from 'react-icons/fi';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { useAuth } from '@/context/AuthContext';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
+import { toast } from 'react-hot-toast';
+import anime from 'animejs';
 
-// ... (imports)
+const BLUR_DATA_URL = 'data:image/gray;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 export default function ProductCard({ product, priority = false }) {
   const router = useRouter();

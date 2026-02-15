@@ -68,7 +68,7 @@ export default function ProductGridSection({ theme, onThemeChange }) {
                             onChange={(e) => handleProductChange('showInstallmentText', e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm text-gray-700">Show "Pay in 3" Text</span>
+                        <span className="text-sm text-gray-700">Show &quot;Pay in 3&quot; Text</span>
                     </label>
                 </div>
             </div>
