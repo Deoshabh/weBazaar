@@ -40,7 +40,7 @@ export default function FirebaseLoginPage() {
         return;
       }
 
-      console.log(`📱 Firebase user authenticated: ${user.email} (UID: ${user.uid})`);
+
 
       // Get reCAPTCHA token for backend verification
       const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.LOGIN);
@@ -56,13 +56,7 @@ export default function FirebaseLoginPage() {
         recaptchaToken
       };
 
-      console.log(`📤 Sending Firebase login payload:`, {
-        hasToken: !!payload.firebaseToken,
-        tokenLength: payload.firebaseToken ? payload.firebaseToken.length : 0,
-        email: payload.email,
-        uid: payload.uid,
-        payloadKeys: Object.keys(payload),
-      });
+
 
       if (!payload.firebaseToken) {
         toast.error("Failed to get Firebase ID token. Please try again.");
@@ -75,7 +69,7 @@ export default function FirebaseLoginPage() {
       // ✅ SECURITY CHECK #2: Verify returned user email matches Firebase
       if (response.data?.user) {
         const backendUserEmail = response.data.user.email;
-        console.log(`🔐 Backend returned user: ${backendUserEmail}`);
+        // console.log(`🔐 Backend returned user: ${backendUserEmail}`);
 
         // CRITICAL: Email must match between Firebase and backend
         if (backendUserEmail !== user.email) {
@@ -134,14 +128,7 @@ export default function FirebaseLoginPage() {
     try {
       const result = await loginWithGoogle();
 
-      console.log(`🔐 Google Sign-In Result:`, {
-        success: result?.success,
-        hasUser: !!result?.user,
-        hasToken: !!result?.token,
-        userEmail: result?.user?.email,
-        errorCode: result?.code,
-        errorMessage: result?.error,
-      });
+
 
       if (!result) {
         toast.error('No response from Google sign-in');

@@ -45,31 +45,29 @@ export default function AnnouncementBar() {
 
   return (
     <div
+      className="relative px-4 py-2 text-center text-sm font-medium transition-colors duration-300"
       style={{
-        backgroundColor: announcement.backgroundColor || '#10b981',
-        color: announcement.textColor || '#ffffff',
+        backgroundColor: announcement.backgroundColor,
+        color: announcement.textColor,
       }}
-      className="w-full"
     >
-      <div className="container-custom py-2 flex items-center justify-center gap-3 text-sm text-center">
-        {announcement.link ? (
-          <Link href={announcement.link} className="hover:underline">
-            {content}
-          </Link>
-        ) : (
-          content
-        )}
-        {announcement.dismissible && (
-          <button
-            type="button"
-            onClick={handleDismiss}
-            className="p-1 rounded hover:bg-black/10"
-            aria-label="Dismiss announcement"
-          >
-            <FiX className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+      {announcement.link ? (
+        <Link href={announcement.link} className="hover:underline">
+          {announcement.text}
+        </Link>
+      ) : (
+        <span>{announcement.text}</span>
+      )}
+
+      {announcement.dismissible !== false && (
+        <button
+          onClick={() => setIsVisible(false)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-black/10 rounded-full transition-colors"
+          aria-label="Dismiss"
+        >
+          <FiX className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }

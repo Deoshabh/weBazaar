@@ -1,28 +1,54 @@
-'use client';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { FiHeart, FiShoppingCart } from 'react-icons/fi';
-import { useCart } from '@/context/CartContext';
-import { useWishlist } from '@/context/WishlistContext';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import anime from 'animejs';
-
-// Tiny 1x1 neutral blur placeholder (avoids layout shift)
-const BLUR_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN89OhRPQAIhwMwaKSvfQAAAABJRU5ErkJggg==';
+// ... (imports)
 
 export default function ProductCard({ product, priority = false }) {
   const router = useRouter();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
+  const { settings } = useSiteSettings();
+
+  const themeProducts = settings?.theme?.products || {};
+  const cardStyle = themeProducts.cardStyle || 'shadow';
+  const hoverEffect = themeProducts.hoverEffect || 'lift';
+  const showSaleBadge = themeProducts.showSaleBadge !== false;
+  // const showRating = themeProducts.showRating !== false; // Not implemented in UI yet
+  const showInstallment = themeProducts.showInstallmentText !== false;
 
   const categoryLabel = typeof product.category === 'object'
     ? product.category?.name
     : product.category;
 
+  // Compute Card Classes based on Theme
+  const getCardClasses = () => {
+    let classes = 'card group overflow-hidden h-full flex flex-col transition-all duration-300 ';
+
+    // Card Style
+    switch (cardStyle) {
+      case 'minimal': classes += 'border border-gray-100 '; break;
+      case 'bordered': classes += 'border border-gray-200 '; break;
+      case 'glass': classes += 'backdrop-blur-md bg-white/40 border border-white/50 '; break;
+      case 'shadow': default: classes += 'bg-white shadow-sm '; break;
+    }
+
+    // Hover Effect
+    switch (hoverEffect) {
+      case 'lift': classes += 'hover:-translate-y-1 hover:shadow-lg '; break;
+      case 'none': break;
+      // Zoom and Color Shift handled in image/content
+      default: classes += 'hover:shadow-md '; break;
+    }
+    return classes;
+  };
+
+  const getHoverImageClasses = () => {
+    let classes = 'object-cover transition-transform duration-500 ';
+    if (hoverEffect === 'zoom') classes += 'group-hover:scale-110 ';
+    return classes;
+  };
+
+  // ... (flyToCart, handleAddToCart, etc. - keep existing)
   const flyToCart = (e) => {
     try {
       const card = e.currentTarget.closest('.card');
@@ -107,7 +133,7 @@ export default function ProductCard({ product, priority = false }) {
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <div className="card group overflow-hidden h-full flex flex-col shadow-sm hover:shadow-md transition-shadow">
+      <div className={getCardClasses()}>
         {/* Image Container */}
         <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden bg-primary-100">
           <Image
@@ -115,7 +141,7 @@ export default function ProductCard({ product, priority = false }) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            className={getHoverImageClasses()}
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
             priority={priority}
@@ -137,6 +163,13 @@ export default function ProductCard({ product, priority = false }) {
           {!product.inStock && (
             <div className="absolute top-2 left-2 sm:top-4 sm:left-4 px-2 py-1 sm:px-3 bg-red-500 text-white text-[10px] sm:text-xs font-medium rounded-full">
               Unavailable
+            </div>
+          )}
+
+          {/* Sale Badge from Theme */}
+          {showSaleBadge && product.comparePrice > product.price && product.inStock && (
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 px-2 py-1 sm:px-3 bg-black text-white text-[10px] sm:text-xs font-medium">
+              SALE
             </div>
           )}
 
@@ -212,10 +245,8 @@ export default function ProductCard({ product, priority = false }) {
                     {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}% OFF
                   </span>
                 </div>
-                {product.sizes && product.sizes.length > 0 && (
-                  <p className="text-[10px] sm:text-xs text-primary-600">
-                    {product.sizes.length} sizes
-                  </p>
+                {showInstallment && (
+                  <p className="text-[10px] text-gray-500 mt-1">Pay in 3 interest-free installments</p>
                 )}
               </div>
             ) : (

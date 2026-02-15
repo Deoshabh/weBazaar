@@ -134,6 +134,120 @@ const HeroSection = ({ banners, heroSettings }) => {
 
 // --- Main Page Component ---
 
+// --- Section Components ---
+
+const FeaturedProductsSection = ({ settings, products }) => {
+  const sectionData = settings.homeSections?.featuredProducts || {};
+  if (!sectionData.enabled) return null;
+
+  return (
+    <ScrollReveal delay={200}>
+      <section className="section-padding bg-primary-50">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-4xl font-bold text-primary-900 mb-4">{sectionData.title}</h2>
+            <p className="text-lg text-primary-600 max-w-2xl mx-auto">{sectionData.description}</p>
+          </div>
+
+          {products.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.map((product, idx) => (
+                <ProductCard key={product._id} product={product} priority={idx < 4} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-primary-600">No products available.</p>
+          )}
+
+          {sectionData.viewAllButtonLink && (
+            <div className="text-center mt-12">
+              <Link href={sectionData.viewAllButtonLink} className="btn btn-primary">
+                {sectionData.viewAllButtonText} <FiArrowRight className="ml-2 inline" />
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+    </ScrollReveal>
+  );
+};
+
+const MadeToOrderSection = ({ settings }) => {
+  const sectionData = settings.homeSections?.madeToOrder || {};
+  if (!sectionData.enabled) return null;
+
+  return (
+    <ScrollReveal delay={100}>
+      <section className="section-padding bg-white text-center">
+        <div className="container-custom max-w-4xl">
+          <h2 className="font-serif text-4xl font-bold text-primary-900 mb-6">{sectionData.title}</h2>
+          <p className="text-lg text-primary-600 mb-8">{sectionData.description}</p>
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-primary-600">
+            {sectionData.features?.map(f => (
+              <span key={f} className="bg-primary-50 px-3 py-1 rounded-full">{f}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+    </ScrollReveal>
+  );
+};
+
+const NewsletterSection = ({ settings }) => {
+  const sectionData = settings.homeSections?.newsletter || {};
+  if (!sectionData.enabled) return null;
+
+  return (
+    <ScrollReveal delay={100}>
+      <section className="section-padding bg-brand-brown text-white text-center">
+        <div className="container-custom max-w-2xl">
+          <h2 className="font-serif text-3xl font-bold mb-4">{sectionData.title}</h2>
+          <p className="text-white/80 mb-8">{sectionData.description}</p>
+          <form className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="Your email address"
+              className="flex-1 px-4 py-3 rounded-md text-gray-900 focus:outline-none"
+            />
+            <button className="bg-brand-tan text-white px-6 py-3 rounded-md hover:bg-white hover:text-brand-brown transition-colors font-medium">
+              {sectionData.buttonText}
+            </button>
+          </form>
+        </div>
+      </section>
+    </ScrollReveal>
+  );
+};
+
+const TrustBadgesSection = ({ settings }) => {
+  if (!settings.trustBadges?.length) return null;
+  return (
+    <ScrollReveal>
+      <section className="section-padding bg-white">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {settings.trustBadges.map(badge => {
+              const Icon = getIconComponent(badge.icon);
+              return (
+                <div key={badge.id} className="text-center p-6">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Icon className="w-8 h-8 text-brand-brown" />
+                  </div>
+                  <h3 className="font-serif text-xl font-semibold mb-2">{badge.title}</h3>
+                  <p className="text-primary-600">{badge.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </ScrollReveal>
+  );
+};
+
+
+// --- Main Page Component ---
+
 export default async function Home() {
   const settings = await getSiteSettings();
 
@@ -144,85 +258,55 @@ export default async function Home() {
     featuredSection.manualProductIds
   );
 
+  // Determine Layout Order
+  // Use settings.layout if available, otherwise fallback to default structure
+
+  let renderOrder = [];
+
+  if (settings.layout && settings.layout.length > 0) {
+    renderOrder = settings.layout.filter(item => item.enabled);
+  } else {
+    // Default fallback
+    if (settings.homeSections?.heroSection?.enabled) renderOrder.push({ id: 'hero', type: 'hero' });
+    if (settings.homeSections?.featuredProducts?.enabled) renderOrder.push({ id: 'products', type: 'products' });
+    if (settings.homeSections?.madeToOrder?.enabled) renderOrder.push({ id: 'madeToOrder', type: 'madeToOrder' });
+    if (settings.homeSections?.newsletter?.enabled) renderOrder.push({ id: 'newsletter', type: 'newsletter' });
+  }
+
+  // Helper to render section by type
+  const renderSection = (section) => {
+    switch (section.type) {
+      case 'hero':
+        return <HeroSection key={section.id} banners={settings.banners} heroSettings={settings.homeSections?.heroSection} />;
+      case 'products':
+        return <FeaturedProductsSection key={section.id} settings={settings} products={products} />;
+      case 'madeToOrder':
+        return <MadeToOrderSection key={section.id} settings={settings} />;
+      case 'newsletter':
+        return <NewsletterSection key={section.id} settings={settings} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <JsonLd data={generateWebsiteJsonLd()} />
       <JsonLd data={generateOrganizationJsonLd()} />
 
-      <HeroSection banners={settings.banners} heroSettings={settings.homeSections?.heroSection} />
+      {renderOrder.map(section => (
+        <div key={section.id}>
+          {renderSection(section)}
+          {/* Inject Trust Badges after Hero if it's the first render */}
+          {section.type === 'hero' && <TrustBadgesSection settings={settings} />}
+        </div>
+      ))}
 
-      {/* Trust Badges */}
-      {settings.trustBadges?.length > 0 && (
-        <ScrollReveal>
-          <section className="section-padding bg-white">
-            <div className="container-custom">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {settings.trustBadges.map(badge => {
-                  const Icon = getIconComponent(badge.icon);
-                  return (
-                    <div key={badge.id} className="text-center p-6">
-                      <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Icon className="w-8 h-8 text-brand-brown" />
-                      </div>
-                      <h3 className="font-serif text-xl font-semibold mb-2">{badge.title}</h3>
-                      <p className="text-primary-600">{badge.description}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-      )}
-
-      {/* Featured Products */}
-      {featuredSection.enabled && (
-        <ScrollReveal delay={200}>
-          <section className="section-padding bg-primary-50">
-            <div className="container-custom">
-              <div className="text-center mb-12">
-                <h2 className="font-serif text-4xl font-bold text-primary-900 mb-4">{featuredSection.title}</h2>
-                <p className="text-lg text-primary-600 max-w-2xl mx-auto">{featuredSection.description}</p>
-              </div>
-
-              {products.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {products.map((product, idx) => (
-                    <ProductCard key={product._id} product={product} priority={idx < 4} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-primary-600">No products available.</p>
-              )}
-
-              {featuredSection.viewAllButtonLink && (
-                <div className="text-center mt-12">
-                  <Link href={featuredSection.viewAllButtonLink} className="btn btn-primary">
-                    {featuredSection.viewAllButtonText} <FiArrowRight className="ml-2 inline" />
-                  </Link>
-                </div>
-              )}
-            </div>
-          </section>
-        </ScrollReveal>
-      )}
-
-      {/* Made to Order */}
-      {settings.homeSections?.madeToOrder?.enabled && (
-        <ScrollReveal delay={100}>
-          <section className="section-padding bg-white text-center">
-            <div className="container-custom max-w-4xl">
-              <h2 className="font-serif text-4xl font-bold text-primary-900 mb-6">{settings.homeSections.madeToOrder.title}</h2>
-              <p className="text-lg text-primary-600 mb-8">{settings.homeSections.madeToOrder.description}</p>
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-primary-600">
-                {settings.homeSections.madeToOrder.features.map(f => (
-                  <span key={f} className="bg-primary-50 px-3 py-1 rounded-full">{f}</span>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-      )}
+      {/* Fallback if Hero is missing from layout but we want badges? 
+          For now, strictly bind badges to Hero or just put them if not rendered? 
+          Let's assume Badges go after Hero. If no Hero, maybe they don't show or show at top?
+          Let's leave it bound to Hero for simplicity.
+      */}
     </>
   );
 }

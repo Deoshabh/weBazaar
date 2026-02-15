@@ -190,12 +190,29 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            <Link href="/" className={`hover:text-brand-brown transition-colors ${pathname === '/' ? 'text-brand-brown font-semibold' : ''}`}>
-              Home
-            </Link>
-            <Link href="/products" className={`hover:text-brand-brown transition-colors ${pathname === '/products' ? 'text-brand-brown font-semibold' : ''}`}>
-              Products
-            </Link>
+            {['/', '/products'].map((path) => {
+              const label = path === '/' ? 'Home' : 'Products';
+              const isActive = pathname === path;
+              const linkStyle = settings?.theme?.header?.navLinkStyle?.activeIndicator || 'none';
+
+              let activeClass = '';
+              if (isActive) {
+                switch (linkStyle) {
+                  case 'underline': activeClass = 'border-b-2 border-brand-brown'; break;
+                  case 'pill': activeClass = 'bg-primary-100 text-brand-brown px-3 py-1 rounded-full'; break;
+                  case 'dot': activeClass = "relative after:content-[''] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-brand-brown after:rounded-full"; break;
+                  default: activeClass = 'text-brand-brown font-semibold'; break;
+                }
+              } else {
+                if (linkStyle === 'pill') activeClass = 'px-3 py-1'; // Maintain spacing
+              }
+
+              return (
+                <Link key={path} href={path} className={`hover:text-brand-brown transition-colors ${activeClass}`}>
+                  {label}
+                </Link>
+              );
+            })}
 
             {/* Categories Dropdown */}
             <div
@@ -205,7 +222,7 @@ export default function Navbar() {
             >
               <button className="hover:text-brand-brown transition-colors flex items-center gap-1 py-4">
                 Categories
-                <svg className={`w-4 h-4 transition-transform duration-300 ${isCategoriesOpen ? 'rotate-1800' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-4 h-4 transition-transform duration-300 ${isCategoriesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>

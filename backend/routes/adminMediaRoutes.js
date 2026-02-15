@@ -1,8 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB per frame
+});
+
 const {
   getUploadUrl,
   deleteMedia,
+  uploadFrames
 } = require("../controllers/adminMediaController");
 const { authenticate } = require("../middleware/auth");
 const admin = require("../middleware/admin");
@@ -16,5 +23,8 @@ router.post("/upload-url", getUploadUrl);
 
 // DELETE /api/v1/admin/media - Delete media object
 router.delete("/", deleteMedia);
+
+// POST /api/v1/admin/media/frames - Upload 360 viewer frames
+router.post("/frames", upload.array("frames", 72), uploadFrames);
 
 module.exports = router;

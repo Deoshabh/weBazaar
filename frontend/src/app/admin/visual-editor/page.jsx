@@ -38,9 +38,11 @@ import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
 
 export default function VisualEditorPage() {
     const [activeView, setActiveView] = useState('desktop');
-    const [layout, setLayout] = useState([]);
-    const [theme, setTheme] = useState(SITE_SETTINGS_DEFAULTS.theme);
+    const [layout, setLayout] = useState([]); // Ordered list of sections
+    const [theme, setTheme] = useState({}); // Stores global styles, fonts, and now section-specific theme overrides (header, footer, etc.)
     const [branding, setBranding] = useState(SITE_SETTINGS_DEFAULTS.branding || {});
+    const [announcementBar, setAnnouncementBar] = useState({});
+    const [homeSections, setHomeSections] = useState({}); // Legacy - maps to layout but keeps data structure
     const [activeTab, setActiveTab] = useState('layout');
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,8 +60,12 @@ export default function VisualEditorPage() {
                 const settings = response.data.settings || {};
 
                 // Map settings to layout format
-                const currentLayout = [];
-                if (settings.homeSections) {
+                let currentLayout = [];
+
+                if (settings.layout && settings.layout.length > 0) {
+                    currentLayout = settings.layout;
+                } else if (settings.homeSections) {
+                    // Fallback to legacy homeSections
                     const sections = settings.homeSections;
                     if (sections.heroSection) currentLayout.push({ id: 'hero', type: 'hero', enabled: sections.heroSection.enabled, data: sections.heroSection });
                     if (sections.featuredProducts) currentLayout.push({ id: 'products', type: 'products', enabled: sections.featuredProducts.enabled, data: sections.featuredProducts });
@@ -94,7 +100,18 @@ export default function VisualEditorPage() {
             setLayout((items) => {
                 const oldIndex = items.findIndex((item) => item.id === active.id);
                 const newIndex = items.findIndex((item) => item.id === over.id);
-                return arrayMove(items, oldIndex, newIndex);
+                const newLayout = arrayMove(items, oldIndex, newIndex);
+
+                // Sync to preview
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                        type: 'THEME_UPDATE',
+                        payload: { layout: newLayout }
+                    }, '*');
+                }
+
+                return newLayout;
             });
         }
     };
@@ -112,8 +129,10 @@ export default function VisualEditorPage() {
 
             const updateData = {
                 homeSections,
+                layout, // Save the ordered layout
                 theme,
-                branding
+                branding,
+                announcementBar
             };
 
             await adminAPI.updateSettings(updateData);
@@ -144,7 +163,24 @@ export default function VisualEditorPage() {
     };
 
     const handleUpdateSection = (id, newData) => {
-        setLayout(items => items.map(item => item.id === id ? { ...item, data: newData } : item));
+        setLayout(items => {
+            const newLayout = items.map(item => item.id === id ? { ...item, data: newData } : item);
+
+            // Sync to preview
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                // We need to map layout back to 'homeSections' for the legacy components if they rely on it, 
+                // OR ensure the frontend uses 'layout' prop correctly.
+                // Our updated page.jsx uses 'layout' OR legacy.
+                // Sending 'layout' is safer.
+                iframe.contentWindow.postMessage({
+                    type: 'THEME_UPDATE',
+                    payload: { layout: newLayout }
+                }, '*');
+            }
+
+            return newLayout;
+        });
         setEditingSectionId(null);
         toast.success('Section updated');
     };
@@ -214,19 +250,66 @@ export default function VisualEditorPage() {
                             <ThemeCustomizer
                                 theme={theme}
                                 branding={branding}
+                                // Pass current section data to allow editing content from Theme tab
+                                sections={{
+                                    hero: layout.find(s => s.type === 'hero')?.data || {},
+                                    products: layout.find(s => s.type === 'products')?.data || {},
+                                    footer: layout.find(s => s.type === 'footer')?.data || {}, // Assuming footer has data
+                                    newsletter: layout.find(s => s.type === 'newsletter')?.data || {},
+                                }}
+                                onUpdateSection={(type, partialData) => {
+                                    setLayout(items => {
+                                        const newLayout = items.map(item => {
+                                            if (item.type === type) {
+                                                return { ...item, data: { ...item.data, ...partialData } };
+                                            }
+                                            return item;
+                                        });
+
+                                        // Sync to preview
+                                        const iframe = document.querySelector('iframe');
+                                        if (iframe && iframe.contentWindow) {
+                                            iframe.contentWindow.postMessage({
+                                                type: 'THEME_UPDATE',
+                                                payload: { layout: newLayout }
+                                            }, '*');
+                                        }
+
+                                        return newLayout;
+                                    });
+                                }}
                                 onChange={(newTheme) => {
                                     setTheme(newTheme);
-                                    // Inject into iframe
+                                    // Send update to preview
                                     const iframe = document.querySelector('iframe');
                                     if (iframe && iframe.contentWindow) {
-                                        const style = iframe.contentWindow.document.documentElement.style;
-                                        if (newTheme.primaryColor) style.setProperty('--color-primary-900', newTheme.primaryColor);
-                                        if (newTheme.secondaryColor) style.setProperty('--color-brand-brown', newTheme.secondaryColor);
-                                        if (newTheme.borderRadius) style.setProperty('--radius', newTheme.borderRadius);
-                                        if (newTheme.fontFamily) style.setProperty('--font-primary', newTheme.fontFamily);
+                                        iframe.contentWindow.postMessage({
+                                            type: 'THEME_UPDATE',
+                                            payload: { theme: newTheme }
+                                        }, '*');
                                     }
                                 }}
-                                onBrandingChange={setBranding}
+                                onBrandingChange={(newBranding) => {
+                                    setBranding(newBranding);
+                                    const iframe = document.querySelector('iframe');
+                                    if (iframe && iframe.contentWindow) {
+                                        iframe.contentWindow.postMessage({
+                                            type: 'THEME_UPDATE',
+                                            payload: { branding: newBranding }
+                                        }, '*');
+                                    }
+                                }}
+                                announcementBar={announcementBar}
+                                onAnnouncementChange={(newBar) => {
+                                    setAnnouncementBar(newBar);
+                                    const iframe = document.querySelector('iframe');
+                                    if (iframe && iframe.contentWindow) {
+                                        iframe.contentWindow.postMessage({
+                                            type: 'THEME_UPDATE',
+                                            payload: { announcementBar: newBar }
+                                        }, '*');
+                                    }
+                                }}
                             />
                         )}
 

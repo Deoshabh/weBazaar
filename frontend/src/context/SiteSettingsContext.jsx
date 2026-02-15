@@ -130,6 +130,25 @@ export function SiteSettingsProvider({ children }) {
     fetchSettings();
   }, [fetchSettings]);
 
+  // Live Preview Listener
+  useEffect(() => {
+    const handleMessage = (event) => {
+      const { type, payload } = event.data;
+      if (type === 'THEME_UPDATE' && payload) {
+        setSettings((prev) => {
+          // If payload is the full settings object or a specific section
+          // We need to be careful about what we are merging.
+          // The Visual Editor sends the 'theme' object or 'homeSections' object.
+          // Let's assume payload IS the new settings object or a partial.
+          return deepMerge(prev, payload);
+        });
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const value = useMemo(
     () => ({
       settings,

@@ -78,10 +78,13 @@ const siteSettingsSchema = new mongoose.Schema(
     ],
     // Global Theme Validation
     theme: {
-      primaryColor: { type: String, default: '#3B2F2F' }, // brand-brown
-      secondaryColor: { type: String, default: '#F4F1EA' }, // brand-cream
-      fontFamily: { type: String, default: 'Inter' },
-      borderRadius: { type: String, default: '8px' },
+      type: mongoose.Schema.Types.Mixed,
+      default: {
+        primaryColor: '#3B2F2F',
+        secondaryColor: '#F4F1EA',
+        fontFamily: 'Inter',
+        borderRadius: '8px',
+      }
     },
     // Singleton pattern enforcement
     isDefault: { type: Boolean, default: true, unique: true },

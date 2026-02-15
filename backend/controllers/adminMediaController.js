@@ -1,4 +1,5 @@
-const { generateSignedUploadUrl, deleteObject } = require("../utils/minio");
+const { generateSignedUploadUrl, deleteObject, uploadBuffer } = require("../utils/minio");
+const sharp = require("sharp");
 
 /**
  * Generate signed upload URL for admin
@@ -82,6 +83,73 @@ exports.deleteMedia = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to delete media",
+    });
+  }
+};
+
+/**
+ * Upload 360 viewer frames
+ * POST /api/v1/admin/media/frames
+ * Expects multipart/form-data with "frames" array
+ */
+exports.uploadFrames = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No frames uploaded",
+      });
+    }
+
+    const { productSlug } = req.body;
+    const folder = productSlug || "uploads";
+    const timestamp = Date.now();
+
+    // Process each frame
+    // We run sequentially to maintain order if needed, but Promise.all is faster
+    // Naming convention: frame_01.webp, frame_02.webp, etc.
+    const uploadPromises = req.files.map(async (file, index) => {
+      // 1. Process with Sharp
+      const processedBuffer = await sharp(file.buffer)
+        .resize(1500, 1500, { fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 80 }) // WebP conversion
+        .toBuffer();
+
+      // 2. Generate key
+      // Sortable filename: frame_001.webp, frame_002.webp
+      const sequenceNum = String(index + 1).padStart(3, "0");
+      const key = `products/${folder}/360/${timestamp}/frame_${sequenceNum}.webp`;
+
+      // 3. Upload to MinIO
+      const url = await uploadBuffer(processedBuffer, key, "image/webp");
+      
+      // Return details
+      return {
+        index,
+        url,
+        key
+      };
+    });
+
+    const results = await Promise.all(uploadPromises);
+
+    // Sort by index to ensure order matches input
+    results.sort((a, b) => a.index - b.index);
+    const urls = results.map(r => r.url);
+
+    res.json({
+      success: true,
+      message: `Successfully uploaded ${urls.length} frames`,
+      data: {
+        frames: urls,
+        folder: `products/${folder}/360/${timestamp}`
+      },
+    });
+  } catch (error) {
+    console.error("Error uploading frames:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to upload frames",
     });
   }
 };
