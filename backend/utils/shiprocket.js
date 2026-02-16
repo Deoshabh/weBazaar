@@ -160,6 +160,37 @@ class ShiprocketService {
     return null;
   }
 
+  detectBusinessFailure(payload) {
+    if (!payload || typeof payload !== "object") {
+      return null;
+    }
+
+    const failureStatuses = [false, "false", 0, "0", "failed", "error"];
+    const statusValue = payload.status;
+    const successValue = payload.success;
+
+    if (
+      failureStatuses.includes(statusValue) ||
+      successValue === false ||
+      payload.error ||
+      payload.errors
+    ) {
+      return (
+        this.extractFirstByKeys(payload, ["message", "error", "errors"]) ||
+        "Shiprocket operation failed"
+      );
+    }
+
+    if (typeof payload.status_code === "number" && payload.status_code >= 400) {
+      return (
+        this.extractFirstByKeys(payload, ["message", "error"]) ||
+        "Shiprocket operation failed"
+      );
+    }
+
+    return null;
+  }
+
   /**
    * Check serviceability and get shipping rates
    * @param {Object} params - { pickup_postcode, delivery_postcode, weight, cod, declared_value }
@@ -256,6 +287,15 @@ class ShiprocketService {
         { headers },
       );
 
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to create Shiprocket order",
+          "SHIPROCKET_CREATE_ORDER_ERROR",
+        );
+      }
+
       console.log("✅ Shiprocket order created:", response.data);
       return response.data;
     } catch (error) {
@@ -287,6 +327,15 @@ class ShiprocketService {
         },
         { headers },
       );
+
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to assign AWB",
+          "SHIPROCKET_ASSIGN_AWB_ERROR",
+        );
+      }
 
       console.log("✅ AWB assigned successfully:", response.data);
       return response.data;
@@ -327,6 +376,15 @@ class ShiprocketService {
         { headers },
       );
 
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to schedule pickup",
+          "SHIPROCKET_SCHEDULE_PICKUP_ERROR",
+        );
+      }
+
       console.log("✅ Pickup scheduled successfully:", response.data);
       return response.data;
     } catch (error) {
@@ -357,6 +415,15 @@ class ShiprocketService {
         },
         { headers },
       );
+
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to generate label",
+          "SHIPROCKET_GENERATE_LABEL_ERROR",
+        );
+      }
 
       console.log("✅ Label generated successfully");
       return response.data;
@@ -389,6 +456,15 @@ class ShiprocketService {
         { headers },
       );
 
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to generate manifest",
+          "SHIPROCKET_MANIFEST_GENERATE_ERROR",
+        );
+      }
+
       console.log("✅ Manifest generated successfully");
       return response.data;
     } catch (error) {
@@ -396,7 +472,11 @@ class ShiprocketService {
         "❌ Generate manifest failed:",
         error.response?.data || error.message,
       );
-      throw error;
+      throw this.buildShiprocketError(
+        error,
+        "Failed to generate manifest",
+        "SHIPROCKET_MANIFEST_GENERATE_ERROR",
+      );
     }
   }
 
@@ -416,6 +496,15 @@ class ShiprocketService {
         { headers },
       );
 
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to print manifest",
+          "SHIPROCKET_MANIFEST_PRINT_ERROR",
+        );
+      }
+
       console.log("✅ Manifest print URL generated");
       return response.data;
     } catch (error) {
@@ -423,7 +512,11 @@ class ShiprocketService {
         "❌ Print manifest failed:",
         error.response?.data || error.message,
       );
-      throw error;
+      throw this.buildShiprocketError(
+        error,
+        "Failed to print manifest",
+        "SHIPROCKET_MANIFEST_PRINT_ERROR",
+      );
     }
   }
 
@@ -446,7 +539,11 @@ class ShiprocketService {
         "❌ Track by AWB failed:",
         error.response?.data || error.message,
       );
-      throw error;
+      throw this.buildShiprocketError(
+        error,
+        "Failed to track shipment by AWB",
+        "SHIPROCKET_TRACK_AWB_ERROR",
+      );
     }
   }
 
@@ -469,7 +566,11 @@ class ShiprocketService {
         "❌ Track by order ID failed:",
         error.response?.data || error.message,
       );
-      throw error;
+      throw this.buildShiprocketError(
+        error,
+        "Failed to track shipment by order ID",
+        "SHIPROCKET_TRACK_ORDER_ERROR",
+      );
     }
   }
 
@@ -516,6 +617,15 @@ class ShiprocketService {
         { headers },
       );
 
+      const businessFailure = this.detectBusinessFailure(response.data);
+      if (businessFailure) {
+        throw this.buildShiprocketError(
+          { response: { status: 422, data: response.data }, message: businessFailure },
+          "Failed to cancel shipment",
+          "SHIPROCKET_CANCEL_SHIPMENT_ERROR",
+        );
+      }
+
       console.log("✅ Shipment cancelled successfully");
       return response.data;
     } catch (error) {
@@ -523,7 +633,11 @@ class ShiprocketService {
         "❌ Cancel shipment failed:",
         error.response?.data || error.message,
       );
-      throw error;
+      throw this.buildShiprocketError(
+        error,
+        "Failed to cancel shipment",
+        "SHIPROCKET_CANCEL_SHIPMENT_ERROR",
+      );
     }
   }
 
@@ -576,10 +690,12 @@ class ShiprocketService {
       // Step 1: Create order in Shiprocket
       const orderResponse = await this.createOrder(orderData);
 
-      const shiprocketOrderId =
-        orderResponse?.order_id || orderResponse?.data?.order_id;
-      const shipmentId =
-        orderResponse?.shipment_id || orderResponse?.data?.shipment_id;
+      const shiprocketOrderId = this.extractFirstByKeys(orderResponse, [
+        "order_id",
+      ]);
+      const shipmentId = this.extractFirstByKeys(orderResponse, [
+        "shipment_id",
+      ]);
 
       if (!shiprocketOrderId || !shipmentId) {
         throw this.buildShiprocketError(
@@ -609,7 +725,11 @@ class ShiprocketService {
           // Use the first recommended courier
           courierId = availableCouriers[0].courier_company_id;
         } else {
-          throw new Error("No courier available for this shipment");
+          throw this.buildShiprocketError(
+            { response: { status: 422, data: rates }, message: "No courier available for this shipment" },
+            "No courier available for this shipment",
+            "SHIPROCKET_NO_COURIER_AVAILABLE",
+          );
         }
       }
 

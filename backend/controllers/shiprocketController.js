@@ -1,6 +1,16 @@
 const Order = require("../models/Order");
 const shiprocketService = require("../utils/shiprocket");
 
+const sendShiprocketError = (res, error, fallbackMessage) => {
+  const statusCode = error.statusCode || error.response?.status || 500;
+  return res.status(statusCode).json({
+    success: false,
+    message: error.message || fallbackMessage,
+    error: error.details || error.response?.data || error.message,
+    code: error.code,
+  });
+};
+
 /**
  * Get shipping rates for an order
  * POST /api/admin/shiprocket/rates
@@ -31,11 +41,7 @@ exports.getShippingRates = async (req, res) => {
     });
   } catch (error) {
     console.error("Get shipping rates error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to get shipping rates",
-      error: error.response?.data || error.message,
-    });
+    return sendShiprocketError(res, error, "Failed to get shipping rates");
   }
 };
 
@@ -140,15 +146,7 @@ exports.createShipment = async (req, res) => {
     });
   } catch (error) {
     console.error("Create shipment error:", error);
-
-    const statusCode = error.statusCode || error.response?.status || 500;
-
-    res.status(statusCode).json({
-      success: false,
-      message: error.message || "Failed to create shipment",
-      error: error.details || error.response?.data || error.message,
-      code: error.code,
-    });
+    return sendShiprocketError(res, error, "Failed to create shipment");
   }
 };
 
@@ -190,11 +188,7 @@ exports.generateLabel = async (req, res) => {
     });
   } catch (error) {
     console.error("Generate label error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to generate label",
-      error: error.response?.data || error.message,
-    });
+    return sendShiprocketError(res, error, "Failed to generate label");
   }
 };
 
@@ -240,11 +234,7 @@ exports.trackShipment = async (req, res) => {
     });
   } catch (error) {
     console.error("Track shipment error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to track shipment",
-      error: error.response?.data || error.message,
-    });
+    return sendShiprocketError(res, error, "Failed to track shipment");
   }
 };
 
@@ -288,11 +278,7 @@ exports.cancelShipment = async (req, res) => {
     });
   } catch (error) {
     console.error("Cancel shipment error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to cancel shipment",
-      error: error.response?.data || error.message,
-    });
+    return sendShiprocketError(res, error, "Failed to cancel shipment");
   }
 };
 
@@ -311,15 +297,7 @@ exports.getShiprocketHealth = async (req, res) => {
     });
   } catch (error) {
     console.error("Shiprocket health check error:", error);
-
-    const statusCode = error.statusCode || error.response?.status || 500;
-
-    res.status(statusCode).json({
-      success: false,
-      message: error.message || "Shiprocket health check failed",
-      error: error.details || error.response?.data || error.message,
-      code: error.code,
-    });
+    return sendShiprocketError(res, error, "Shiprocket health check failed");
   }
 };
 
@@ -365,15 +343,7 @@ exports.getPickupAddresses = async (req, res) => {
     });
   } catch (error) {
     console.error("Get pickup addresses error:", error);
-
-    const statusCode = error.statusCode || error.response?.status || 500;
-
-    res.status(statusCode).json({
-      success: false,
-      message: error.message || "Failed to get pickup addresses",
-      error: error.details || error.response?.data || error.message,
-      code: error.code,
-    });
+    return sendShiprocketError(res, error, "Failed to get pickup addresses");
   }
 };
 
@@ -419,11 +389,7 @@ exports.schedulePickup = async (req, res) => {
     });
   } catch (error) {
     console.error("Schedule pickup error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to schedule pickup",
-      error: error.response?.data || error.message,
-    });
+    return sendShiprocketError(res, error, "Failed to schedule pickup");
   }
 };
 
@@ -470,11 +436,7 @@ exports.generateManifest = async (req, res) => {
     });
   } catch (error) {
     console.error("Generate manifest error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to generate manifest",
-      error: error.response?.data || error.message,
-    });
+    return sendShiprocketError(res, error, "Failed to generate manifest");
   }
 };
 
@@ -512,10 +474,7 @@ exports.markAsShipped = async (req, res) => {
     });
   } catch (error) {
     console.error("Mark as shipped error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to mark order as shipped",
-    });
+    return sendShiprocketError(res, error, "Failed to mark order as shipped");
   }
 };
 
