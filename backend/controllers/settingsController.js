@@ -9,6 +9,7 @@ const {
   resetSettingToDefault,
   getSettingHistory: getSettingHistoryForKey,
 } = require('../utils/siteSettings');
+const { runScheduledPublishCheck } = require('../services/publishWorkflowService');
 
 const forwardError = (res, next, err) => {
   if (err?.statusCode && res.statusCode === 200) {
@@ -25,6 +26,39 @@ const createSnapshotPayload = (settings) => ({
   layout: settings.layout,
   theme: settings.theme,
 });
+
+const getPublishedSnapshot = (settings) => {
+  if (settings?.publishedSnapshot && typeof settings.publishedSnapshot === 'object') {
+    return settings.publishedSnapshot;
+  }
+  return createSnapshotPayload(settings);
+};
+
+const normalizePublishWorkflowInput = (incoming = {}, previous = {}) => {
+  const requestedStatus = incoming?.status;
+  const allowedStatuses = new Set(['draft', 'scheduled', 'live']);
+  const status = allowedStatuses.has(requestedStatus)
+    ? requestedStatus
+    : previous?.status || 'live';
+
+  const scheduledAt = status === 'scheduled' && incoming?.scheduledAt
+    ? new Date(incoming.scheduledAt)
+    : null;
+
+  return {
+    ...previous,
+    status,
+    scheduledAt:
+      scheduledAt && !Number.isNaN(scheduledAt.getTime())
+        ? scheduledAt
+        : null,
+    publishedAt:
+      status === 'live'
+        ? new Date()
+        : previous?.publishedAt || null,
+    updatedAt: new Date(),
+  };
+};
 
 const appendVersionSnapshot = (settings, { label, userId } = {}) => {
   const snapshot = createSnapshotPayload(settings);
@@ -62,7 +96,7 @@ exports.getAllSettings = async (req, res, next) => {
 ===================== */
 exports.updateSettings = async (req, res, next) => {
   try {
-    const { branding, banners, announcementBar, homeSections } = req.body;
+    const { branding, banners, announcementBar, homeSections, publishWorkflow } = req.body;
     
     // Validate inputs if necessary
     
@@ -102,6 +136,16 @@ exports.updateSettings = async (req, res, next) => {
         ? settings.theme.toObject()
         : settings.theme || {};
       settings.theme = { ...currentTheme, ...req.body.theme };
+    }
+
+    settings.publishWorkflow = normalizePublishWorkflowInput(
+      publishWorkflow || {},
+      settings.publishWorkflow || {},
+    );
+
+    if (settings.publishWorkflow.status === 'live') {
+      settings.publishWorkflow.publishedAt = new Date();
+      settings.publishedSnapshot = createSnapshotPayload(settings);
     }
 
     appendVersionSnapshot(settings, {
@@ -168,6 +212,15 @@ exports.restoreThemeVersion = async (req, res, next) => {
     settings.layout = snapshot.layout || settings.layout;
     settings.theme = snapshot.theme || settings.theme;
 
+    if ((settings.publishWorkflow?.status || 'live') === 'live') {
+      settings.publishedSnapshot = createSnapshotPayload(settings);
+      settings.publishWorkflow = {
+        ...(settings.publishWorkflow || {}),
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
+
     appendVersionSnapshot(settings, {
       label: `Restore: ${historyItem.label || 'Snapshot'}`,
       userId: req.user?.id || null,
@@ -217,6 +270,15 @@ exports.importThemeJson = async (req, res, next) => {
     if (importedSettings.homeSections) settings.homeSections = importedSettings.homeSections;
     if (importedSettings.layout) settings.layout = importedSettings.layout;
     if (importedSettings.theme) settings.theme = importedSettings.theme;
+
+    if ((settings.publishWorkflow?.status || 'live') === 'live') {
+      settings.publishedSnapshot = createSnapshotPayload(settings);
+      settings.publishWorkflow = {
+        ...(settings.publishWorkflow || {}),
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
 
     appendVersionSnapshot(settings, {
       label: incoming.label || 'Imported JSON',
@@ -362,7 +424,66 @@ exports.getPublicSettings = async (req, res, next) => {
       return acc;
     }, {});
 
+    const singletonSettings = await SiteSettings.getSettings();
+    const publishedSnapshot = getPublishedSnapshot(singletonSettings);
+
+    if (publishedSnapshot?.announcementBar) {
+      publicSettings.announcementBar = publishedSnapshot.announcementBar;
+    }
+
+    if (publishedSnapshot?.banners) {
+      publicSettings.banners = publishedSnapshot.banners;
+      publicSettings.bannerSystem = {
+        ...(publicSettings.bannerSystem || {}),
+        banners: publishedSnapshot.banners,
+      };
+    }
+
+    if (publishedSnapshot?.homeSections) {
+      publicSettings.homeSections = {
+        ...(publicSettings.homeSections || {}),
+        ...publishedSnapshot.homeSections,
+      };
+      publicSettings.heroSection = publicSettings.homeSections.heroSection || publicSettings.heroSection;
+      publicSettings.featuredProducts = publicSettings.homeSections.featuredProducts || publicSettings.featuredProducts;
+    }
+
+    if (publishedSnapshot?.layout) {
+      publicSettings.layout = publishedSnapshot.layout;
+    }
+
+    if (publishedSnapshot?.theme) {
+      publicSettings.theme = publishedSnapshot.theme;
+    }
+
+    publicSettings.publishWorkflow = {
+      status: singletonSettings.publishWorkflow?.status || 'live',
+      scheduledAt: singletonSettings.publishWorkflow?.scheduledAt || null,
+      publishedAt: singletonSettings.publishWorkflow?.publishedAt || null,
+      updatedAt: singletonSettings.publishWorkflow?.updatedAt || null,
+    };
+
     res.json({ settings: publicSettings });
+  } catch (err) {
+    forwardError(res, next, err);
+  }
+};
+
+/* =====================
+   Manual Publish Workflow Check (Admin)
+===================== */
+exports.runPublishWorkflowNow = async (req, res, next) => {
+  try {
+    const result = await runScheduledPublishCheck();
+    const settings = await SiteSettings.getSettings();
+
+    res.json({
+      message: result?.promoted
+        ? 'Scheduled publish promoted to live'
+        : 'Publish workflow check completed',
+      result,
+      publishWorkflow: settings.publishWorkflow || {},
+    });
   } catch (err) {
     forwardError(res, next, err);
   }

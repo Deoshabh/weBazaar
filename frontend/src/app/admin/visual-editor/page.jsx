@@ -41,29 +41,29 @@ const normalizeHeroDataForEditor = (heroData = {}) => ({
     title: heroData.title || '',
     subtitle: heroData.subtitle || '',
     buttonText:
-        heroData.buttonText || heroData.primaryButtonText || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonText || 'Shop Now',
+        heroData.buttonText ?? heroData.primaryButtonText ?? SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonText ?? 'Shop Now',
     buttonLink:
-        heroData.buttonLink || heroData.primaryButtonLink || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonLink || '/products',
+        heroData.buttonLink ?? heroData.primaryButtonLink ?? SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonLink ?? '/products',
     secondaryButtonText:
-        heroData.secondaryButtonText || heroData.buttonTextSecondary || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonText || 'Learn More',
+        heroData.secondaryButtonText ?? heroData.buttonTextSecondary ?? SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonText ?? 'Learn More',
     secondaryButtonLink:
-        heroData.secondaryButtonLink || heroData.buttonLinkSecondary || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonLink || '/about',
+        heroData.secondaryButtonLink ?? heroData.buttonLinkSecondary ?? SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonLink ?? '/about',
     buttonTextSecondary:
-        heroData.buttonTextSecondary || heroData.secondaryButtonText || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonText || 'Learn More',
+        heroData.buttonTextSecondary ?? heroData.secondaryButtonText ?? SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonText ?? 'Learn More',
     buttonLinkSecondary:
-        heroData.buttonLinkSecondary || heroData.secondaryButtonLink || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonLink || '/about',
+        heroData.buttonLinkSecondary ?? heroData.secondaryButtonLink ?? SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonLink ?? '/about',
     imageUrl: heroData.imageUrl || heroData.image || '',
     alignment: heroData.alignment || 'center',
 });
 
 const normalizeHeroDataForStorefront = (heroData = {}) => {
     const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.heroSection || {};
-    const primaryButtonText = heroData.primaryButtonText || heroData.buttonText || defaults.primaryButtonText;
-    const primaryButtonLink = heroData.primaryButtonLink || heroData.buttonLink || defaults.primaryButtonLink;
+    const primaryButtonText = heroData.primaryButtonText ?? heroData.buttonText ?? defaults.primaryButtonText;
+    const primaryButtonLink = heroData.primaryButtonLink ?? heroData.buttonLink ?? defaults.primaryButtonLink;
     const secondaryButtonText =
-        heroData.secondaryButtonText || heroData.buttonTextSecondary || defaults.secondaryButtonText;
+        heroData.secondaryButtonText ?? heroData.buttonTextSecondary ?? defaults.secondaryButtonText;
     const secondaryButtonLink =
-        heroData.secondaryButtonLink || heroData.buttonLinkSecondary || defaults.secondaryButtonLink;
+        heroData.secondaryButtonLink ?? heroData.buttonLinkSecondary ?? defaults.secondaryButtonLink;
 
     return {
         ...defaults,
@@ -72,10 +72,10 @@ const normalizeHeroDataForStorefront = (heroData = {}) => {
         primaryButtonLink,
         secondaryButtonText,
         secondaryButtonLink,
-        buttonText: heroData.buttonText || primaryButtonText,
-        buttonLink: heroData.buttonLink || primaryButtonLink,
-        buttonTextSecondary: heroData.buttonTextSecondary || secondaryButtonText,
-        buttonLinkSecondary: heroData.buttonLinkSecondary || secondaryButtonLink,
+        buttonText: heroData.buttonText ?? primaryButtonText,
+        buttonLink: heroData.buttonLink ?? primaryButtonLink,
+        buttonTextSecondary: heroData.buttonTextSecondary ?? secondaryButtonText,
+        buttonLinkSecondary: heroData.buttonLinkSecondary ?? secondaryButtonLink,
     };
 };
 
@@ -146,12 +146,21 @@ const normalizeNewsletterDataForStorefront = (newsletterData = {}) => {
     };
 };
 
+const withAdvancedSectionDefaults = (sectionData = {}) => ({
+    ...sectionData,
+    customCss: sectionData.customCss ?? '',
+    globalClassStyles: sectionData.globalClassStyles ?? {},
+    visibilityRules: sectionData.visibilityRules ?? {},
+    experiments: sectionData.experiments ?? { enabled: false, variants: [] },
+    blocks: sectionData.blocks ?? [],
+});
+
 const normalizeSectionDataForEditor = (type, data = {}) => {
-    if (type === 'hero') return normalizeHeroDataForEditor(data);
-    if (type === 'products') return normalizeProductsDataForEditor(data);
-    if (type === 'madeToOrder') return normalizeMadeToOrderDataForEditor(data);
-    if (type === 'newsletter') return normalizeNewsletterDataForEditor(data);
-    return data;
+    if (type === 'hero') return withAdvancedSectionDefaults(normalizeHeroDataForEditor(data));
+    if (type === 'products') return withAdvancedSectionDefaults(normalizeProductsDataForEditor(data));
+    if (type === 'madeToOrder') return withAdvancedSectionDefaults(normalizeMadeToOrderDataForEditor(data));
+    if (type === 'newsletter') return withAdvancedSectionDefaults(normalizeNewsletterDataForEditor(data));
+    return withAdvancedSectionDefaults(data);
 };
 
 const normalizeSectionForEditor = (section = {}) => ({
@@ -177,6 +186,8 @@ export default function VisualEditorPage() {
     const [iframeLoading, setIframeLoading] = useState(true);
     const [versionHistory, setVersionHistory] = useState([]);
     const [isRestoring, setIsRestoring] = useState(false);
+    const [publishStatus, setPublishStatus] = useState('draft');
+    const [scheduledPublishAt, setScheduledPublishAt] = useState('');
 
     const postPreviewUpdate = (payload) => {
         const iframe = document.querySelector('iframe');
@@ -247,6 +258,8 @@ export default function VisualEditorPage() {
                 setBranding(settings.branding || SITE_SETTINGS_DEFAULTS.branding || {});
                 setAnnouncementBar(settings.announcementBar || {});
                 setBanners(settings.banners || settings.bannerSystem?.banners || []);
+                setPublishStatus(settings.publishWorkflow?.status || 'draft');
+                setScheduledPublishAt(settings.publishWorkflow?.scheduledAt || '');
 
                 const historyResponse = await adminAPI.getThemeVersionHistory();
                 setVersionHistory(historyResponse.data?.history || []);
@@ -308,7 +321,7 @@ export default function VisualEditorPage() {
         }
     };
 
-    const handleSave = async () => {
+    const handleSave = async ({ publishMode = 'draft' } = {}) => {
         setIsSaving(true);
         try {
             const homeSections = {};
@@ -324,19 +337,66 @@ export default function VisualEditorPage() {
                 layout, // Save the ordered layout
                 theme,
                 branding,
-                announcementBar
+                announcementBar,
+                publishWorkflow: {
+                    status: publishMode === 'live' ? 'live' : publishMode === 'scheduled' ? 'scheduled' : 'draft',
+                    scheduledAt: publishMode === 'scheduled' ? scheduledPublishAt : '',
+                    publishedAt: publishMode === 'live' ? new Date().toISOString() : undefined,
+                    updatedAt: new Date().toISOString(),
+                },
             };
 
             await adminAPI.updateSettings(updateData);
+            setPublishStatus(updateData.publishWorkflow.status);
 
             const historyResponse = await adminAPI.getThemeVersionHistory();
             setVersionHistory(historyResponse.data?.history || []);
-            toast.success('Layout and Theme saved successfully!');
+            if (publishMode === 'live') {
+                toast.success('Published to live successfully');
+            } else if (publishMode === 'scheduled') {
+                toast.success('Publish schedule saved');
+            } else {
+                toast.success('Draft saved successfully');
+            }
         } catch (error) {
             console.error("Failed to save settings:", error);
             toast.error("Failed to save settings");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handlePublishNow = async () => {
+        await handleSave({ publishMode: 'live' });
+    };
+
+    const handleSchedulePublish = async () => {
+        if (!scheduledPublishAt) {
+            toast.error('Choose a publish date/time first');
+            return;
+        }
+
+        await handleSave({ publishMode: 'scheduled' });
+    };
+
+    const handleRunPublishCheck = async () => {
+        try {
+            const response = await adminAPI.runPublishWorkflowNow();
+            const workflow = response?.data?.publishWorkflow || {};
+
+            if (workflow.status) {
+                setPublishStatus(workflow.status);
+            }
+            setScheduledPublishAt(workflow.scheduledAt || '');
+
+            if (response?.data?.result?.promoted) {
+                toast.success('Scheduled publish promoted to live');
+            } else {
+                toast.success('Publish check completed');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to run publish check');
         }
     };
 
@@ -701,8 +761,51 @@ export default function VisualEditorPage() {
                             ))}
                         </div>
 
+                        <div className="mb-3 rounded border border-gray-200 bg-white p-2 text-xs space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="font-semibold text-gray-500 uppercase tracking-wider">Publish Status</span>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${publishStatus === 'live'
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : publishStatus === 'scheduled'
+                                            ? 'bg-amber-100 text-amber-700'
+                                            : 'bg-slate-100 text-slate-700'
+                                    }`}>
+                                    {publishStatus}
+                                </span>
+                            </div>
+                            <input
+                                type="datetime-local"
+                                value={scheduledPublishAt}
+                                onChange={(e) => setScheduledPublishAt(e.target.value)}
+                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs"
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={handleSchedulePublish}
+                                    disabled={isSaving}
+                                    className="btn btn-secondary text-xs"
+                                >
+                                    Schedule
+                                </button>
+                                <button
+                                    onClick={handlePublishNow}
+                                    disabled={isSaving}
+                                    className="btn btn-primary text-xs"
+                                >
+                                    Publish Now
+                                </button>
+                            </div>
+                            <button
+                                onClick={handleRunPublishCheck}
+                                disabled={isSaving}
+                                className="btn btn-secondary text-xs w-full"
+                            >
+                                Run Publish Check
+                            </button>
+                        </div>
+
                         <button
-                            onClick={handleSave}
+                            onClick={() => handleSave({ publishMode: 'draft' })}
                             disabled={isSaving}
                             className="btn btn-primary w-full flex items-center justify-center gap-2"
                         >
@@ -711,7 +814,7 @@ export default function VisualEditorPage() {
                             ) : (
                                 <FiSave />
                             )}
-                            {isSaving ? 'Saving...' : 'Save Layout'}
+                            {isSaving ? 'Saving...' : 'Save Draft'}
                         </button>
                     </div>
                 </aside>

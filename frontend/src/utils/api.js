@@ -217,6 +217,7 @@ export const adminAPI = {
   getThemeVersionHistory: () => api.get("/settings/history"),
   restoreThemeVersion: (historyId) =>
     api.post("/settings/history/restore", { historyId }),
+  runPublishWorkflowNow: () => api.post('/settings/publish/run'),
   exportThemeJson: () => api.get("/settings/export"),
   importThemeJson: (payload) => api.post("/settings/import", payload),
 

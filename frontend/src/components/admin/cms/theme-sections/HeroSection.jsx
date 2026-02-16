@@ -128,7 +128,7 @@ export default function HeroSection({ theme, sectionData = {}, hasActiveBanners 
                         <label className="block text-xs text-gray-500 mb-1">Primary Button Text</label>
                         <input
                             type="text"
-                            value={sectionData.buttonText || sectionData.primaryButtonText || ''}
+                            value={sectionData.buttonText ?? sectionData.primaryButtonText ?? ''}
                             onChange={(e) => handleContentChange('buttonText', e.target.value)}
                             className="w-full text-sm border-gray-200 rounded"
                             placeholder="Shop Collection"
@@ -138,7 +138,7 @@ export default function HeroSection({ theme, sectionData = {}, hasActiveBanners 
                         <label className="block text-xs text-gray-500 mb-1">Primary Button Link</label>
                         <input
                             type="text"
-                            value={sectionData.buttonLink || sectionData.primaryButtonLink || ''}
+                            value={sectionData.buttonLink ?? sectionData.primaryButtonLink ?? ''}
                             onChange={(e) => handleContentChange('buttonLink', e.target.value)}
                             className="w-full text-sm border-gray-200 rounded"
                             placeholder="/products"
@@ -148,7 +148,7 @@ export default function HeroSection({ theme, sectionData = {}, hasActiveBanners 
                         <label className="block text-xs text-gray-500 mb-1">Secondary Button Text</label>
                         <input
                             type="text"
-                            value={sectionData.secondaryButtonText || sectionData.buttonTextSecondary || ''}
+                            value={sectionData.secondaryButtonText ?? sectionData.buttonTextSecondary ?? ''}
                             onChange={(e) => handleContentChange('secondaryButtonText', e.target.value)}
                             className="w-full text-sm border-gray-200 rounded"
                             placeholder="Our Story"
@@ -158,7 +158,7 @@ export default function HeroSection({ theme, sectionData = {}, hasActiveBanners 
                         <label className="block text-xs text-gray-500 mb-1">Secondary Button Link</label>
                         <input
                             type="text"
-                            value={sectionData.secondaryButtonLink || sectionData.buttonLinkSecondary || ''}
+                            value={sectionData.secondaryButtonLink ?? sectionData.buttonLinkSecondary ?? ''}
                             onChange={(e) => handleContentChange('secondaryButtonLink', e.target.value)}
                             className="w-full text-sm border-gray-200 rounded"
                             placeholder="/about"

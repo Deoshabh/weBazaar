@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { FiX, FiCheck } from 'react-icons/fi';
 import { getTemplateByType } from '@/constants/section-registry';
 import ImageUploader from './ImageUploader';
+import toast from 'react-hot-toast';
+import BlockTreeEditor from './BlockTreeEditor';
+import { lintCssContent } from '@/utils/visualBuilder';
 
 export default function EditSectionPanel({ section, onSave, onCancel }) {
     const [formData, setFormData] = useState({});
@@ -21,7 +24,29 @@ export default function EditSectionPanel({ section, onSave, onCancel }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(section.id, formData);
+
+        const nextData = { ...formData };
+
+        for (const field of template.fields) {
+            if (field.type !== 'json') continue;
+
+            const rawValue = nextData[field.name];
+            if (rawValue == null || rawValue === '') {
+                nextData[field.name] = field.defaultValue ?? null;
+                continue;
+            }
+
+            if (typeof rawValue !== 'string') continue;
+
+            try {
+                nextData[field.name] = JSON.parse(rawValue);
+            } catch {
+                toast.error(`${field.label} must be valid JSON`);
+                return;
+            }
+        }
+
+        onSave(section.id, nextData);
     };
 
     return (
@@ -44,7 +69,7 @@ export default function EditSectionPanel({ section, onSave, onCancel }) {
                             {field.type === 'text' && (
                                 <input
                                     type="text"
-                                    value={formData[field.name] || ''}
+                                    value={formData[field.name] ?? ''}
                                     onChange={(e) => handleChange(field.name, e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 />
@@ -53,7 +78,7 @@ export default function EditSectionPanel({ section, onSave, onCancel }) {
                             {field.type === 'number' && (
                                 <input
                                     type="number"
-                                    value={formData[field.name] || 0}
+                                    value={formData[field.name] ?? 0}
                                     onChange={(e) => handleChange(field.name, Number(e.target.value))}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 />
@@ -61,11 +86,57 @@ export default function EditSectionPanel({ section, onSave, onCancel }) {
 
                             {field.type === 'textarea' && (
                                 <textarea
-                                    value={formData[field.name] || ''}
+                                    value={formData[field.name] ?? ''}
                                     onChange={(e) => handleChange(field.name, e.target.value)}
                                     rows={4}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
                                 />
+                            )}
+
+                            {field.type === 'code' && (
+                                <>
+                                    <textarea
+                                        value={formData[field.name] ?? ''}
+                                        onChange={(e) => handleChange(field.name, e.target.value)}
+                                        rows={6}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                                        placeholder={field.placeholder || 'Enter CSS'}
+                                    />
+                                    {lintCssContent(formData[field.name] ?? '').map((warning) => (
+                                        <p key={warning} className="text-[11px] text-amber-700 mt-1">⚠ {warning}</p>
+                                    ))}
+                                </>
+                            )}
+
+                            {field.type === 'json' && (
+                                field.name === 'blocks' ? (
+                                    <BlockTreeEditor
+                                        value={formData[field.name]}
+                                        onChange={(nextBlocks) => handleChange(field.name, nextBlocks)}
+                                    />
+                                ) : (
+                                    <textarea
+                                        value={typeof formData[field.name] === 'string'
+                                            ? formData[field.name]
+                                            : JSON.stringify(formData[field.name] ?? field.defaultValue ?? {}, null, 2)}
+                                        onChange={(e) => handleChange(field.name, e.target.value)}
+                                        rows={8}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-mono text-xs"
+                                        placeholder={field.placeholder || '{\n  "key": "value"\n}'}
+                                    />
+                                )
+                            )}
+
+                            {field.type === 'toggle' && (
+                                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(formData[field.name])}
+                                        onChange={(e) => handleChange(field.name, e.target.checked)}
+                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span>{field.toggleLabel || 'Enabled'}</span>
+                                </label>
                             )}
 
                             {field.type === 'select' && (

@@ -98,6 +98,20 @@ const siteSettingsSchema = new mongoose.Schema(
       },
     ],
     currentVersion: { type: Number, default: 1 },
+    publishWorkflow: {
+      status: {
+        type: String,
+        enum: ['draft', 'scheduled', 'live'],
+        default: 'live',
+      },
+      scheduledAt: { type: Date, default: null },
+      publishedAt: { type: Date, default: null },
+      updatedAt: { type: Date, default: Date.now },
+    },
+    publishedSnapshot: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
     // Singleton pattern enforcement
     isDefault: { type: Boolean, default: true, unique: true },
   },

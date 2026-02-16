@@ -24,6 +24,40 @@ export const SECTION_TEMPLATES = [
       { name: 'secondaryButtonText', label: 'Secondary Button Text', type: 'text' },
       { name: 'secondaryButtonLink', label: 'Secondary Button Link', type: 'text' },
       { name: 'imageUrl', label: 'Background Image', type: 'image' },
+      {
+        name: 'customCss',
+        label: 'Section Custom CSS',
+        type: 'code',
+        help: 'Use {{scope}} to target this section only. Example: {{scope}} h1 { color: red; }',
+      },
+      {
+        name: 'visibilityRules',
+        label: 'Visibility Rules (JSON)',
+        type: 'json',
+        defaultValue: {},
+        help: 'Example: {"devices":["desktop"],"startAt":"2026-02-20T00:00:00Z"}',
+      },
+      {
+        name: 'experiments',
+        label: 'A/B Experiment (JSON)',
+        type: 'json',
+        defaultValue: { enabled: false, variants: [] },
+        help: 'Example: {"enabled":true,"variants":[{"id":"A","weight":50,"data":{"title":"Variant A"}}]}',
+      },
+      {
+        name: 'blocks',
+        label: 'Dynamic Blocks (JSON)',
+        type: 'json',
+        defaultValue: [],
+        help: 'Example: [{"id":"b1","zone":"after","type":"heading","props":{"text":"Promo"}}]',
+      },
+      {
+        name: 'globalClassStyles',
+        label: 'Global Class Styles (JSON)',
+        type: 'json',
+        defaultValue: {},
+        help: 'Example: {"heroTitle":"font-size:48px; color:#111;"}',
+      },
       { 
         name: 'alignment', 
         label: 'Text Alignment', 
@@ -53,6 +87,11 @@ export const SECTION_TEMPLATES = [
       { name: 'productLimit', label: 'Number of Products', type: 'number' },
       { name: 'viewAllButtonText', label: 'View All Button Text', type: 'text' },
       { name: 'viewAllButtonLink', label: 'View All Button Link', type: 'text' },
+      { name: 'customCss', label: 'Section Custom CSS', type: 'code' },
+      { name: 'visibilityRules', label: 'Visibility Rules (JSON)', type: 'json', defaultValue: {} },
+      { name: 'experiments', label: 'A/B Experiment (JSON)', type: 'json', defaultValue: { enabled: false, variants: [] } },
+      { name: 'blocks', label: 'Dynamic Blocks (JSON)', type: 'json', defaultValue: [] },
+      { name: 'globalClassStyles', label: 'Global Class Styles (JSON)', type: 'json', defaultValue: {} },
     ]
   },
   {
@@ -73,6 +112,11 @@ export const SECTION_TEMPLATES = [
         type: 'textarea',
         help: 'Enter one feature per line',
       },
+      { name: 'customCss', label: 'Section Custom CSS', type: 'code' },
+      { name: 'visibilityRules', label: 'Visibility Rules (JSON)', type: 'json', defaultValue: {} },
+      { name: 'experiments', label: 'A/B Experiment (JSON)', type: 'json', defaultValue: { enabled: false, variants: [] } },
+      { name: 'blocks', label: 'Dynamic Blocks (JSON)', type: 'json', defaultValue: [] },
+      { name: 'globalClassStyles', label: 'Global Class Styles (JSON)', type: 'json', defaultValue: {} },
     ]
   },
   {
@@ -84,6 +128,11 @@ export const SECTION_TEMPLATES = [
     },
     fields: [
       { name: 'content', label: 'Content (Markdown)', type: 'textarea' },
+      { name: 'customCss', label: 'Section Custom CSS', type: 'code' },
+      { name: 'visibilityRules', label: 'Visibility Rules (JSON)', type: 'json', defaultValue: {} },
+      { name: 'experiments', label: 'A/B Experiment (JSON)', type: 'json', defaultValue: { enabled: false, variants: [] } },
+      { name: 'blocks', label: 'Dynamic Blocks (JSON)', type: 'json', defaultValue: [] },
+      { name: 'globalClassStyles', label: 'Global Class Styles (JSON)', type: 'json', defaultValue: {} },
     ]
   },
   {
@@ -101,6 +150,11 @@ export const SECTION_TEMPLATES = [
       { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'placeholder', label: 'Input Placeholder', type: 'text' },
       { name: 'buttonText', label: 'Button Text', type: 'text' },
+      { name: 'customCss', label: 'Section Custom CSS', type: 'code' },
+      { name: 'visibilityRules', label: 'Visibility Rules (JSON)', type: 'json', defaultValue: {} },
+      { name: 'experiments', label: 'A/B Experiment (JSON)', type: 'json', defaultValue: { enabled: false, variants: [] } },
+      { name: 'blocks', label: 'Dynamic Blocks (JSON)', type: 'json', defaultValue: [] },
+      { name: 'globalClassStyles', label: 'Global Class Styles (JSON)', type: 'json', defaultValue: {} },
     ]
   }
 ];

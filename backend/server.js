@@ -21,6 +21,9 @@ const { preventCaching } = require("./middleware/security");
 const {
   startShiprocketReconciliationWorker,
 } = require("./services/shiprocketReconciliationService");
+const {
+  startPublishWorkflowWorker,
+} = require('./services/publishWorkflowService');
 
 // ===============================
 // NoSQL injection sanitizer (Express 5 compatible)
@@ -269,6 +272,7 @@ async function startServer() {
       log.success(`Server running on port ${PORT}`);
       log.info("CORS allowed origins", { origins: allowedOrigins });
       startShiprocketReconciliationWorker();
+      startPublishWorkflowWorker();
     });
   } catch (err) {
     log.error("Fatal startup error", err);

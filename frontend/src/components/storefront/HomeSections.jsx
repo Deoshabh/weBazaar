@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { FiArrowRight } from 'react-icons/fi';
 import ProductCard from '@/components/ProductCard';
 import HeroAnimate from '@/components/ui/HeroAnimate';
@@ -8,29 +9,39 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 import { getIconComponent } from '@/utils/iconMapper';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useEffect, useMemo } from 'react';
+import {
+    analyzeBlockPerformance,
+    compileGlobalClassCss,
+    compileScopedCss,
+    evaluateVisibilityRules,
+    parseMaybeJson,
+    resolveDynamicObject,
+    resolveExperimentVariant,
+    resolveResponsiveProps,
+} from '@/utils/visualBuilder';
 
 // --- Sub-components ---
 
 const mergeHeroSettings = (globalHeroSettings = {}, layoutHeroSettings = {}) => {
     const primaryButtonText =
-        layoutHeroSettings.primaryButtonText ||
-        layoutHeroSettings.buttonText ||
-        globalHeroSettings.primaryButtonText ||
+        layoutHeroSettings.primaryButtonText ??
+        layoutHeroSettings.buttonText ??
+        globalHeroSettings.primaryButtonText ??
         globalHeroSettings.buttonText;
     const primaryButtonLink =
-        layoutHeroSettings.primaryButtonLink ||
-        layoutHeroSettings.buttonLink ||
-        globalHeroSettings.primaryButtonLink ||
+        layoutHeroSettings.primaryButtonLink ??
+        layoutHeroSettings.buttonLink ??
+        globalHeroSettings.primaryButtonLink ??
         globalHeroSettings.buttonLink;
     const secondaryButtonText =
-        layoutHeroSettings.secondaryButtonText ||
-        layoutHeroSettings.buttonTextSecondary ||
-        globalHeroSettings.secondaryButtonText ||
+        layoutHeroSettings.secondaryButtonText ??
+        layoutHeroSettings.buttonTextSecondary ??
+        globalHeroSettings.secondaryButtonText ??
         globalHeroSettings.buttonTextSecondary;
     const secondaryButtonLink =
-        layoutHeroSettings.secondaryButtonLink ||
-        layoutHeroSettings.buttonLinkSecondary ||
-        globalHeroSettings.secondaryButtonLink ||
+        layoutHeroSettings.secondaryButtonLink ??
+        layoutHeroSettings.buttonLinkSecondary ??
+        globalHeroSettings.secondaryButtonLink ??
         globalHeroSettings.buttonLinkSecondary;
 
     return {
@@ -40,10 +51,10 @@ const mergeHeroSettings = (globalHeroSettings = {}, layoutHeroSettings = {}) => 
         primaryButtonLink,
         secondaryButtonText,
         secondaryButtonLink,
-        buttonText: layoutHeroSettings.buttonText || primaryButtonText,
-        buttonLink: layoutHeroSettings.buttonLink || primaryButtonLink,
-        buttonTextSecondary: layoutHeroSettings.buttonTextSecondary || secondaryButtonText,
-        buttonLinkSecondary: layoutHeroSettings.buttonLinkSecondary || secondaryButtonLink,
+        buttonText: layoutHeroSettings.buttonText ?? primaryButtonText,
+        buttonLink: layoutHeroSettings.buttonLink ?? primaryButtonLink,
+        buttonTextSecondary: layoutHeroSettings.buttonTextSecondary ?? secondaryButtonText,
+        buttonLinkSecondary: layoutHeroSettings.buttonLinkSecondary ?? secondaryButtonLink,
     };
 };
 
@@ -73,6 +84,122 @@ const resolveHeroContentPosition = (alignment = 'center') => {
     if (alignment === 'left') return 'mr-auto';
     if (alignment === 'right') return 'ml-auto';
     return 'mx-auto';
+};
+
+const renderDynamicBlocks = (blocksInput, context, zone = 'after') => {
+    const parsed = parseMaybeJson(blocksInput, blocksInput);
+    const blocks = Array.isArray(parsed) ? parsed : [];
+
+    const visibleBlocks = blocks.filter((block) => {
+        if (!block || (block.zone || 'after') !== zone) return false;
+        return evaluateVisibilityRules(block.visibilityRules, context.runtime);
+    });
+
+    if (visibleBlocks.length === 0) return null;
+
+    const renderBlockNode = (block, keyPrefix) => {
+        const dynamicProps = resolveDynamicObject(block.props || {}, context.binding);
+        const resolvedProps = resolveResponsiveProps(dynamicProps, context.runtime.device);
+        const blockType = block.type || 'text';
+        const globalClassName = resolvedProps.globalClassName || '';
+        const className = [resolvedProps.className || '', globalClassName].filter(Boolean).join(' ').trim();
+        const childNodes = Array.isArray(block.children) ? block.children : [];
+        const visibleChildren = childNodes.filter((child) =>
+            evaluateVisibilityRules(child.visibilityRules, context.runtime),
+        );
+        const id = block.id || keyPrefix;
+
+        if (blockType === 'row') {
+            const columns = Math.min(Math.max(Number(resolvedProps.columns) || 2, 1), 6);
+            return (
+                <div
+                    key={id}
+                    className={className || 'grid gap-4'}
+                    style={className ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+                >
+                    {visibleChildren.map((child, index) => renderBlockNode(child, `${id}-child-${index}`))}
+                </div>
+            );
+        }
+
+        if (blockType === 'column') {
+            return (
+                <div key={id} className={className || 'space-y-3'}>
+                    {visibleChildren.map((child, index) => renderBlockNode(child, `${id}-child-${index}`))}
+                </div>
+            );
+        }
+
+        if (blockType === 'container') {
+            return (
+                <div key={id} className={className || 'container-custom'}>
+                    {visibleChildren.map((child, index) => renderBlockNode(child, `${id}-child-${index}`))}
+                </div>
+            );
+        }
+
+        if (blockType === 'heading') {
+            return (
+                <h3 key={id} className={className || 'font-serif text-2xl font-semibold text-primary-900'}>
+                    {resolvedProps.text || ''}
+                </h3>
+            );
+        }
+
+        if (blockType === 'button') {
+            const href = resolvedProps.link || resolvedProps.href || '';
+            const label = resolvedProps.text || 'Learn More';
+            if (!href) return null;
+            return (
+                <Link key={id} href={href} className={className || 'btn btn-primary'}>
+                    {label}
+                </Link>
+            );
+        }
+
+        if (blockType === 'image') {
+            const src = resolvedProps.src || '';
+            if (!src) return null;
+            return (
+                <Image
+                    key={id}
+                    src={src}
+                    alt={resolvedProps.alt || ''}
+                    className={className || 'w-full rounded-lg'}
+                    width={Number(resolvedProps.width) || 1200}
+                    height={Number(resolvedProps.height) || 800}
+                    unoptimized
+                />
+            );
+        }
+
+        if (blockType === 'spacer') {
+            const height = Number(resolvedProps.height || 24);
+            return <div key={id} style={{ height: Number.isFinite(height) ? height : 24 }} />;
+        }
+
+        if (blockType === 'divider') {
+            return <hr key={id} className={className || 'border-primary-200'} />;
+        }
+
+        return (
+            <p key={id} className={className || 'text-primary-700'}>
+                {resolvedProps.text || ''}
+            </p>
+        );
+    };
+
+    return <div className="space-y-3">{visibleBlocks.map((block, index) => renderBlockNode(block, `${zone}-${index}`))}</div>;
+};
+
+const withExperimentData = (section = {}, runtime = {}) => {
+    const baseData = section.data || {};
+    const variant = resolveExperimentVariant(baseData.experiments, `${runtime.seed}:${section.id}:${runtime.pathname}`);
+    if (!variant?.data) return baseData;
+    return {
+        ...baseData,
+        ...variant.data,
+    };
 };
 
 const HeroSection = ({ banners, heroSettings }) => {
@@ -136,13 +263,15 @@ const HeroSection = ({ banners, heroSettings }) => {
     if (!heroSettings?.enabled) return null;
 
     const primaryButtonText =
-        heroSettings.primaryButtonText || heroSettings.buttonText || 'Shop Collection';
+        heroSettings.primaryButtonText ?? heroSettings.buttonText ?? 'Shop Collection';
     const primaryButtonLink =
-        heroSettings.primaryButtonLink || heroSettings.buttonLink || '/products';
+        heroSettings.primaryButtonLink ?? heroSettings.buttonLink ?? '/products';
     const secondaryButtonText =
-        heroSettings.secondaryButtonText || heroSettings.buttonTextSecondary || 'Learn More';
+        heroSettings.secondaryButtonText ?? heroSettings.buttonTextSecondary ?? 'Learn More';
     const secondaryButtonLink =
-        heroSettings.secondaryButtonLink || heroSettings.buttonLinkSecondary || '';
+        heroSettings.secondaryButtonLink ?? heroSettings.buttonLinkSecondary ?? '';
+    const hasPrimaryButton = typeof primaryButtonLink === 'string' ? primaryButtonLink.trim().length > 0 : Boolean(primaryButtonLink);
+    const hasSecondaryButton = typeof secondaryButtonLink === 'string' ? secondaryButtonLink.trim().length > 0 : Boolean(secondaryButtonLink);
 
     const heroLayout = heroSettings.layout || 'full-bleed';
     const heroAlignment = heroSettings.alignment || (heroLayout === 'minimal' ? 'center' : 'left');
@@ -165,12 +294,12 @@ const HeroSection = ({ banners, heroSettings }) => {
                     <p data-hero-animate className={`text-xl mb-8 ${heroHasImage ? 'text-white/90' : 'text-primary-700'}`}>{heroSettings.description}</p>
                 )}
                 <div data-hero-animate className="flex flex-col sm:flex-row gap-4 justify-center sm:justify-start">
-                    {primaryButtonLink && (
+                    {hasPrimaryButton && (
                         <Link href={primaryButtonLink} className="btn btn-primary text-lg px-8 py-4">
                             {primaryButtonText} <FiArrowRight className="inline ml-2" />
                         </Link>
                     )}
-                    {secondaryButtonLink && (
+                    {hasSecondaryButton && (
                         <Link href={secondaryButtonLink} className="btn btn-secondary text-lg px-8 py-4">
                             {secondaryButtonText}
                         </Link>
@@ -344,12 +473,41 @@ export default function HomeSections({ initialSettings, initialProducts }) {
         return clientSettings;
     }, [loading, clientSettings, initialSettings]);
 
+    const runtimeContext = useMemo(() => {
+        const hasWindow = typeof window !== 'undefined';
+        const width = hasWindow ? window.innerWidth : 1280;
+        const device = width <= 768 ? 'mobile' : width <= 1024 ? 'tablet' : 'desktop';
+        const query = hasWindow ? new URLSearchParams(window.location.search) : new URLSearchParams('');
+        const pathname = hasWindow ? window.location.pathname : '/';
+        const isEmbeddedPreview = hasWindow && query.get('visualEditor') === '1';
+        const seed = hasWindow
+            ? window.localStorage.getItem('vb-seed') || `${Date.now()}`
+            : 'server';
+
+        if (hasWindow && !window.localStorage.getItem('vb-seed')) {
+            window.localStorage.setItem('vb-seed', seed);
+        }
+
+        return {
+            device,
+            query,
+            pathname,
+            seed,
+            isEmbeddedPreview,
+            isLoggedIn: false,
+        };
+    }, []);
+
     // Determine Layout Order
     // Use settings.layout if available, otherwise fallback to default structure
     let renderOrder = [];
 
     if (activeSettings.layout && activeSettings.layout.length > 0) {
-        renderOrder = activeSettings.layout.filter(item => item.enabled);
+        renderOrder = activeSettings.layout.filter((item) => {
+            if (!item.enabled) return false;
+            const effectiveData = withExperimentData(item, runtimeContext);
+            return evaluateVisibilityRules(effectiveData.visibilityRules, runtimeContext);
+        });
     } else {
         // Default fallback
         if (activeSettings.homeSections?.heroSection?.enabled) renderOrder.push({ id: 'hero', type: 'hero' });
@@ -360,37 +518,39 @@ export default function HomeSections({ initialSettings, initialProducts }) {
 
     // Helper to render section by type
     const renderSection = (section) => {
+        const sectionData = withExperimentData(section, runtimeContext);
+
         switch (section.type) {
             case 'hero': {
                 const heroSettings = mergeHeroSettings(
                     activeSettings.homeSections?.heroSection || {},
-                    section.data || {}
+                    sectionData || {}
                 );
                 return <HeroSection key={section.id} banners={activeSettings.banners} heroSettings={heroSettings} />;
             }
             case 'products': {
                 const productsSettings = mergeSectionSettings(
                     activeSettings.homeSections?.featuredProducts || {},
-                    section.data || {}
+                    sectionData || {}
                 );
                 return <FeaturedProductsSection key={section.id} sectionData={productsSettings} products={initialProducts} />;
             }
             case 'madeToOrder': {
                 const madeToOrderSettings = mergeSectionSettings(
                     activeSettings.homeSections?.madeToOrder || {},
-                    section.data || {}
+                    sectionData || {}
                 );
                 return <MadeToOrderSection key={section.id} sectionData={madeToOrderSettings} />;
             }
             case 'newsletter': {
                 const newsletterSettings = mergeSectionSettings(
                     activeSettings.homeSections?.newsletter || {},
-                    section.data || {}
+                    sectionData || {}
                 );
                 return <NewsletterSection key={section.id} sectionData={newsletterSettings} />;
             }
             case 'text':
-                return <TextSection key={section.id} sectionData={section.data || {}} />;
+                return <TextSection key={section.id} sectionData={sectionData || {}} />;
             default:
                 return null;
         }
@@ -433,16 +593,57 @@ export default function HomeSections({ initialSettings, initialProducts }) {
     return (
         <>
             {renderOrder.map(section => (
-                <div
-                    key={section.id}
-                    data-editor-section="true"
-                    data-section-id={section.id}
-                    data-section-type={section.type}
-                >
-                    {renderSection(section)}
-                    {/* Inject Trust Badges after Hero if it's the first render (or check type) */}
-                    {section.type === 'hero' && <TrustBadgesSection settings={activeSettings} />}
-                </div>
+                (() => {
+                    const effectiveSectionData = withExperimentData(section, runtimeContext);
+                    const scopeSelector = `[data-section-id="${section.id}"]`;
+                    const compiledCss = compileScopedCss(scopeSelector, effectiveSectionData.customCss || '');
+                    const compiledGlobalClassCss = compileGlobalClassCss(scopeSelector, effectiveSectionData.globalClassStyles);
+                    const renderCost = analyzeBlockPerformance(effectiveSectionData.blocks);
+                    const bindingContext = {
+                        settings: activeSettings,
+                        section: effectiveSectionData,
+                    };
+
+                    return (
+                        <div
+                            key={section.id}
+                            className="relative"
+                            data-editor-section="true"
+                            data-section-id={section.id}
+                            data-section-type={section.type}
+                        >
+                            {compiledCss && <style>{compiledCss}</style>}
+                            {compiledGlobalClassCss && <style>{compiledGlobalClassCss}</style>}
+                            {runtimeContext.isEmbeddedPreview && (
+                                <div className="pointer-events-none absolute right-2 top-2 z-20">
+                                    <span
+                                        className={`rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                                            renderCost.level === 'high'
+                                                ? 'bg-red-100 text-red-700'
+                                                : renderCost.level === 'medium'
+                                                    ? 'bg-amber-100 text-amber-700'
+                                                    : 'bg-emerald-100 text-emerald-700'
+                                        }`}
+                                    >
+                                        Render Cost: {renderCost.level}
+                                    </span>
+                                </div>
+                            )}
+                            {renderDynamicBlocks(
+                                effectiveSectionData.blocks,
+                                { runtime: runtimeContext, binding: bindingContext },
+                                'before',
+                            )}
+                            {renderSection(section)}
+                            {renderDynamicBlocks(
+                                effectiveSectionData.blocks,
+                                { runtime: runtimeContext, binding: bindingContext },
+                                'after',
+                            )}
+                            {section.type === 'hero' && <TrustBadgesSection settings={activeSettings} />}
+                        </div>
+                    );
+                })()
             ))}
         </>
     );

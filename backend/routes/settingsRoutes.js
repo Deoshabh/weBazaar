@@ -14,6 +14,7 @@ router.get('/', settingsController.getAllSettings);
 router.put('/', settingsController.updateSettings);
 router.get('/history', settingsController.getThemeVersionHistory);
 router.post('/history/restore', settingsController.restoreThemeVersion);
+router.post('/publish/run', settingsController.runPublishWorkflowNow);
 router.get('/export', settingsController.exportThemeJson);
 router.post('/import', settingsController.importThemeJson);
 
