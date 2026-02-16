@@ -36,6 +36,115 @@ import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
 
 // ... imports
 
+const normalizeHeroDataForEditor = (heroData = {}) => ({
+    ...heroData,
+    title: heroData.title || '',
+    subtitle: heroData.subtitle || '',
+    buttonText:
+        heroData.buttonText || heroData.primaryButtonText || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonText || 'Shop Now',
+    buttonLink:
+        heroData.buttonLink || heroData.primaryButtonLink || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonLink || '/products',
+    imageUrl: heroData.imageUrl || heroData.image || '',
+    alignment: heroData.alignment || 'center',
+});
+
+const normalizeHeroDataForStorefront = (heroData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.heroSection || {};
+    const primaryButtonText = heroData.primaryButtonText || heroData.buttonText || defaults.primaryButtonText;
+    const primaryButtonLink = heroData.primaryButtonLink || heroData.buttonLink || defaults.primaryButtonLink;
+
+    return {
+        ...defaults,
+        ...heroData,
+        primaryButtonText,
+        primaryButtonLink,
+        buttonText: heroData.buttonText || primaryButtonText,
+        buttonLink: heroData.buttonLink || primaryButtonLink,
+    };
+};
+
+const normalizeProductsDataForEditor = (productsData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.featuredProducts || {};
+    return {
+        ...defaults,
+        ...productsData,
+        productLimit: Number(productsData.productLimit ?? productsData.count ?? defaults.productLimit ?? 8),
+    };
+};
+
+const normalizeProductsDataForStorefront = (productsData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.featuredProducts || {};
+    return {
+        ...defaults,
+        ...productsData,
+        productLimit: Number(productsData.productLimit ?? productsData.count ?? defaults.productLimit ?? 8),
+    };
+};
+
+const normalizeFeaturesForStorefront = (features) => {
+    if (Array.isArray(features)) return features.filter(Boolean);
+    if (typeof features === 'string') {
+        return features
+            .split('\n')
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    return [];
+};
+
+const normalizeMadeToOrderDataForEditor = (madeToOrderData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.madeToOrder || {};
+    const normalizedFeatures = normalizeFeaturesForStorefront(
+        madeToOrderData.features ?? defaults.features
+    );
+
+    return {
+        ...defaults,
+        ...madeToOrderData,
+        features: normalizedFeatures.join('\n'),
+    };
+};
+
+const normalizeMadeToOrderDataForStorefront = (madeToOrderData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.madeToOrder || {};
+    return {
+        ...defaults,
+        ...madeToOrderData,
+        features: normalizeFeaturesForStorefront(madeToOrderData.features ?? defaults.features),
+    };
+};
+
+const normalizeNewsletterDataForEditor = (newsletterData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.newsletter || {};
+    return {
+        ...defaults,
+        ...newsletterData,
+    };
+};
+
+const normalizeNewsletterDataForStorefront = (newsletterData = {}) => {
+    const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.newsletter || {};
+    return {
+        ...defaults,
+        ...newsletterData,
+    };
+};
+
+const normalizeSectionDataForEditor = (type, data = {}) => {
+    if (type === 'hero') return normalizeHeroDataForEditor(data);
+    if (type === 'products') return normalizeProductsDataForEditor(data);
+    if (type === 'madeToOrder') return normalizeMadeToOrderDataForEditor(data);
+    if (type === 'newsletter') return normalizeNewsletterDataForEditor(data);
+    return data;
+};
+
+const normalizeSectionForEditor = (section = {}) => ({
+    ...section,
+    data: normalizeSectionDataForEditor(section.type, section.data || {}),
+});
+
+const normalizeLayoutForEditor = (sections = []) => sections.map(normalizeSectionForEditor);
+
 export default function VisualEditorPage() {
     const [activeView, setActiveView] = useState('desktop');
     const [layout, setLayout] = useState([]); // Ordered list of sections
@@ -78,14 +187,42 @@ export default function VisualEditorPage() {
                 let currentLayout = [];
 
                 if (settings.layout && settings.layout.length > 0) {
-                    currentLayout = settings.layout;
+                    currentLayout = normalizeLayoutForEditor(settings.layout);
                 } else if (settings.homeSections) {
                     // Fallback to legacy homeSections
                     const sections = settings.homeSections;
-                    if (sections.heroSection) currentLayout.push({ id: 'hero', type: 'hero', enabled: sections.heroSection.enabled, data: sections.heroSection });
-                    if (sections.featuredProducts) currentLayout.push({ id: 'products', type: 'products', enabled: sections.featuredProducts.enabled, data: sections.featuredProducts });
-                    if (sections.madeToOrder) currentLayout.push({ id: 'madeToOrder', type: 'madeToOrder', enabled: sections.madeToOrder.enabled, data: sections.madeToOrder });
-                    if (sections.newsletter) currentLayout.push({ id: 'newsletter', type: 'newsletter', enabled: sections.newsletter.enabled, data: sections.newsletter });
+                    if (sections.heroSection) {
+                        currentLayout.push({
+                            id: 'hero',
+                            type: 'hero',
+                            enabled: sections.heroSection.enabled,
+                            data: normalizeHeroDataForEditor(sections.heroSection),
+                        });
+                    }
+                    if (sections.featuredProducts) {
+                        currentLayout.push({
+                            id: 'products',
+                            type: 'products',
+                            enabled: sections.featuredProducts.enabled,
+                            data: normalizeProductsDataForEditor(sections.featuredProducts),
+                        });
+                    }
+                    if (sections.madeToOrder) {
+                        currentLayout.push({
+                            id: 'madeToOrder',
+                            type: 'madeToOrder',
+                            enabled: sections.madeToOrder.enabled,
+                            data: normalizeMadeToOrderDataForEditor(sections.madeToOrder),
+                        });
+                    }
+                    if (sections.newsletter) {
+                        currentLayout.push({
+                            id: 'newsletter',
+                            type: 'newsletter',
+                            enabled: sections.newsletter.enabled,
+                            data: normalizeNewsletterDataForEditor(sections.newsletter),
+                        });
+                    }
                 }
 
                 setLayout(currentLayout.length > 0 ? currentLayout : initialLayout);
@@ -158,10 +295,10 @@ export default function VisualEditorPage() {
         try {
             const homeSections = {};
             layout.forEach(section => {
-                if (section.type === 'hero') homeSections.heroSection = { ...section.data, enabled: section.enabled };
-                if (section.type === 'products') homeSections.featuredProducts = { ...section.data, enabled: section.enabled };
-                if (section.type === 'madeToOrder') homeSections.madeToOrder = { ...section.data, enabled: section.enabled };
-                if (section.type === 'newsletter') homeSections.newsletter = { ...section.data, enabled: section.enabled };
+                if (section.type === 'hero') homeSections.heroSection = normalizeHeroDataForStorefront({ ...section.data, enabled: section.enabled });
+                if (section.type === 'products') homeSections.featuredProducts = normalizeProductsDataForStorefront({ ...section.data, enabled: section.enabled });
+                if (section.type === 'madeToOrder') homeSections.madeToOrder = normalizeMadeToOrderDataForStorefront({ ...section.data, enabled: section.enabled });
+                if (section.type === 'newsletter') homeSections.newsletter = normalizeNewsletterDataForStorefront({ ...section.data, enabled: section.enabled });
             });
 
             const updateData = {
@@ -213,7 +350,7 @@ export default function VisualEditorPage() {
             const settings = response.data?.settings;
 
             if (settings) {
-                setLayout(settings.layout || layout);
+                setLayout(normalizeLayoutForEditor(settings.layout || layout));
                 setTheme(settings.theme || theme);
                 setBranding(settings.branding || branding);
                 setAnnouncementBar(settings.announcementBar || announcementBar);
@@ -244,7 +381,7 @@ export default function VisualEditorPage() {
             const settings = response.data?.settings;
 
             if (settings) {
-                setLayout(settings.layout || []);
+                setLayout(normalizeLayoutForEditor(settings.layout || []));
                 setTheme(settings.theme || {});
                 setBranding(settings.branding || {});
                 setAnnouncementBar(settings.announcementBar || {});
@@ -295,7 +432,13 @@ export default function VisualEditorPage() {
 
     const handleUpdateSection = (id, newData) => {
         setLayout(items => {
-            const newLayout = items.map(item => item.id === id ? { ...item, data: newData } : item);
+            const newLayout = items.map(item => {
+                if (item.id !== id) return item;
+                return {
+                    ...item,
+                    data: normalizeSectionDataForEditor(item.type, newData),
+                };
+            });
 
             // Sync to preview
             postPreviewUpdate({ layout: newLayout });
@@ -310,11 +453,17 @@ export default function VisualEditorPage() {
         // ... similar logic, but we need to ensure we don't duplicate unique sections
         // if the backend structure enforces singletons (like 'hero').
 
+        const uniqueTypes = new Set(['hero', 'products', 'madeToOrder', 'newsletter']);
+        if (uniqueTypes.has(template.type) && layout.some((section) => section.type === template.type)) {
+            toast.error(`${template.label} already exists`);
+            return;
+        }
+
         const newSection = {
             id: `section-${Date.now()}`, // Temporary ID
             type: template.type,
             enabled: true,
-            data: { ...template.defaultData }
+            data: normalizeSectionDataForEditor(template.type, { ...template.defaultData })
         };
 
         setLayout(prev => {

@@ -11,6 +11,44 @@ import { useEffect, useMemo } from 'react';
 
 // --- Sub-components ---
 
+const mergeHeroSettings = (globalHeroSettings = {}, layoutHeroSettings = {}) => {
+    const primaryButtonText =
+        layoutHeroSettings.primaryButtonText ||
+        layoutHeroSettings.buttonText ||
+        globalHeroSettings.primaryButtonText ||
+        globalHeroSettings.buttonText;
+    const primaryButtonLink =
+        layoutHeroSettings.primaryButtonLink ||
+        layoutHeroSettings.buttonLink ||
+        globalHeroSettings.primaryButtonLink ||
+        globalHeroSettings.buttonLink;
+
+    return {
+        ...globalHeroSettings,
+        ...layoutHeroSettings,
+        primaryButtonText,
+        primaryButtonLink,
+        buttonText: layoutHeroSettings.buttonText || primaryButtonText,
+        buttonLink: layoutHeroSettings.buttonLink || primaryButtonLink,
+    };
+};
+
+const mergeSectionSettings = (globalSectionSettings = {}, layoutSectionSettings = {}) => ({
+    ...globalSectionSettings,
+    ...layoutSectionSettings,
+});
+
+const normalizeFeatureList = (features) => {
+    if (Array.isArray(features)) return features.filter(Boolean);
+    if (typeof features === 'string') {
+        return features
+            .split('\n')
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    return [];
+};
+
 const HeroSection = ({ banners, heroSettings }) => {
     // Use banners if enabled and active, else fallback to Hero Settings
     const activeBanners = (banners || [])
@@ -87,8 +125,7 @@ const TextSection = ({ sectionData }) => {
     );
 };
 
-const FeaturedProductsSection = ({ settings, products }) => {
-    const sectionData = settings.homeSections?.featuredProducts || {};
+const FeaturedProductsSection = ({ sectionData = {}, products }) => {
     if (!sectionData.enabled) return null;
 
     return (
@@ -123,9 +160,10 @@ const FeaturedProductsSection = ({ settings, products }) => {
     );
 };
 
-const MadeToOrderSection = ({ settings }) => {
-    const sectionData = settings.homeSections?.madeToOrder || {};
+const MadeToOrderSection = ({ sectionData = {} }) => {
     if (!sectionData.enabled) return null;
+
+    const featureList = normalizeFeatureList(sectionData.features);
 
     return (
         <ScrollReveal delay={100}>
@@ -134,7 +172,7 @@ const MadeToOrderSection = ({ settings }) => {
                     <h2 className="font-serif text-4xl font-bold text-primary-900 mb-6">{sectionData.title}</h2>
                     <p className="text-lg text-primary-600 mb-8">{sectionData.description}</p>
                     <div className="flex flex-wrap justify-center gap-4 text-sm text-primary-600">
-                        {sectionData.features?.map(f => (
+                        {featureList.map(f => (
                             <span key={f} className="bg-primary-50 px-3 py-1 rounded-full">{f}</span>
                         ))}
                     </div>
@@ -144,8 +182,7 @@ const MadeToOrderSection = ({ settings }) => {
     );
 };
 
-const NewsletterSection = ({ settings }) => {
-    const sectionData = settings.homeSections?.newsletter || {};
+const NewsletterSection = ({ sectionData = {} }) => {
     if (!sectionData.enabled) return null;
 
     return (
@@ -157,7 +194,7 @@ const NewsletterSection = ({ settings }) => {
                     <form className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
                         <input
                             type="email"
-                            placeholder="Your email address"
+                            placeholder={sectionData.placeholder || 'Your email address'}
                             className="flex-1 px-4 py-3 rounded-md text-gray-900 focus:outline-none"
                         />
                         <button className="bg-brand-tan text-white px-6 py-3 rounded-md hover:bg-white hover:text-brand-brown transition-colors font-medium">
@@ -227,14 +264,34 @@ export default function HomeSections({ initialSettings, initialProducts }) {
     // Helper to render section by type
     const renderSection = (section) => {
         switch (section.type) {
-            case 'hero':
-                return <HeroSection key={section.id} banners={activeSettings.banners} heroSettings={activeSettings.homeSections?.heroSection} />;
-            case 'products':
-                return <FeaturedProductsSection key={section.id} settings={activeSettings} products={initialProducts} />;
-            case 'madeToOrder':
-                return <MadeToOrderSection key={section.id} settings={activeSettings} />;
-            case 'newsletter':
-                return <NewsletterSection key={section.id} settings={activeSettings} />;
+            case 'hero': {
+                const heroSettings = mergeHeroSettings(
+                    activeSettings.homeSections?.heroSection || {},
+                    section.data || {}
+                );
+                return <HeroSection key={section.id} banners={activeSettings.banners} heroSettings={heroSettings} />;
+            }
+            case 'products': {
+                const productsSettings = mergeSectionSettings(
+                    activeSettings.homeSections?.featuredProducts || {},
+                    section.data || {}
+                );
+                return <FeaturedProductsSection key={section.id} sectionData={productsSettings} products={initialProducts} />;
+            }
+            case 'madeToOrder': {
+                const madeToOrderSettings = mergeSectionSettings(
+                    activeSettings.homeSections?.madeToOrder || {},
+                    section.data || {}
+                );
+                return <MadeToOrderSection key={section.id} sectionData={madeToOrderSettings} />;
+            }
+            case 'newsletter': {
+                const newsletterSettings = mergeSectionSettings(
+                    activeSettings.homeSections?.newsletter || {},
+                    section.data || {}
+                );
+                return <NewsletterSection key={section.id} sectionData={newsletterSettings} />;
+            }
             case 'text':
                 return <TextSection key={section.id} sectionData={section.data || {}} />;
             default:

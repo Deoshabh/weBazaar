@@ -1,5 +1,5 @@
 
-import { FiLayout, FiShoppingBag, FiType, FiMail, FiImage } from 'react-icons/fi';
+import { FiLayout, FiShoppingBag, FiType, FiMail, FiBox } from 'react-icons/fi';
 
 export const SECTION_TEMPLATES = [
   {
@@ -37,14 +37,38 @@ export const SECTION_TEMPLATES = [
     label: 'Featured Products',
     icon: <FiShoppingBag />,
     defaultData: {
-      title: 'Best Sellers',
-      category: '', // empty = all
-      count: 4,
+      title: 'Featured Collection',
+      description: 'Explore our handpicked selection of premium shoes.',
+      productLimit: 8,
+      viewAllButtonText: 'View All Products',
+      viewAllButtonLink: '/products',
     },
     fields: [
       { name: 'title', label: 'Section Title', type: 'text' },
-      { name: 'category', label: 'Category Slug', type: 'text', help: 'Leave empty for all products' },
-      { name: 'count', label: 'Number of Products', type: 'number' },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      { name: 'productLimit', label: 'Number of Products', type: 'number' },
+      { name: 'viewAllButtonText', label: 'View All Button Text', type: 'text' },
+      { name: 'viewAllButtonLink', label: 'View All Button Link', type: 'text' },
+    ]
+  },
+  {
+    type: 'madeToOrder',
+    label: 'Made To Order',
+    icon: <FiBox />,
+    defaultData: {
+      title: 'Made to Order',
+      description: 'All our shoes are crafted to order for perfect fit and quality.',
+      features: ['Custom Crafted', 'Premium Leather', 'Expert Artisans', '7-10 Days Delivery'],
+    },
+    fields: [
+      { name: 'title', label: 'Section Title', type: 'text' },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      {
+        name: 'features',
+        label: 'Features (one per line)',
+        type: 'textarea',
+        help: 'Enter one feature per line',
+      },
     ]
   },
   {
@@ -64,11 +88,15 @@ export const SECTION_TEMPLATES = [
     icon: <FiMail />,
     defaultData: {
       title: 'Subscribe to our newsletter',
+      description: 'Get updates on new products and exclusive offers',
       placeholder: 'Enter your email',
+      buttonText: 'Subscribe',
     },
     fields: [
       { name: 'title', label: 'Heading', type: 'text' },
+      { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'placeholder', label: 'Input Placeholder', type: 'text' },
+      { name: 'buttonText', label: 'Button Text', type: 'text' },
     ]
   }
 ];
