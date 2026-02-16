@@ -3,6 +3,21 @@
 // ===============================
 const crypto = require("crypto");
 
+const safeCompare = (left, right) => {
+  if (!left || !right) return false;
+
+  const leftBuffer = Buffer.from(String(left));
+  const rightBuffer = Buffer.from(String(right));
+
+  if (leftBuffer.length !== rightBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
+
+const normalizeIP = (ip) => String(ip || "").replace(/^::ffff:/, "");
+
 /**
  * Shiprocket webhook IP whitelist
  * Update this list based on Shiprocket's official documentation
@@ -33,18 +48,20 @@ const verifyShiprocketIP = (req, res, next) => {
     req.headers["x-real-ip"] ||
     req.connection.remoteAddress;
 
-  console.log(`📡 Webhook request from IP: ${clientIP}`);
+  const normalizedClientIP = normalizeIP(clientIP);
+
+  console.log(`📡 Webhook request from IP: ${normalizedClientIP}`);
 
   // Skip IP check if valid x-api-key token is provided
   const apiKey = req.headers["x-api-key"];
-  if (apiKey && apiKey === process.env.SHIPROCKET_WEBHOOK_TOKEN) {
+  if (safeCompare(apiKey, process.env.SHIPROCKET_WEBHOOK_TOKEN)) {
     console.log("✅ Webhook: Valid token provided, skipping IP check");
     return next();
   }
 
   // Verify IP is from Shiprocket
-  if (!SHIPROCKET_IPS.includes(clientIP)) {
-    console.log(`⚠️ Webhook: Unauthorized IP ${clientIP} (no valid token)`);
+  if (!SHIPROCKET_IPS.includes(normalizedClientIP)) {
+    console.log(`⚠️ Webhook: Unauthorized IP ${normalizedClientIP} (no valid token)`);
     return res.status(403).json({
       success: false,
       message: "Forbidden: Unauthorized IP address",
@@ -67,7 +84,7 @@ const verifyShiprocketSignature = (req, res, next) => {
     if (!secret) {
       console.log("⚠️ SHIPROCKET_WEBHOOK_SECRET not configured");
       const apiKey = req.headers["x-api-key"];
-      if (!apiKey || apiKey !== process.env.SHIPROCKET_WEBHOOK_TOKEN) {
+      if (!safeCompare(apiKey, process.env.SHIPROCKET_WEBHOOK_TOKEN)) {
         return res.status(401).json({
           success: false,
           message: "Unauthorized: Invalid webhook token",
@@ -87,7 +104,7 @@ const verifyShiprocketSignature = (req, res, next) => {
         .update(rawBody)
         .digest("hex");
 
-      if (signature !== computedSignature) {
+      if (!safeCompare(signature, computedSignature)) {
         console.log("❌ Webhook: Invalid signature");
         return res.status(401).json({
           success: false,

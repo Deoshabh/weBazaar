@@ -6,12 +6,14 @@ import { toast } from 'react-hot-toast';
 import { FiMail, FiMapPin, FiPhone, FiArrowRight } from 'react-icons/fi';
 import { contactAPI } from '@/utils/api';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
+import { useRecaptcha, RECAPTCHA_ACTIONS } from '@/utils/recaptcha';
 
 export default function ContactPage() {
   const { settings } = useSiteSettings();
   const contactInfo = settings.contactInfo || {};
   const contactPage = settings.contactPage || {};
   const socialLinks = (settings.socialLinks || []).filter((item) => item.enabled && item.url);
+  const { getToken } = useRecaptcha();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -39,7 +41,8 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      await contactAPI.submit(formData);
+      const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.CONTACT_FORM);
+      await contactAPI.submit({ ...formData, recaptchaToken });
       toast.success("Message sent successfully! We'll get back to you soon.");
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {

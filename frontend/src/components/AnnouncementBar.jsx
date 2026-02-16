@@ -30,12 +30,6 @@ export default function AnnouncementBar() {
     return null;
   }
 
-  const content = (
-    <span className="font-medium">
-      {announcement.text}
-    </span>
-  );
-
   const handleDismiss = () => {
     setDismissed(true);
     if (typeof window !== 'undefined') {
@@ -61,7 +55,7 @@ export default function AnnouncementBar() {
 
       {announcement.dismissible !== false && (
         <button
-          onClick={() => setIsVisible(false)}
+          onClick={handleDismiss}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-black/10 rounded-full transition-colors"
           aria-label="Dismiss"
         >

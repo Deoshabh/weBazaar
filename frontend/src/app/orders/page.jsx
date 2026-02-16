@@ -32,7 +32,6 @@ export default function OrdersPage() {
       setLoadingOrders(true);
       const response = await orderAPI.getAll();
       // Backend returns {orders: [...]}
-      console.log('📦 User Orders API response:', response.data);
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);

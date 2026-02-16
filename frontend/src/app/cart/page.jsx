@@ -28,6 +28,8 @@ export default function CartPage() {
     router.push('/checkout');
   };
 
+  const freeShippingThreshold = 1000;
+
   const handleUpdateQuantity = async (productId, size, currentQty, change) => {
     const newQty = currentQty + change;
     if (newQty < 1) return;
@@ -135,7 +137,7 @@ export default function CartPage() {
                 <div className="space-y-3 mb-6">
                   {/* Free Shipping Progress */}
                   <div className="bg-primary-50 rounded-lg p-3 mb-4">
-                    {cartTotal >= 4999 ? (
+                    {cartTotal >= freeShippingThreshold ? (
                       <div className="flex items-center gap-2 text-green-700 font-medium text-sm">
                         <FiAward className="w-5 h-5" />
                         Your order qualifies for Free Shipping!
@@ -143,13 +145,13 @@ export default function CartPage() {
                     ) : (
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-primary-700">Add <strong>₹{(4999 - cartTotal).toLocaleString()}</strong> for Free Shipping</span>
-                          <span className="text-primary-500">{Math.min(100, Math.round((cartTotal / 4999) * 100))}%</span>
+                          <span className="text-primary-700">Add <strong>₹{(freeShippingThreshold - cartTotal).toLocaleString()}</strong> for Free Shipping</span>
+                          <span className="text-primary-500">{Math.min(100, Math.round((cartTotal / freeShippingThreshold) * 100))}%</span>
                         </div>
                         <div className="h-2 bg-primary-200 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-brand-brown transition-all duration-500 ease-out"
-                            style={{ width: `${Math.min(100, (cartTotal / 4999) * 100)}%` }}
+                            style={{ width: `${Math.min(100, (cartTotal / freeShippingThreshold) * 100)}%` }}
                           />
                         </div>
                       </div>
@@ -162,7 +164,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-primary-700">
                     <span>Shipping</span>
-                    <span>{cartTotal >= 4999 ? <span className="text-green-600">Free</span> : 'Calculated at checkout'}</span>
+                    <span>{cartTotal >= freeShippingThreshold ? <span className="text-green-600">Free</span> : 'Calculated at checkout'}</span>
                   </div>
                   <div className="border-t border-primary-200 pt-3">
                     <div className="flex justify-between text-lg font-bold text-primary-900">

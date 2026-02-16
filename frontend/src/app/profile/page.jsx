@@ -55,7 +55,6 @@ export default function ProfilePage() {
     try {
       const response = await addressAPI.getAll();
       // Backend returns array directly, not wrapped
-      console.log('📦 Addresses API response:', response.data);
       const addressesData = Array.isArray(response.data) ? response.data : (response.data.addresses || []);
       setAddresses(addressesData);
     } catch (error) {

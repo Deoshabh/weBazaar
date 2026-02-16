@@ -7,6 +7,7 @@ const {
   toggleUserBlock,
   createAdmin,
   getUserHistory,
+  getSecurityEvents,
 } = require("../controllers/adminUserController");
 const { authenticate } = require("../middleware/auth");
 const admin = require("../middleware/admin");
@@ -22,6 +23,9 @@ router.get("/", getAllUsers);
 
 // @route   POST /api/v1/admin/users/create-admin
 router.post("/create-admin", createAdmin);
+
+// @route   GET /api/v1/admin/users/security-events
+router.get("/security-events", getSecurityEvents);
 
 // @route   GET /api/v1/admin/users/:id/history (must come before /:id)
 router.get("/:id/history", validateRequest(mongoIdSchema), getUserHistory);

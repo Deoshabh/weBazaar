@@ -115,6 +115,8 @@ const allowedOrigins = [
   ...(process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [])
 ];
 
+const allowWildcardSubdomains = process.env.CORS_ALLOW_WILDCARD_SUBDOMAINS === 'true';
+
 app.use(
   cors({
     origin(origin, callback) {
@@ -126,8 +128,8 @@ app.use(
         return callback(null, true);
       }
 
-      // Permissive allow for radeo.in subdomains
-      if (origin.endsWith('.radeo.in') || origin === 'https://radeo.in') {
+      // Optional wildcard allow for radeo.in subdomains (disabled by default)
+      if (allowWildcardSubdomains && /^https:\/\/[a-z0-9-]+\.radeo\.in$/i.test(origin)) {
         return callback(null, true);
       }
       
@@ -150,8 +152,6 @@ app.use(
   helmet({
     // Allow cross-origin requests from frontend (radeo.in → api.radeo.in)
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    // API server doesn't serve HTML — disable CSP
-    contentSecurityPolicy: false,
   }),
 );
 app.use(compression()); // Compress all responses

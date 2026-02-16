@@ -20,7 +20,6 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       try {
         const response = await adminAPI.getAdminStats();
-        console.log('Admin Stats:', response.data);
         setStats(response.data);
       } catch (error) {
         console.error('Failed to fetch admin stats:', error);
@@ -33,9 +32,9 @@ export default function AdminDashboard() {
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
     }).format(amount || 0);
   };

@@ -1,6 +1,10 @@
 const User = require("../models/User");
+const RefreshToken = require("../models/RefreshToken");
+const SecurityEvent = require("../models/SecurityEvent");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const { log } = require("../utils/logger");
+const { recordSecurityEvent } = require("../utils/securityEvents");
 
 // @desc    Get all users
 // @route   GET /api/v1/admin/users
@@ -22,9 +26,18 @@ exports.getAllUsers = async (req, res) => {
     }
 
     const users = await usersQuery;
+    const userIds = users.map((u) => u._id);
+
+    const sessionCounts = await RefreshToken.aggregate([
+      { $match: { userId: { $in: userIds } } },
+      { $group: { _id: "$userId", count: { $sum: 1 } } },
+    ]);
+
+    const sessionCountByUserId = new Map(
+      sessionCounts.map((row) => [String(row._id), row.count]),
+    );
 
     // Batch fetch all order addresses in ONE query instead of N+1
-    const userIds = users.map((u) => u._id);
     const allOrders = await Order.find({ user: { $in: userIds } })
       .sort({ createdAt: -1 })
       .select("user shippingAddress")
@@ -85,6 +98,7 @@ exports.getAllUsers = async (req, res) => {
         ...userObj,
         addresses: allAddresses,
         isActive: !user.isBlocked,
+        activeSessions: sessionCountByUserId.get(String(user._id)) || 0,
       };
     });
 
@@ -114,6 +128,7 @@ exports.getUserById = async (req, res) => {
     }
 
     const userObj = user.toObject();
+    const activeSessions = await RefreshToken.countDocuments({ userId: user._id });
 
     // Collect all unique addresses from orders
     const orders = await Order.find({ user: user._id })
@@ -159,7 +174,7 @@ exports.getUserById = async (req, res) => {
       }
     });
 
-    res.json({ user: { ...userObj, addresses: allAddresses } });
+    res.json({ user: { ...userObj, addresses: allAddresses, activeSessions } });
   } catch (error) {
     console.error("Get user by ID error:", error);
     res.status(500).json({ message: "Server error" });
@@ -278,6 +293,35 @@ exports.toggleUserBlock = async (req, res) => {
     user.isBlocked = !user.isBlocked;
     await user.save();
 
+    let revokedSessions = 0;
+    if (user.isBlocked) {
+      const revoked = await RefreshToken.deleteMany({ userId: user._id });
+      revokedSessions = revoked.deletedCount || 0;
+    }
+
+    log.info("Admin user block toggled", {
+      actionByUserId: String(req.user?.id || req.user?._id || "unknown"),
+      targetUserId: String(user._id),
+      targetEmail: user.email,
+      blocked: user.isBlocked,
+      reason: user.isBlocked ? "admin_block" : "admin_unblock",
+      revokedSessions,
+    });
+
+    await recordSecurityEvent({
+      eventType: "admin_user_block_toggled",
+      actorUserId: req.user?.id || req.user?._id || null,
+      targetUserId: user._id,
+      reason: user.isBlocked ? "admin_block" : "admin_unblock",
+      ip: req.ip,
+      userAgent: req.headers["user-agent"] || null,
+      metadata: {
+        targetEmail: user.email,
+        blocked: user.isBlocked,
+        revokedSessions,
+      },
+    });
+
     console.log("User block status toggled:", {
       userId: user._id,
       isBlocked: user.isBlocked,
@@ -292,6 +336,7 @@ exports.toggleUserBlock = async (req, res) => {
         role: user.role,
         isBlocked: user.isBlocked,
         isActive: !user.isBlocked, // For frontend compatibility
+        activeSessions: user.isBlocked ? 0 : await RefreshToken.countDocuments({ userId: user._id }),
       },
     });
   } catch (error) {
@@ -302,6 +347,49 @@ exports.toggleUserBlock = async (req, res) => {
     res.status(500).json({
       message: "Server error",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+// @desc    Get recent security events
+// @route   GET /api/v1/admin/users/security-events
+// @access  Private/Admin
+exports.getSecurityEvents = async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+    const eventType = req.query.eventType;
+    const targetUserId = req.query.userId;
+
+    const filter = {};
+    if (eventType) {
+      filter.eventType = eventType;
+    }
+
+    if (targetUserId) {
+      if (!mongoose.Types.ObjectId.isValid(targetUserId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid user ID",
+        });
+      }
+      filter.targetUserId = targetUserId;
+    }
+
+    const events = await SecurityEvent.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      count: events.length,
+      events,
+    });
+  } catch (error) {
+    console.error("Get security events error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
     });
   }
 };

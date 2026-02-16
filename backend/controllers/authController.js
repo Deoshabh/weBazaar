@@ -2,8 +2,10 @@ const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const admin = require("../config/firebase");
 const { log } = require("../utils/logger");
+const { recordSecurityEvent } = require("../utils/securityEvents");
 
 /* =====================
    Helpers
@@ -15,19 +17,72 @@ const generateAccessToken = (user) => {
   });
 };
 
+const setRefreshCookie = (res, token) => {
+  return res.cookie("refreshToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    domain: process.env.NODE_ENV === "production" ? ".radeo.in" : undefined,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+};
+
+const clearRefreshCookie = (res) => {
+  return res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    domain: process.env.NODE_ENV === "production" ? ".radeo.in" : undefined,
+  });
+};
+
 const generateRefreshToken = async (user, ip) => {
-  const token = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
+  const tokenId = crypto.randomUUID();
+  const token = jwt.sign({ id: user._id, jti: tokenId }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRATION || "7d",
   });
 
   const tokenHash = await bcrypt.hash(token, 10);
 
   await RefreshToken.create({
+    tokenId,
     userId: user._id,
     tokenHash,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     createdByIp: ip,
   });
+
+  const sessionRows = await RefreshToken.find({ userId: user._id })
+    .sort({ createdAt: -1 })
+    .select("_id")
+    .lean();
+
+  if (sessionRows.length > MAX_ACTIVE_REFRESH_SESSIONS) {
+    const staleIds = sessionRows
+      .slice(MAX_ACTIVE_REFRESH_SESSIONS)
+      .map((row) => row._id);
+
+    if (staleIds.length > 0) {
+      const pruned = await RefreshToken.deleteMany({ _id: { $in: staleIds } });
+      log.info("Refresh sessions pruned", {
+        userId: String(user._id),
+        reason: "max_session_cap",
+        maxActiveSessions: MAX_ACTIVE_REFRESH_SESSIONS,
+        revokedSessions: pruned.deletedCount || 0,
+      });
+      await recordSecurityEvent({
+        eventType: "refresh_sessions_pruned",
+        actorUserId: user._id,
+        targetUserId: user._id,
+        reason: "max_session_cap",
+        ip,
+        metadata: {
+          maxActiveSessions: MAX_ACTIVE_REFRESH_SESSIONS,
+          revokedSessions: pruned.deletedCount || 0,
+        },
+      });
+    }
+  }
 
   return token;
 };
@@ -37,7 +92,41 @@ const normalizeAuthProvider = (providerId) => {
   if (providerId === "google.com") return "google";
   if (providerId === "facebook.com") return "facebook";
   if (["local", "phone", "password"].includes(providerId)) return providerId;
-  return "local"; // Fallback
+  return "local";
+};
+
+const isStrongPassword = (password = "") => {
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password)
+  );
+};
+
+const strongPasswordMessage =
+  "Password must be at least 8 characters and include uppercase, lowercase, and a number";
+
+const MAX_ACTIVE_REFRESH_SESSIONS = Math.max(
+  1,
+  Number(process.env.MAX_ACTIVE_REFRESH_SESSIONS || 5),
+);
+
+const findLegacyRefreshTokenRecord = async (userId, token) => {
+  const legacyCandidates = await RefreshToken.find({
+    userId,
+    $or: [{ tokenId: { $exists: false } }, { tokenId: null }],
+  })
+    .sort({ createdAt: -1 })
+    .limit(25);
+
+  for (const candidate of legacyCandidates) {
+    if (await bcrypt.compare(token, candidate.tokenHash)) {
+      return candidate;
+    }
+  }
+
+  return null;
 };
 
 /* =====================
@@ -70,14 +159,7 @@ exports.register = async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user, req.ip);
 
-    res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        domain: process.env.NODE_ENV === "production" ? ".radeo.in" : undefined,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
+    setRefreshCookie(res, refreshToken)
       .status(201)
       .json({
         message: "Registered successfully",
@@ -116,26 +198,18 @@ exports.login = async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user, req.ip);
 
-    res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        domain: process.env.NODE_ENV === "production" ? ".radeo.in" : undefined,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
-      .json({
-        message: "Login successful",
-        accessToken,
-        user: {
-          _id: user._id,
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone || "",
-          role: user.role,
-        },
-      });
+    setRefreshCookie(res, refreshToken).json({
+      message: "Login successful",
+      accessToken,
+      user: {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        role: user.role,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -151,17 +225,27 @@ exports.refresh = async (req, res, next) => {
 
     const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 
-    const storedTokens = await RefreshToken.find({ userId: payload.id });
-
     let validToken = null;
-    for (const t of storedTokens) {
-      if (await bcrypt.compare(token, t.tokenHash)) {
-        validToken = t;
-        break;
+    let isMatch = false;
+
+    if (payload.jti) {
+      validToken = await RefreshToken.findOne({
+        userId: payload.id,
+        tokenId: payload.jti,
+      });
+
+      if (validToken) {
+        isMatch = await bcrypt.compare(token, validToken.tokenHash);
       }
+    } else {
+      validToken = await findLegacyRefreshTokenRecord(payload.id, token);
+      isMatch = Boolean(validToken);
     }
 
-    if (!validToken) {
+    if (!validToken || !isMatch) {
+      if (validToken) {
+        await validToken.deleteOne();
+      }
       return res.status(401).json({ message: "Invalid refresh token" });
     }
 
@@ -169,8 +253,11 @@ exports.refresh = async (req, res, next) => {
     if (!user) return res.status(401).json({ message: "User not found" });
 
     const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = await generateRefreshToken(user, req.ip);
 
-    res.json({
+    await validToken.deleteOne();
+
+    setRefreshCookie(res, newRefreshToken).json({
       accessToken: newAccessToken,
       user: {
         _id: user._id,
@@ -218,33 +305,35 @@ exports.logout = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
     if (token) {
-      // Decode the refresh token to get userId (narrow the search scope)
       const refreshSecret =
         process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
       try {
         const payload = jwt.verify(token, refreshSecret);
-        // Only search tokens belonging to this user
-        const tokens = await RefreshToken.find({ userId: payload.id });
-        for (const t of tokens) {
-          if (await bcrypt.compare(token, t.tokenHash)) {
-            await t.deleteOne();
-            break;
+
+        if (payload?.id && payload?.jti) {
+          const storedToken = await RefreshToken.findOne({
+            userId: payload.id,
+            tokenId: payload.jti,
+          });
+
+          if (storedToken) {
+            const isMatch = await bcrypt.compare(token, storedToken.tokenHash);
+            if (isMatch) {
+              await storedToken.deleteOne();
+            }
+          }
+        } else if (payload?.id) {
+          const legacyToken = await findLegacyRefreshTokenRecord(payload.id, token);
+          if (legacyToken) {
+            await legacyToken.deleteOne();
           }
         }
-      } catch (jwtErr) {
-        // Token expired or invalid — still clear cookie, skip DB cleanup
-        console.log("Logout: refresh token invalid/expired, clearing cookie");
+      } catch (_jwtErr) {
+        log.debug("Logout with expired/invalid refresh token");
       }
     }
 
-    res
-      .clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        domain: process.env.NODE_ENV === "production" ? ".radeo.in" : undefined,
-      })
-      .json({ message: "Logged out" });
+    clearRefreshCookie(res).json({ message: "Logged out" });
   } catch (err) {
     next(err);
   }
@@ -263,10 +352,8 @@ exports.changePassword = async (req, res, next) => {
         .json({ message: "Current password and new password are required" });
     }
 
-    if (newPassword.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "New password must be at least 6 characters" });
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({ message: strongPasswordMessage });
     }
 
     const user = await User.findById(req.user.id);
@@ -274,17 +361,35 @@ exports.changePassword = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Verify current password
     const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isValid) {
       return res.status(401).json({ message: "Current password is incorrect" });
     }
 
-    // Hash and save new password
     user.passwordHash = await bcrypt.hash(newPassword, 12);
     await user.save();
 
-    res.json({ message: "Password changed successfully" });
+    const revoked = await RefreshToken.deleteMany({ userId: user._id });
+    log.info("Refresh sessions revoked", {
+      userId: String(user._id),
+      reason: "password_change",
+      revokedSessions: revoked.deletedCount || 0,
+    });
+    await recordSecurityEvent({
+      eventType: "refresh_sessions_revoked",
+      actorUserId: req.user.id,
+      targetUserId: user._id,
+      reason: "password_change",
+      ip: req.ip,
+      userAgent: req.headers["user-agent"] || null,
+      metadata: {
+        revokedSessions: revoked.deletedCount || 0,
+      },
+    });
+
+    clearRefreshCookie(res).json({
+      message: "Password changed successfully. Please sign in again.",
+    });
   } catch (err) {
     next(err);
   }
@@ -303,21 +408,18 @@ exports.forgotPassword = async (req, res, next) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      // Don't reveal if user exists or not
       return res.json({
         message: "If that email exists, a reset link has been sent",
       });
     }
 
-    // Generate reset token
-    const resetToken = require("crypto").randomBytes(32).toString("hex");
+    const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenHash = await bcrypt.hash(resetToken, 10);
 
     user.resetPasswordToken = resetTokenHash;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    // In production, send this token via email provider. Never log plaintext tokens.
     if (process.env.NODE_ENV !== "production") {
       console.log(
         `Password reset requested for ${email}. Token expires at ${new Date(
@@ -345,10 +447,8 @@ exports.resetPassword = async (req, res, next) => {
         .json({ message: "Email, token, and new password are required" });
     }
 
-    if (newPassword.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "New password must be at least 6 characters" });
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({ message: strongPasswordMessage });
     }
 
     const user = await User.findOne({ email });
@@ -358,7 +458,6 @@ exports.resetPassword = async (req, res, next) => {
         .json({ message: "Invalid or expired reset token" });
     }
 
-    // Check if token is expired
     if (Date.now() > user.resetPasswordExpires) {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
@@ -366,7 +465,6 @@ exports.resetPassword = async (req, res, next) => {
       return res.status(400).json({ message: "Reset token has expired" });
     }
 
-    // Verify token
     const isValid = await bcrypt.compare(token, user.resetPasswordToken);
     if (!isValid) {
       return res
@@ -374,11 +472,28 @@ exports.resetPassword = async (req, res, next) => {
         .json({ message: "Invalid or expired reset token" });
     }
 
-    // Update password and clear reset token
     user.passwordHash = await bcrypt.hash(newPassword, 12);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
+
+    const revoked = await RefreshToken.deleteMany({ userId: user._id });
+    log.info("Refresh sessions revoked", {
+      userId: String(user._id),
+      reason: "password_reset",
+      revokedSessions: revoked.deletedCount || 0,
+    });
+    await recordSecurityEvent({
+      eventType: "refresh_sessions_revoked",
+      actorUserId: null,
+      targetUserId: user._id,
+      reason: "password_reset",
+      ip: req.ip,
+      userAgent: req.headers["user-agent"] || null,
+      metadata: {
+        revokedSessions: revoked.deletedCount || 0,
+      },
+    });
 
     res.json({ message: "Password reset successfully" });
   } catch (err) {
@@ -391,34 +506,21 @@ exports.resetPassword = async (req, res, next) => {
 ===================== */
 exports.firebaseLogin = async (req, res, next) => {
   try {
-    const { firebaseToken, email, phoneNumber, displayName, photoURL, uid } =
-      req.body;
+    const { firebaseToken, email, phoneNumber, displayName, photoURL } = req.body;
 
-    // Detailed logging for debugging
-    console.log(`📋 Firebase Login Request Received:`, {
-      hasToken: !!firebaseToken,
-      tokenLength: firebaseToken ? firebaseToken.length : 0,
-      email,
-      uid,
-      bodyKeys: Object.keys(req.body),
-      contentType: req.headers["content-type"],
+    log.debug("Firebase login request received", {
+      hasToken: Boolean(firebaseToken),
+      hasEmail: Boolean(email),
     });
 
     if (!firebaseToken) {
-      console.warn(`⚠️  MISSING FIREBASE TOKEN:`, {
-        requestBodyKeys: Object.keys(req.body || {}),
-        contentType: req.headers["content-type"],
-        hasAuthorizationHeader: Boolean(req.headers.authorization),
-        hasCookieHeader: Boolean(req.headers.cookie),
-      });
+      log.warn("Firebase token missing in login request");
       return res.status(400).json({
         message: "Firebase token is required",
         error: "MISSING_FIREBASE_TOKEN",
-        received: Object.keys(req.body),
       });
     }
 
-    // Verify Firebase ID token
     let decodedToken;
     try {
       decodedToken = await admin.auth().verifyIdToken(firebaseToken);
@@ -433,46 +535,27 @@ exports.firebaseLogin = async (req, res, next) => {
       });
     }
 
-    // ✅ SECURITY FIX: Prioritize Firebase UID for user lookup
-    // Firebase UID is the source of truth for OAuth-based logins
-    // Email matching is unreliable because:
-    // - Multiple Gmail accounts can use the same business domain
-    // - Users can change their email
-    // - Different OAuth providers may use same email
-    //
-    // LOOKUP ORDER:
-    // 1. firebaseUid (primary, unique identifier from Firebase)
-    // 2. email (secondary, for linking existing email-based accounts)
-    // 3. phone (tertiary, if available)
-
     log.debug("Firebase Login Lookup", {
       firebaseUid: decodedToken.uid,
       email: decodedToken.email || email,
     });
 
-    // IMPORTANT: Look up by Firebase UID FIRST
     let user = await User.findOne({ firebaseUid: decodedToken.uid });
 
-    // If not found by UID, check email (for first-time logins or account linking)
-    // But only if the email matches EXACTLY (case-insensitive)
     if (!user && decodedToken.email) {
       user = await User.findOne({
-        email: { $regex: `^${decodedToken.email}$`, $options: "i" }, // Case-insensitive exact match
+        email: { $regex: `^${decodedToken.email}$`, $options: "i" },
       });
 
-      // If found by email, MUST link the Firebase UID to this account
       if (user && !user.firebaseUid) {
         log.info("Linking Firebase UID to existing email account");
         user.firebaseUid = decodedToken.uid;
         await user.save();
       } else if (user) {
-        // Email matched but already has different firebaseUid - SECURITY ISSUE
-        // This prevents account takeover
         log.warn("SECURITY: Email matched but different firebaseUid found", {
           email: decodedToken.email,
         });
 
-        // Reject to prevent account confusion
         return res.status(403).json({
           message:
             "Account security check failed. Please contact support if this is your account.",
@@ -481,24 +564,22 @@ exports.firebaseLogin = async (req, res, next) => {
       }
     }
 
-    // Create new user if doesn't exist
     if (!user) {
       log.debug("Creating new Firebase user");
       user = await User.create({
         name: displayName || decodedToken.name || "User",
         email: decodedToken.email || email,
         phone: decodedToken.phone_number || phoneNumber,
-        firebaseUid: decodedToken.uid, // Always set Firebase UID
+        firebaseUid: decodedToken.uid,
         profilePicture: photoURL || decodedToken.picture,
         role: "customer",
         emailVerified: decodedToken.email_verified || false,
         phoneVerified: !!decodedToken.phone_number,
         authProvider: normalizeAuthProvider(
           decodedToken.firebase.sign_in_provider,
-        ), // 'phone', 'password', google.com, etc.
+        ),
       });
     } else {
-      // Update existing user with Firebase data
       log.debug("Logging in existing user");
 
       if (!user.firebaseUid) {
@@ -516,7 +597,7 @@ exports.firebaseLogin = async (req, res, next) => {
           user.phone = decodedToken.phone_number;
         }
       }
-      // Update authProvider if coming from OAuth
+
       if (
         decodedToken.firebase.sign_in_provider &&
         decodedToken.firebase.sign_in_provider !== "password"
@@ -528,45 +609,33 @@ exports.firebaseLogin = async (req, res, next) => {
       await user.save();
     }
 
-    // Check if user is blocked
     if (user.isBlocked) {
       return res.status(403).json({ message: "Your account has been blocked" });
     }
 
-    // Generate tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user, req.ip);
 
-    // Set refresh token cookie and return access token
-    res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        domain: process.env.NODE_ENV === "production" ? ".radeo.in" : undefined,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
-      .json({
-        message: "Firebase authentication successful",
-        accessToken,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          profilePicture: user.profilePicture,
-          emailVerified: user.emailVerified,
-          phoneVerified: user.phoneVerified,
-          authProvider: user.authProvider,
-        },
-      });
+    setRefreshCookie(res, refreshToken).json({
+      message: "Firebase authentication successful",
+      accessToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        profilePicture: user.profilePicture,
+        emailVerified: user.emailVerified,
+        phoneVerified: user.phoneVerified,
+        authProvider: user.authProvider,
+      },
+    });
   } catch (err) {
-    console.error("Firebase login error:", {
+    log.error("Firebase login error", {
       code: err.code,
       message: err.message,
       name: err.name,
-      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
     next(err);
   }
