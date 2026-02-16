@@ -28,7 +28,41 @@ export default function ShiprocketShipmentModal({ order, isOpen, onClose, onSucc
       setShiprocketHealthy(true);
 
       const response = await adminAPI.getPickupAddresses();
-      setPickupAddresses(response.data?.data?.shipping_address || []);
+
+      const pickupPayload = response.data?.data;
+      const rawPickupAddresses =
+        pickupPayload?.shipping_address ||
+        pickupPayload?.data?.shipping_address ||
+        pickupPayload?.pickup_addresses ||
+        pickupPayload?.data?.pickup_addresses ||
+        (Array.isArray(pickupPayload) ? pickupPayload : []);
+
+      const normalizedPickupAddresses = (Array.isArray(rawPickupAddresses)
+        ? rawPickupAddresses
+        : []
+      ).map((address) => ({
+        ...address,
+        pickup_location:
+          address?.pickup_location ||
+          address?.address_name ||
+          address?.address_nickname ||
+          address?.nickname ||
+          'Primary',
+        pin_code:
+          address?.pin_code ||
+          address?.pincode ||
+          address?.postal_code ||
+          address?.postcode ||
+          '',
+      }));
+
+      setPickupAddresses(normalizedPickupAddresses);
+
+      if (normalizedPickupAddresses.length > 0) {
+        setPickupLocation(
+          normalizedPickupAddresses[0].pickup_location || 'Primary',
+        );
+      }
     } catch (error) {
       setShiprocketHealthy(false);
       setPickupAddresses([]);
