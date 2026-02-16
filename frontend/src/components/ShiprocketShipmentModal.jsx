@@ -116,15 +116,35 @@ export default function ShiprocketShipmentModal({ order, isOpen, onClose, onSucc
         declared_value: order.total / 100, // Convert from cents to rupees
       });
 
-      const couriers = response.data?.data?.available_courier_companies || [];
+      const ratesPayload = response.data?.data;
+      const couriers =
+        ratesPayload?.available_courier_companies ||
+        ratesPayload?.data?.available_courier_companies ||
+        [];
+      const ratesMessage =
+        ratesPayload?.message ||
+        ratesPayload?.data?.message ||
+        'No courier services available for this route right now.';
       
       if (couriers.length === 0) {
+        console.warn('Shiprocket returned no courier services', {
+          pickup_postcode: pickupPostcode,
+          delivery_postcode: order.shippingAddress.postalCode,
+          weight,
+          cod: order.payment.method === 'cod' ? 1 : 0,
+          declared_value: order.total / 100,
+          ratesPayload,
+        });
+
         toast.error(
           <div>
-            <div>No courier services available. Check:</div>
+            <div>{ratesMessage}</div>
+            <div className="mt-1">Check:</div>
             <div>1. Pickup PIN: {pickupPostcode}</div>
             <div>2. Delivery PIN: {order.shippingAddress.postalCode}</div>
-            <div>3. Shiprocket account has pickup location configured</div>
+            <div>3. Weight: {weight} kg</div>
+            <div>4. Payment Mode: {order.payment.method === 'cod' ? 'COD' : 'Prepaid'}</div>
+            <div>5. Shiprocket account has pickup location configured</div>
           </div>
         );
       }
@@ -132,7 +152,12 @@ export default function ShiprocketShipmentModal({ order, isOpen, onClose, onSucc
       setRates(couriers);
       setStep(2);
     } catch (error) {
-      toast.error('Failed to fetch shipping rates');
+      const apiMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error?.message ||
+        error.message ||
+        'Failed to fetch shipping rates';
+      toast.error(apiMessage);
       console.error(error);
     } finally {
       setLoading(false);

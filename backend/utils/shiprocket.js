@@ -492,10 +492,14 @@ class ShiprocketService {
           declared_value: orderData.sub_total,
         });
 
-        if (rates.data?.available_courier_companies?.length > 0) {
+        const availableCouriers =
+          rates?.available_courier_companies ||
+          rates?.data?.available_courier_companies ||
+          [];
+
+        if (availableCouriers.length > 0) {
           // Use the first recommended courier
-          courierId =
-            rates.data.available_courier_companies[0].courier_company_id;
+          courierId = availableCouriers[0].courier_company_id;
         } else {
           throw new Error("No courier available for this shipment");
         }
