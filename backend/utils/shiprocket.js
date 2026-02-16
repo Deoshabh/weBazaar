@@ -121,6 +121,45 @@ class ShiprocketService {
     return mappedError;
   }
 
+  extractFirstByKeys(payload, keys) {
+    if (!payload || !Array.isArray(keys) || keys.length === 0) {
+      return null;
+    }
+
+    const queue = [payload];
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+
+      if (!current) {
+        continue;
+      }
+
+      if (Array.isArray(current)) {
+        for (const item of current) {
+          queue.push(item);
+        }
+        continue;
+      }
+
+      if (typeof current === "object") {
+        for (const key of keys) {
+          if (current[key] !== undefined && current[key] !== null && current[key] !== "") {
+            return current[key];
+          }
+        }
+
+        for (const value of Object.values(current)) {
+          if (value && (typeof value === "object" || Array.isArray(value))) {
+            queue.push(value);
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Check serviceability and get shipping rates
    * @param {Object} params - { pickup_postcode, delivery_postcode, weight, cod, declared_value }
@@ -435,6 +474,33 @@ class ShiprocketService {
   }
 
   /**
+   * Track shipment by shipment ID
+   * @param {String|Number} shipmentId - Shiprocket shipment ID
+   */
+  async trackByShipmentId(shipmentId) {
+    try {
+      const headers = await this.getHeaders();
+
+      const response = await axios.get(
+        `${this.baseURL}/courier/track/shipment/${shipmentId}`,
+        { headers },
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "❌ Track by shipment ID failed:",
+        error.response?.data || error.message,
+      );
+      throw this.buildShiprocketError(
+        error,
+        "Failed to track shipment by shipment ID",
+        "SHIPROCKET_TRACK_SHIPMENT_ERROR",
+      );
+    }
+  }
+
+  /**
    * Cancel shipment
    * @param {Array} awbs - Array of AWB numbers
    */
@@ -550,27 +616,53 @@ class ShiprocketService {
       // Step 3: Assign AWB
       const awbResponse = await this.assignAWB(shipmentId, courierId);
 
-      const awbData = awbResponse?.response?.data || awbResponse?.data || awbResponse;
-      const awbCode =
-        awbData?.awb_code ||
-        awbData?.data?.awb_code ||
-        awbResponse?.response?.data?.data?.awb_code ||
-        awbResponse?.data?.data?.awb_code ||
-        awbResponse?.awb_code;
-      const courierName =
-        awbData?.courier_name ||
-        awbData?.data?.courier_name ||
-        awbResponse?.response?.data?.data?.courier_name ||
-        awbResponse?.data?.data?.courier_name ||
-        awbResponse?.courier_name ||
-        null;
+      let awbCode = this.extractFirstByKeys(awbResponse, [
+        "awb_code",
+        "awb",
+      ]);
+      let courierName = this.extractFirstByKeys(awbResponse, [
+        "courier_name",
+        "courier_company_name",
+      ]);
 
       if (!awbCode) {
-        throw this.buildShiprocketError(
+        try {
+          const trackingResponse = await this.trackByShipmentId(shipmentId);
+          awbCode = this.extractFirstByKeys(trackingResponse, [
+            "awb_code",
+            "awb",
+          ]);
+          courierName =
+            courierName ||
+            this.extractFirstByKeys(trackingResponse, [
+              "courier_name",
+              "courier_company_name",
+            ]);
+        } catch (trackingError) {
+          warnings.push({
+            step: "track_by_shipment_fallback",
+            code: trackingError.code,
+            message: trackingError.message,
+            details:
+              trackingError.details ||
+              trackingError.response?.data ||
+              trackingError.message,
+          });
+        }
+      }
+
+      if (!awbCode) {
+        const awbMissingError = this.buildShiprocketError(
           new Error("AWB code missing in assign AWB response"),
           "Failed to assign AWB",
           "SHIPROCKET_ASSIGN_AWB_ERROR",
         );
+        awbMissingError.details = {
+          message: "AWB not found in assign AWB and shipment tracking responses",
+          assign_awb_response: awbResponse,
+          shipment_id: shipmentId,
+        };
+        throw awbMissingError;
       }
 
       // Step 4: Schedule pickup
