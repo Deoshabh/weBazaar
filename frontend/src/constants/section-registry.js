@@ -11,6 +11,8 @@ export const SECTION_TEMPLATES = [
       subtitle: 'Experience comfort and style like never before.',
       buttonText: 'Shop Now',
       buttonLink: '/products',
+      secondaryButtonText: 'Our Story',
+      secondaryButtonLink: '/about',
       imageUrl: '/hero-placeholder.jpg',
       alignment: 'center', // left, center, right
     },
@@ -19,6 +21,8 @@ export const SECTION_TEMPLATES = [
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
       { name: 'buttonText', label: 'Button Text', type: 'text' },
       { name: 'buttonLink', label: 'Button Link', type: 'text' },
+      { name: 'secondaryButtonText', label: 'Secondary Button Text', type: 'text' },
+      { name: 'secondaryButtonLink', label: 'Secondary Button Link', type: 'text' },
       { name: 'imageUrl', label: 'Background Image', type: 'image' },
       { 
         name: 'alignment', 

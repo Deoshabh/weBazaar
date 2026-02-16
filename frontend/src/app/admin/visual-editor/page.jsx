@@ -44,6 +44,14 @@ const normalizeHeroDataForEditor = (heroData = {}) => ({
         heroData.buttonText || heroData.primaryButtonText || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonText || 'Shop Now',
     buttonLink:
         heroData.buttonLink || heroData.primaryButtonLink || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.primaryButtonLink || '/products',
+    secondaryButtonText:
+        heroData.secondaryButtonText || heroData.buttonTextSecondary || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonText || 'Learn More',
+    secondaryButtonLink:
+        heroData.secondaryButtonLink || heroData.buttonLinkSecondary || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonLink || '/about',
+    buttonTextSecondary:
+        heroData.buttonTextSecondary || heroData.secondaryButtonText || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonText || 'Learn More',
+    buttonLinkSecondary:
+        heroData.buttonLinkSecondary || heroData.secondaryButtonLink || SITE_SETTINGS_DEFAULTS.homeSections?.heroSection?.secondaryButtonLink || '/about',
     imageUrl: heroData.imageUrl || heroData.image || '',
     alignment: heroData.alignment || 'center',
 });
@@ -52,14 +60,22 @@ const normalizeHeroDataForStorefront = (heroData = {}) => {
     const defaults = SITE_SETTINGS_DEFAULTS.homeSections?.heroSection || {};
     const primaryButtonText = heroData.primaryButtonText || heroData.buttonText || defaults.primaryButtonText;
     const primaryButtonLink = heroData.primaryButtonLink || heroData.buttonLink || defaults.primaryButtonLink;
+    const secondaryButtonText =
+        heroData.secondaryButtonText || heroData.buttonTextSecondary || defaults.secondaryButtonText;
+    const secondaryButtonLink =
+        heroData.secondaryButtonLink || heroData.buttonLinkSecondary || defaults.secondaryButtonLink;
 
     return {
         ...defaults,
         ...heroData,
         primaryButtonText,
         primaryButtonLink,
+        secondaryButtonText,
+        secondaryButtonLink,
         buttonText: heroData.buttonText || primaryButtonText,
         buttonLink: heroData.buttonLink || primaryButtonLink,
+        buttonTextSecondary: heroData.buttonTextSecondary || secondaryButtonText,
+        buttonLinkSecondary: heroData.buttonLinkSecondary || secondaryButtonLink,
     };
 };
 
@@ -151,6 +167,7 @@ export default function VisualEditorPage() {
     const [theme, setTheme] = useState({}); // Stores global styles, fonts, and now section-specific theme overrides (header, footer, etc.)
     const [branding, setBranding] = useState(SITE_SETTINGS_DEFAULTS.branding || {});
     const [announcementBar, setAnnouncementBar] = useState({});
+    const [banners, setBanners] = useState([]);
     const [homeSections, setHomeSections] = useState({}); // Legacy - maps to layout but keeps data structure
     const [activeTab, setActiveTab] = useState('layout');
     const [isSaving, setIsSaving] = useState(false);
@@ -229,6 +246,7 @@ export default function VisualEditorPage() {
                 setTheme(settings.theme || SITE_SETTINGS_DEFAULTS.theme);
                 setBranding(settings.branding || SITE_SETTINGS_DEFAULTS.branding || {});
                 setAnnouncementBar(settings.announcementBar || {});
+                setBanners(settings.banners || settings.bannerSystem?.banners || []);
 
                 const historyResponse = await adminAPI.getThemeVersionHistory();
                 setVersionHistory(historyResponse.data?.history || []);
@@ -350,13 +368,15 @@ export default function VisualEditorPage() {
             const settings = response.data?.settings;
 
             if (settings) {
-                setLayout(normalizeLayoutForEditor(settings.layout || layout));
+                const normalizedLayout = normalizeLayoutForEditor(settings.layout || layout);
+                setLayout(normalizedLayout);
                 setTheme(settings.theme || theme);
                 setBranding(settings.branding || branding);
                 setAnnouncementBar(settings.announcementBar || announcementBar);
+                setBanners(settings.banners || settings.bannerSystem?.banners || banners);
 
                 postPreviewUpdate({
-                    layout: settings.layout || layout,
+                    layout: normalizedLayout,
                     theme: settings.theme || theme,
                     branding: settings.branding || branding,
                     announcementBar: settings.announcementBar || announcementBar,
@@ -381,13 +401,15 @@ export default function VisualEditorPage() {
             const settings = response.data?.settings;
 
             if (settings) {
-                setLayout(normalizeLayoutForEditor(settings.layout || []));
+                const normalizedLayout = normalizeLayoutForEditor(settings.layout || []);
+                setLayout(normalizedLayout);
                 setTheme(settings.theme || {});
                 setBranding(settings.branding || {});
                 setAnnouncementBar(settings.announcementBar || {});
+                setBanners(settings.banners || settings.bannerSystem?.banners || []);
 
                 postPreviewUpdate({
-                    layout: settings.layout || [],
+                    layout: normalizedLayout,
                     theme: settings.theme || {},
                     branding: settings.branding || {},
                     announcementBar: settings.announcementBar || {},
@@ -476,6 +498,8 @@ export default function VisualEditorPage() {
         toast.success(`Added ${template.label}`);
     };
 
+    const hasActiveBanners = (banners || []).some((banner) => banner?.isActive);
+
     return (
         <AdminLayout>
             <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-gray-100">
@@ -519,11 +543,18 @@ export default function VisualEditorPage() {
                     )}
 
                     <div className="flex-1 overflow-y-auto relative">
+                        {hasActiveBanners && (
+                            <div className="m-4 mb-0 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                Active banners currently override Hero section content on the homepage. Update banners in CMS if you want hero text changes to appear.
+                            </div>
+                        )}
+
                         {/* THEME TAB CONTENT */}
                         {activeTab === 'theme' && (
                             <ThemeCustomizer
                                 theme={theme}
                                 branding={branding}
+                                hasActiveBanners={hasActiveBanners}
                                 // Pass current section data to allow editing content from Theme tab
                                 sections={{
                                     hero: layout.find(s => s.type === 'hero')?.data || {},

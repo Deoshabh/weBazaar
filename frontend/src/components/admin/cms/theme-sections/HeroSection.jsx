@@ -10,7 +10,7 @@ const ANIMATION_TYPES = [
     { value: 'stagger', label: 'Stagger Reveal' },
 ];
 
-export default function HeroSection({ theme, sectionData = {}, onUpdateSection, onThemeChange }) {
+export default function HeroSection({ theme, sectionData = {}, hasActiveBanners = false, onUpdateSection, onThemeChange }) {
 
     // Manage section content (headline, image, etc.) through sectionData -> homeSections
     // Manage stylistic things (animation type) through theme if global, or sectionData if specific.
@@ -43,6 +43,12 @@ export default function HeroSection({ theme, sectionData = {}, onUpdateSection, 
 
     return (
         <div className="space-y-6">
+
+            {hasActiveBanners && (
+                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    Active banners are enabled, so homepage hero text comes from banners first. These hero content changes apply only when banners are disabled.
+                </div>
+            )}
 
             <div className="space-y-3">
                 <label className="text-xs font-medium text-gray-500">Layout Style</label>
@@ -115,6 +121,49 @@ export default function HeroSection({ theme, sectionData = {}, onUpdateSection, 
                         rows={2}
                         placeholder="Optional description text..."
                     />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">Primary Button Text</label>
+                        <input
+                            type="text"
+                            value={sectionData.buttonText || sectionData.primaryButtonText || ''}
+                            onChange={(e) => handleContentChange('buttonText', e.target.value)}
+                            className="w-full text-sm border-gray-200 rounded"
+                            placeholder="Shop Collection"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">Primary Button Link</label>
+                        <input
+                            type="text"
+                            value={sectionData.buttonLink || sectionData.primaryButtonLink || ''}
+                            onChange={(e) => handleContentChange('buttonLink', e.target.value)}
+                            className="w-full text-sm border-gray-200 rounded"
+                            placeholder="/products"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">Secondary Button Text</label>
+                        <input
+                            type="text"
+                            value={sectionData.secondaryButtonText || sectionData.buttonTextSecondary || ''}
+                            onChange={(e) => handleContentChange('secondaryButtonText', e.target.value)}
+                            className="w-full text-sm border-gray-200 rounded"
+                            placeholder="Our Story"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">Secondary Button Link</label>
+                        <input
+                            type="text"
+                            value={sectionData.secondaryButtonLink || sectionData.buttonLinkSecondary || ''}
+                            onChange={(e) => handleContentChange('secondaryButtonLink', e.target.value)}
+                            className="w-full text-sm border-gray-200 rounded"
+                            placeholder="/about"
+                        />
+                    </div>
                 </div>
             </div>
 

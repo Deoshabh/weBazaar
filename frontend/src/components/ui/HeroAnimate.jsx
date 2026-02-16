@@ -6,6 +6,7 @@ import anime from 'animejs';
 export default function HeroAnimate({
     children,
     backgroundUrl,
+    animationType = 'stagger',
     className = ''
 }) {
     const containerRef = useRef(null);
@@ -13,25 +14,102 @@ export default function HeroAnimate({
     const contentRef = useRef(null);
 
     useEffect(() => {
-        // Initial Reveal Animation
-        const tl = anime.timeline({
-            easing: 'easeOutExpo',
-            duration: 1000
-        });
+        const explicitTargets = contentRef.current
+            ? Array.from(contentRef.current.querySelectorAll('[data-hero-animate]'))
+            : [];
+        const contentChildren = explicitTargets.length > 0
+            ? explicitTargets
+            : (contentRef.current ? Array.from(contentRef.current.children) : []);
 
-        // Animate content elements (h1, p, button)
-        // Assumes children are passed in a way that the content div wraps them
-        const contentChildren = contentRef.current ? Array.from(contentRef.current.children) : [];
+        if (contentChildren.length === 0) return;
+
+        if (animationType === 'none') {
+            anime.set(contentChildren, {
+                opacity: 1,
+                translateX: 0,
+                translateY: 0,
+            });
+            return;
+        }
+
+        if (animationType === 'fade-up') {
+            anime({
+                targets: contentChildren,
+                translateY: [30, 0],
+                opacity: [0, 1],
+                easing: 'easeOutExpo',
+                duration: 900,
+                delay: anime.stagger(120),
+            });
+            return;
+        }
+
+        if (animationType === 'slide-in') {
+            anime({
+                targets: contentChildren,
+                translateX: [-48, 0],
+                opacity: [0, 1],
+                easing: 'easeOutExpo',
+                duration: 900,
+                delay: anime.stagger(120),
+            });
+            return;
+        }
+
+        if (animationType === 'typewriter') {
+            const [firstChild, ...restChildren] = contentChildren;
+            const timeline = anime.timeline({
+                easing: 'easeOutCubic',
+            });
+
+            if (firstChild) {
+                const firstElement = firstChild;
+                firstElement.style.overflow = 'hidden';
+                firstElement.style.whiteSpace = 'nowrap';
+
+                anime.set(firstElement, {
+                    width: 0,
+                    opacity: 1,
+                });
+
+                timeline.add({
+                    targets: firstElement,
+                    width: [0, firstElement.scrollWidth || 600],
+                    duration: 900,
+                    complete: () => {
+                        firstElement.style.width = '';
+                        firstElement.style.overflow = '';
+                        firstElement.style.whiteSpace = '';
+                    },
+                });
+            }
+
+            if (restChildren.length > 0) {
+                timeline.add(
+                    {
+                        targets: restChildren,
+                        translateY: [20, 0],
+                        opacity: [0, 1],
+                        duration: 700,
+                        delay: anime.stagger(120),
+                    },
+                    '-=150',
+                );
+            }
+            return;
+        }
 
         if (contentChildren.length > 0) {
-            tl.add({
+            anime({
                 targets: contentChildren,
                 translateY: [50, 0],
                 opacity: [0, 1],
-                delay: anime.stagger(150), // Stagger delay for each child
+                easing: 'easeOutExpo',
+                duration: 1000,
+                delay: anime.stagger(150),
             });
         }
-    }, []);
+    }, [animationType]);
 
     // Parallax Effect
     useEffect(() => {
@@ -48,7 +126,7 @@ export default function HeroAnimate({
     }, []);
 
     return (
-        <section ref={containerRef} className={`relative overflow-hidden ${className}`}>
+        <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
             {/* Parallax Background Layer */}
             {backgroundUrl && (
                 <div
@@ -64,6 +142,6 @@ export default function HeroAnimate({
             <div ref={contentRef} className="relative z-10 h-full">
                 {children}
             </div>
-        </section>
+        </div>
     );
 }

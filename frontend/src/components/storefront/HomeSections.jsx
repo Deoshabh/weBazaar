@@ -22,14 +22,28 @@ const mergeHeroSettings = (globalHeroSettings = {}, layoutHeroSettings = {}) => 
         layoutHeroSettings.buttonLink ||
         globalHeroSettings.primaryButtonLink ||
         globalHeroSettings.buttonLink;
+    const secondaryButtonText =
+        layoutHeroSettings.secondaryButtonText ||
+        layoutHeroSettings.buttonTextSecondary ||
+        globalHeroSettings.secondaryButtonText ||
+        globalHeroSettings.buttonTextSecondary;
+    const secondaryButtonLink =
+        layoutHeroSettings.secondaryButtonLink ||
+        layoutHeroSettings.buttonLinkSecondary ||
+        globalHeroSettings.secondaryButtonLink ||
+        globalHeroSettings.buttonLinkSecondary;
 
     return {
         ...globalHeroSettings,
         ...layoutHeroSettings,
         primaryButtonText,
         primaryButtonLink,
+        secondaryButtonText,
+        secondaryButtonLink,
         buttonText: layoutHeroSettings.buttonText || primaryButtonText,
         buttonLink: layoutHeroSettings.buttonLink || primaryButtonLink,
+        buttonTextSecondary: layoutHeroSettings.buttonTextSecondary || secondaryButtonText,
+        buttonLinkSecondary: layoutHeroSettings.buttonLinkSecondary || secondaryButtonLink,
     };
 };
 
@@ -49,6 +63,18 @@ const normalizeFeatureList = (features) => {
     return [];
 };
 
+const resolveHeroTextAlignment = (alignment = 'center') => {
+    if (alignment === 'left') return 'text-left items-start';
+    if (alignment === 'right') return 'text-right items-end';
+    return 'text-center items-center';
+};
+
+const resolveHeroContentPosition = (alignment = 'center') => {
+    if (alignment === 'left') return 'mr-auto';
+    if (alignment === 'right') return 'ml-auto';
+    return 'mx-auto';
+};
+
 const HeroSection = ({ banners, heroSettings }) => {
     // Use banners if enabled and active, else fallback to Hero Settings
     const activeBanners = (banners || [])
@@ -57,6 +83,26 @@ const HeroSection = ({ banners, heroSettings }) => {
 
     if (activeBanners.length > 0) {
         const banner = activeBanners[0];
+        const bannerPrimaryLink = banner.link || banner.primaryLink || '';
+        const bannerPrimaryText =
+            banner.buttonText ||
+            banner.primaryButtonText ||
+            heroSettings?.primaryButtonText ||
+            heroSettings?.buttonText ||
+            'Shop Now';
+        const bannerSecondaryLink =
+            banner.secondaryLink ||
+            banner.secondaryButtonLink ||
+            heroSettings?.secondaryButtonLink ||
+            heroSettings?.buttonLinkSecondary ||
+            '';
+        const bannerSecondaryText =
+            banner.secondaryButtonText ||
+            banner.buttonTextSecondary ||
+            heroSettings?.secondaryButtonText ||
+            heroSettings?.buttonTextSecondary ||
+            'Learn More';
+
         return (
             <HeroAnimate
                 backgroundUrl={banner.imageUrl || banner.image}
@@ -66,11 +112,18 @@ const HeroSection = ({ banners, heroSettings }) => {
                     <div className="max-w-2xl text-white">
                         <h2 className="text-5xl lg:text-7xl font-bold mb-4 leading-tight">{banner.title}</h2>
                         {banner.subtitle && <p className="text-xl text-white/90 mb-8">{banner.subtitle}</p>}
-                        {banner.link && (
-                            <div className="inline-block">
-                                <Link href={banner.link} className="btn bg-white text-primary-900 px-8 py-3 text-lg hover:bg-brand-brown hover:text-white border-none">
-                                    {banner.buttonText || 'Shop Now'} <FiArrowRight className="inline ml-2" />
-                                </Link>
+                        {(bannerPrimaryLink || bannerSecondaryLink) && (
+                            <div className="inline-flex flex-col sm:flex-row gap-4">
+                                {bannerPrimaryLink && (
+                                    <Link href={bannerPrimaryLink} className="btn bg-white text-primary-900 px-8 py-3 text-lg hover:bg-brand-brown hover:text-white border-none">
+                                        {bannerPrimaryText} <FiArrowRight className="inline ml-2" />
+                                    </Link>
+                                )}
+                                {bannerSecondaryLink && (
+                                    <Link href={bannerSecondaryLink} className="btn btn-secondary px-8 py-3 text-lg">
+                                        {bannerSecondaryText}
+                                    </Link>
+                                )}
                             </div>
                         )}
                     </div>
@@ -86,25 +139,64 @@ const HeroSection = ({ banners, heroSettings }) => {
         heroSettings.primaryButtonText || heroSettings.buttonText || 'Shop Collection';
     const primaryButtonLink =
         heroSettings.primaryButtonLink || heroSettings.buttonLink || '/products';
+    const secondaryButtonText =
+        heroSettings.secondaryButtonText || heroSettings.buttonTextSecondary || 'Learn More';
+    const secondaryButtonLink =
+        heroSettings.secondaryButtonLink || heroSettings.buttonLinkSecondary || '';
 
-    return (
-        <section className={`relative min-h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden bg-gradient-to-br ${heroSettings.backgroundGradient || 'from-primary-50 via-brand-cream/20 to-primary-100'}`}>
-            <div className="container mx-auto px-4 text-center z-10">
-                <h1 className="font-serif text-5xl md:text-7xl font-bold text-primary-900 mb-6">
+    const heroLayout = heroSettings.layout || 'full-bleed';
+    const heroAlignment = heroSettings.alignment || (heroLayout === 'minimal' ? 'center' : 'left');
+    const heroAnimationType = heroSettings.animation?.type || 'none';
+    const heroHasImage = Boolean(heroSettings.imageUrl);
+    const textAlignmentClass = resolveHeroTextAlignment(heroAlignment);
+    const contentPositionClass = resolveHeroContentPosition(heroAlignment);
+    const contentWidthClass = heroLayout === 'minimal' ? 'max-w-3xl' : 'max-w-2xl';
+
+    const contentNode = (
+        <div className="container-custom">
+            <div className={`w-full ${contentWidthClass} ${contentPositionClass} flex flex-col ${textAlignmentClass}`}>
+                <h1 data-hero-animate className={`font-serif text-5xl md:text-7xl font-bold mb-6 ${heroHasImage ? 'text-white' : 'text-primary-900'}`}>
                     {heroSettings.title}
-                    {heroSettings.subtitle && <span className="block text-brand-brown mt-2">{heroSettings.subtitle}</span>}
+                    {heroSettings.subtitle && (
+                        <span className={`block mt-2 ${heroHasImage ? 'text-white/90' : 'text-brand-brown'}`}>{heroSettings.subtitle}</span>
+                    )}
                 </h1>
                 {heroSettings.description && (
-                    <p className="text-xl text-primary-700 mb-8 max-w-2xl mx-auto">{heroSettings.description}</p>
+                    <p data-hero-animate className={`text-xl mb-8 ${heroHasImage ? 'text-white/90' : 'text-primary-700'}`}>{heroSettings.description}</p>
                 )}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div data-hero-animate className="flex flex-col sm:flex-row gap-4 justify-center sm:justify-start">
                     {primaryButtonLink && (
                         <Link href={primaryButtonLink} className="btn btn-primary text-lg px-8 py-4">
                             {primaryButtonText} <FiArrowRight className="inline ml-2" />
                         </Link>
                     )}
+                    {secondaryButtonLink && (
+                        <Link href={secondaryButtonLink} className="btn btn-secondary text-lg px-8 py-4">
+                            {secondaryButtonText}
+                        </Link>
+                    )}
                 </div>
             </div>
+        </div>
+    );
+
+    if (heroHasImage) {
+        return (
+            <HeroAnimate
+                backgroundUrl={heroSettings.imageUrl}
+                animationType={heroAnimationType}
+                className="min-h-[calc(100vh-80px)] flex items-center"
+            >
+                {contentNode}
+            </HeroAnimate>
+        );
+    }
+
+    return (
+        <section className={`relative min-h-[calc(100vh-80px)] flex items-center overflow-hidden bg-gradient-to-br ${heroSettings.backgroundGradient || 'from-primary-50 via-brand-cream/20 to-primary-100'}`}>
+            <HeroAnimate animationType={heroAnimationType} className="w-full">
+                {contentNode}
+            </HeroAnimate>
         </section>
     );
 }
@@ -128,6 +220,11 @@ const TextSection = ({ sectionData }) => {
 const FeaturedProductsSection = ({ sectionData = {}, products }) => {
     if (!sectionData.enabled) return null;
 
+    const productLimit = Number(sectionData.productLimit);
+    const visibleProducts = Number.isFinite(productLimit) && productLimit > 0
+        ? products.slice(0, productLimit)
+        : products;
+
     return (
         <ScrollReveal delay={200}>
             <section className="section-padding bg-primary-50">
@@ -137,9 +234,9 @@ const FeaturedProductsSection = ({ sectionData = {}, products }) => {
                         <p className="text-lg text-primary-600 max-w-2xl mx-auto">{sectionData.description}</p>
                     </div>
 
-                    {products.length > 0 ? (
+                    {visibleProducts.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {products.map((product, idx) => (
+                            {visibleProducts.map((product, idx) => (
                                 <ProductCard key={product._id} product={product} priority={idx < 4} />
                             ))}
                         </div>

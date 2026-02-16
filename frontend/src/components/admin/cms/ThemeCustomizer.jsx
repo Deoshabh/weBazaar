@@ -33,7 +33,7 @@ const Section = ({ title, icon: Icon, children, defaultOpen = false }) => {
     );
 };
 
-export default function ThemeCustomizer({ theme, branding, sections, announcementBar, onUpdateSection, onChange, onBrandingChange, onAnnouncementChange }) {
+export default function ThemeCustomizer({ theme, branding, sections, announcementBar, hasActiveBanners = false, onUpdateSection, onChange, onBrandingChange, onAnnouncementChange }) {
 
     // Helper to update theme settings
     const handleThemeChange = (key, value) => {
@@ -69,6 +69,7 @@ export default function ThemeCustomizer({ theme, branding, sections, announcemen
                 <HeroSection
                     theme={theme}
                     sectionData={sections?.hero}
+                    hasActiveBanners={hasActiveBanners}
                     onUpdateSection={(data) => onUpdateSection('hero', data)}
                     onThemeChange={handleThemeChange}
                 />
