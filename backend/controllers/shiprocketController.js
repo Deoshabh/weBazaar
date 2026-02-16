@@ -324,9 +324,37 @@ exports.getPickupAddresses = async (req, res) => {
   try {
     const addresses = await shiprocketService.getPickupAddresses();
 
+    const rawAddresses =
+      addresses?.data?.shipping_address ||
+      addresses?.shipping_address ||
+      addresses?.data?.pickup_addresses ||
+      addresses?.pickup_addresses ||
+      [];
+
+    const pickupAddresses = (Array.isArray(rawAddresses) ? rawAddresses : [])
+      .map((address) => ({
+        ...address,
+        pickup_location:
+          address?.pickup_location ||
+          address?.address_name ||
+          address?.address_nickname ||
+          address?.nickname ||
+          "Primary",
+        pin_code:
+          address?.pin_code ||
+          address?.pincode ||
+          address?.postal_code ||
+          address?.postcode ||
+          "",
+      }))
+      .filter((address) => Boolean(address.pin_code));
+
     res.json({
       success: true,
-      data: addresses,
+      data: {
+        pickup_addresses: pickupAddresses,
+        raw: addresses,
+      },
     });
   } catch (error) {
     console.error("Get pickup addresses error:", error);
