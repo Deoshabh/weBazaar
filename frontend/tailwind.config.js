@@ -57,6 +57,9 @@ module.exports = {
         "slide-down": "slideDown 0.3s ease-out",
         "slide-up": "slideUp 0.3s ease-out",
         "scale-in": "scaleIn 0.2s ease-out",
+        "float": "float 6s ease-in-out infinite",
+        "breath": "breath 8s ease-in-out infinite",
+        "draw-line": "drawLine 4s ease-in-out forwards",
       },
       keyframes: {
         fadeIn: {
@@ -74,6 +77,18 @@ module.exports = {
         scaleIn: {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        breath: {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.3" },
+          "50%": { transform: "scale(1.15)", opacity: "0.6" },
+        },
+        drawLine: {
+          "0%": { strokeDashoffset: "1000" },
+          "100%": { strokeDashoffset: "0" },
         },
       },
     },

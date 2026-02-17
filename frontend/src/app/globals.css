@@ -13,6 +13,7 @@
   --theme-container-width: 1280px;
   --theme-bg-color: #fafaf9;
   --theme-text-color: #1c1917;
+  --navbar-offset: 80px;
   
   /* Spacing scale */
   --spacing-xs: 0.5rem;
@@ -255,3 +256,115 @@ img {
   background-color: var(--color-brand-brown);
   color: white;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Landing Page — Organic Levitation Styles
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Cormorant Garamond — Elegant Serif for Landing Page */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap');
+
+/* Landing page smooth scroll */
+.landing-smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Three.js canvas performance */
+.landing-canvas canvas {
+  touch-action: none;
+  outline: none;
+}
+
+/* Hero text entrance animations */
+.hero-overline {
+  animation: heroFadeUp 1s ease-out 0.5s both;
+}
+
+.hero-headline {
+  animation: heroFadeUp 1.2s ease-out 0.8s both;
+}
+
+.hero-subtitle {
+  animation: heroFadeUp 1s ease-out 1.2s both;
+}
+
+.hero-scroll-hint {
+  animation: heroFadeUp 0.8s ease-out 2s both;
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Liquid button organic morphing */
+.liquid-btn {
+  will-change: border-radius, transform;
+  transition: background-color 0.3s ease;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+.glass-subtle {
+  backdrop-filter: blur(6px) saturate(1.2);
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+}
+
+/* Connector lines for anatomy section */
+.anatomy-line {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawConnector 1s ease-out forwards;
+}
+
+@keyframes drawConnector {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Scroll indicator pulse */
+.scroll-indicator {
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(8px);
+  }
+}
+
+/* Feature card reveal */
+.feature-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.feature-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Organic selection override for landing */
+[data-landing] ::selection {
+  background-color: rgba(139, 115, 85, 0.3);
+  color: #2C2B29;
+}
+
