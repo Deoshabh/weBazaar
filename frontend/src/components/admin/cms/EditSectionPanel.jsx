@@ -8,11 +8,21 @@ import { lintCssContent } from '@/utils/visualBuilder';
 
 export default function EditSectionPanel({ section, onSave, onCancel }) {
     const [formData, setFormData] = useState({});
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const template = getTemplateByType(section?.type);
+
+    const advancedFieldNames = new Set([
+        'customCss',
+        'visibilityRules',
+        'experiments',
+        'blocks',
+        'globalClassStyles',
+    ]);
 
     useEffect(() => {
         if (section) {
             setFormData(section.data || {});
+            setShowAdvanced(false);
         }
     }, [section]);
 
@@ -60,7 +70,20 @@ export default function EditSectionPanel({ section, onSave, onCancel }) {
 
             <div className="flex-1 overflow-y-auto p-4">
                 <form id="edit-section-form" onSubmit={handleSubmit} className="space-y-4">
-                    {template.fields.map((field) => (
+                    <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowAdvanced((prev) => !prev)}
+                            className="w-full text-left text-sm font-medium text-gray-700"
+                        >
+                            {showAdvanced ? 'Hide Advanced Controls' : 'Show Advanced Controls'}
+                        </button>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Advanced controls include custom CSS, rules, experiments, dynamic blocks, and global styles.
+                        </p>
+                    </div>
+
+                    {template.fields.filter((field) => showAdvanced || !advancedFieldNames.has(field.name)).map((field) => (
                         <div key={field.name}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 {field.label}

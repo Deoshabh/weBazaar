@@ -124,9 +124,14 @@ const sanitizeCss = (cssText = '') =>
     .replace(/expression\s*\(/gi, '')
     .replace(/javascript\s*:/gi, '');
 
+const MAX_SCOPED_CSS_LENGTH = 4500;
+
 export const compileScopedCss = (scopeSelector, cssText = '') => {
   const cleaned = sanitizeCss(cssText).trim();
   if (!cleaned) return '';
+  if (cleaned.length > MAX_SCOPED_CSS_LENGTH) {
+    return '';
+  }
 
   if (cleaned.includes('{{scope}}')) {
     return cleaned.replaceAll('{{scope}}', scopeSelector);

@@ -62,7 +62,7 @@ const upload = multer({
 
 // All admin CMS routes require authentication and admin role
 router.use(authenticate);
-router.use(authorize("admin"));
+router.use(authorize("admin", "designer", "publisher"));
 
 // Content Pages
 router.get("/pages", getAllPages);

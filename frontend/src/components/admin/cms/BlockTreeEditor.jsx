@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { FiPlus, FiTrash2, FiMove, FiChevronDown, FiRotateCcw, FiRotateCw, FiCopy, FiClipboard, FiLayers } from 'react-icons/fi';
 import { analyzeBlockPerformance } from '@/utils/visualBuilder';
 
-const DEFAULT_WIDGET_TYPES = ['text', 'heading', 'button', 'image', 'divider', 'spacer'];
+const DEFAULT_WIDGET_TYPES = ['text', 'heading', 'button', 'image', 'divider', 'spacer', 'form'];
 const DEFAULT_LAYOUT_TYPES = ['row', 'column', 'container'];
 const MAX_HISTORY_SIZE = 80;
 const PRESET_STORAGE_KEY = 'visual-builder-block-presets-v1';
@@ -69,6 +69,23 @@ const normalizeNodes = (nodes) => {
 };
 
 const cloneTree = (tree) => JSON.parse(JSON.stringify(tree || []));
+
+const flattenNodes = (nodes = [], parentPath = []) => {
+  const result = [];
+  (nodes || []).forEach((node, index) => {
+    const path = [...parentPath, index];
+    result.push({
+      id: node.id,
+      type: node.type,
+      label: node?.props?.text || node?.props?.title || node.type,
+      path,
+      locked: Boolean(node?.props?.locked),
+      hidden: Boolean(node?.props?.hidden),
+    });
+    result.push(...flattenNodes(node.children || [], path));
+  });
+  return result;
+};
 
 const reorderList = (list, activeId, overId) => {
   const oldIndex = list.findIndex((item) => item.id === activeId);
@@ -481,6 +498,58 @@ function NodeEditor({
                   placeholder="text-2xl md:text-4xl"
                 />
               </div>
+              <div>
+                <label className="block text-[11px] font-medium text-gray-500 mb-1">Global Widget ID</label>
+                <input
+                  type="text"
+                  value={node.props?.globalWidgetId ?? ''}
+                  onChange={(e) => setBaseProp('globalWidgetId', e.target.value)}
+                  className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
+                  placeholder="promoButton"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-gray-500 mb-1">Animation</label>
+                <select
+                  value={node.props?.animationType ?? node.props?.animation ?? 'none'}
+                  onChange={(e) => {
+                    setBaseProp('animationType', e.target.value);
+                    setBaseProp('animation', e.target.value);
+                  }}
+                  className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
+                >
+                  <option value="none">none</option>
+                  <option value="fade-up">fade-up</option>
+                  <option value="slide-in">slide-in</option>
+                  <option value="zoom-in">zoom-in</option>
+                </select>
+              </div>
+              <div className="flex items-end gap-3 text-xs text-gray-600">
+                <label className="inline-flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(node.props?.sticky)}
+                    onChange={(e) => setBaseProp('sticky', e.target.checked)}
+                  />
+                  Sticky
+                </label>
+                <label className="inline-flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(node.props?.hidden)}
+                    onChange={(e) => setBaseProp('hidden', e.target.checked)}
+                  />
+                  Hidden
+                </label>
+                <label className="inline-flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(node.props?.locked)}
+                    onChange={(e) => setBaseProp('locked', e.target.checked)}
+                  />
+                  Locked
+                </label>
+              </div>
             </div>
 
             <textarea
@@ -567,6 +636,7 @@ export default function BlockTreeEditor({ value, onChange }) {
   const [selectedPresetName, setSelectedPresetName] = useState('');
   const [historyPast, setHistoryPast] = useState([]);
   const [historyFuture, setHistoryFuture] = useState([]);
+  const [navigatorQuery, setNavigatorQuery] = useState('');
 
   const snapshotNodes = useCallback((tree) => JSON.stringify(normalizeNodes(tree)), []);
 
@@ -1032,8 +1102,58 @@ export default function BlockTreeEditor({ value, onChange }) {
   ]);
 
   const rootIds = nodes.map((node) => node.id);
+  const navigatorItems = useMemo(() => flattenNodes(nodes), [nodes]);
+  const filteredNavigatorItems = useMemo(() => {
+    const query = navigatorQuery.trim().toLowerCase();
+    if (!query) return navigatorItems;
+    return navigatorItems.filter((item) =>
+      `${item.type} ${item.label}`.toLowerCase().includes(query),
+    );
+  }, [navigatorItems, navigatorQuery]);
   const activeDragPath = activeDragId ? findPathById(nodes, String(activeDragId)) : null;
   const activeDragNode = activeDragPath ? getNodeByPath(nodes, activeDragPath) : null;
+
+  const handleExportTemplates = () => {
+    if (typeof window === 'undefined') return;
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      presets,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `builder-templates-${Date.now()}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportTemplates = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const incoming = Array.isArray(parsed?.presets) ? parsed.presets : [];
+      if (!incoming.length) return;
+      const merged = [...presets];
+      incoming.forEach((item) => {
+        if (!item?.name || !item?.node) return;
+        const existingIndex = merged.findIndex((entry) => entry.name === item.name);
+        if (existingIndex >= 0) {
+          merged[existingIndex] = item;
+        } else {
+          merged.push(item);
+        }
+      });
+      persistPresets(merged);
+    } catch {
+      // ignore invalid import
+    } finally {
+      event.target.value = '';
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -1152,6 +1272,45 @@ export default function BlockTreeEditor({ value, onChange }) {
         >
           <FiClipboard size={12} /> Insert Preset
         </button>
+        <button
+          type="button"
+          onClick={handleExportTemplates}
+          className="inline-flex items-center gap-1 text-xs px-2 py-1.5 border border-gray-300 rounded hover:bg-gray-50"
+          title="Export template presets"
+        >
+          Export Templates
+        </button>
+        <label className="inline-flex items-center gap-1 text-xs px-2 py-1.5 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
+          Import Templates
+          <input type="file" accept="application/json" className="hidden" onChange={handleImportTemplates} />
+        </label>
+      </div>
+      <div className="rounded border border-gray-200 bg-white p-2 space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Navigator</p>
+          <span className="text-[10px] text-gray-400">{filteredNavigatorItems.length} items</span>
+        </div>
+        <input
+          type="text"
+          value={navigatorQuery}
+          onChange={(event) => setNavigatorQuery(event.target.value)}
+          className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
+          placeholder="Search layers..."
+        />
+        <div className="max-h-32 overflow-y-auto space-y-1">
+          {filteredNavigatorItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setSelectedNodeId(item.id)}
+              className={`w-full text-left text-xs px-2 py-1.5 rounded border ${selectedNodeId === item.id ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}
+            >
+              <span className="font-medium">{item.type}</span> · {item.label}
+              {item.locked ? ' · locked' : ''}
+              {item.hidden ? ' · hidden' : ''}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         {['desktop', 'tablet', 'mobile'].map((bp) => (

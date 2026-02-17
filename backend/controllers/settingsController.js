@@ -1,4 +1,5 @@
 const SiteSettings = require('../models/SiteSettings');
+const SettingAuditLog = require('../models/SettingAuditLog');
 const {
   PUBLIC_SETTING_KEYS,
   isKnownSettingKey,
@@ -10,6 +11,11 @@ const {
   getSettingHistory: getSettingHistoryForKey,
 } = require('../utils/siteSettings');
 const { runScheduledPublishCheck } = require('../services/publishWorkflowService');
+const {
+  CURRENT_LAYOUT_SCHEMA_VERSION,
+  normalizeLayoutSchema,
+  deriveHomeSectionsFromLayout,
+} = require('../utils/layoutSchema');
 
 const forwardError = (res, next, err) => {
   if (err?.statusCode && res.statusCode === 200) {
@@ -24,6 +30,7 @@ const createSnapshotPayload = (settings) => ({
   announcementBar: settings.announcementBar,
   homeSections: settings.homeSections,
   layout: settings.layout,
+  layoutSchemaVersion: settings.layoutSchemaVersion || CURRENT_LAYOUT_SCHEMA_VERSION,
   theme: settings.theme,
 });
 
@@ -117,7 +124,7 @@ exports.updateSettings = async (req, res, next) => {
       settings.announcementBar = { ...settings.announcementBar.toObject(), ...announcementBar };
     }
 
-    if (homeSections) {
+    if (homeSections && !req.body.layout) {
       // Deep merge for homeSections to avoid overwriting partial updates if needed, 
       // but usually the admin sends the whole object for a section.
       // Let's assume we replace the specific sections provided.
@@ -128,7 +135,14 @@ exports.updateSettings = async (req, res, next) => {
     }
 
     if (req.body.layout) {
-      settings.layout = req.body.layout;
+      const normalizedLayout = normalizeLayoutSchema(req.body.layout || []);
+      const currentHomeSections = settings.homeSections?.toObject
+        ? settings.homeSections.toObject()
+        : settings.homeSections || {};
+
+      settings.layout = normalizedLayout;
+      settings.layoutSchemaVersion = Number(req.body.layoutSchemaVersion) || CURRENT_LAYOUT_SCHEMA_VERSION;
+      settings.homeSections = deriveHomeSectionsFromLayout(normalizedLayout, currentHomeSections);
     }
 
     if (req.body.theme) {
@@ -176,6 +190,10 @@ exports.getThemeVersionHistory = async (req, res, next) => {
         label: item.label,
         savedAt: item.savedAt,
         savedBy: item.savedBy || null,
+        snapshot: {
+          layout: item.snapshot?.layout || [],
+          theme: item.snapshot?.theme || {},
+        },
       }));
 
     res.json({
@@ -208,8 +226,11 @@ exports.restoreThemeVersion = async (req, res, next) => {
     settings.branding = snapshot.branding || settings.branding;
     settings.banners = snapshot.banners || settings.banners;
     settings.announcementBar = snapshot.announcementBar || settings.announcementBar;
-    settings.homeSections = snapshot.homeSections || settings.homeSections;
-    settings.layout = snapshot.layout || settings.layout;
+    const normalizedLayout = normalizeLayoutSchema(snapshot.layout || settings.layout || []);
+    const baseHomeSections = snapshot.homeSections || settings.homeSections || {};
+    settings.layout = normalizedLayout;
+    settings.layoutSchemaVersion = Number(snapshot.layoutSchemaVersion) || CURRENT_LAYOUT_SCHEMA_VERSION;
+    settings.homeSections = deriveHomeSectionsFromLayout(normalizedLayout, baseHomeSections);
     settings.theme = snapshot.theme || settings.theme;
 
     if ((settings.publishWorkflow?.status || 'live') === 'live') {
@@ -267,8 +288,11 @@ exports.importThemeJson = async (req, res, next) => {
     if (importedSettings.branding) settings.branding = importedSettings.branding;
     if (importedSettings.banners) settings.banners = importedSettings.banners;
     if (importedSettings.announcementBar) settings.announcementBar = importedSettings.announcementBar;
-    if (importedSettings.homeSections) settings.homeSections = importedSettings.homeSections;
-    if (importedSettings.layout) settings.layout = importedSettings.layout;
+    const normalizedLayout = normalizeLayoutSchema(importedSettings.layout || settings.layout || []);
+    const baseHomeSections = importedSettings.homeSections || settings.homeSections || {};
+    settings.layout = normalizedLayout;
+    settings.layoutSchemaVersion = Number(importedSettings.layoutSchemaVersion) || CURRENT_LAYOUT_SCHEMA_VERSION;
+    settings.homeSections = deriveHomeSectionsFromLayout(normalizedLayout, baseHomeSections);
     if (importedSettings.theme) settings.theme = importedSettings.theme;
 
     if ((settings.publishWorkflow?.status || 'live') === 'live') {
@@ -449,7 +473,11 @@ exports.getPublicSettings = async (req, res, next) => {
     }
 
     if (publishedSnapshot?.layout) {
-      publicSettings.layout = publishedSnapshot.layout;
+      publicSettings.layout = normalizeLayoutSchema(publishedSnapshot.layout);
+      publicSettings.layoutSchemaVersion =
+        Number(publishedSnapshot.layoutSchemaVersion) ||
+        Number(singletonSettings.layoutSchemaVersion) ||
+        CURRENT_LAYOUT_SCHEMA_VERSION;
     }
 
     if (publishedSnapshot?.theme) {
@@ -477,12 +505,128 @@ exports.runPublishWorkflowNow = async (req, res, next) => {
     const result = await runScheduledPublishCheck();
     const settings = await SiteSettings.getSettings();
 
+    if (result?.promoted) {
+      await SettingAuditLog.create({
+        key: 'publishWorkflow',
+        action: 'update',
+        oldValue: {
+          status: 'scheduled',
+        },
+        newValue: {
+          status: 'live',
+          publishedAt: settings.publishWorkflow?.publishedAt || null,
+        },
+        updatedBy: req.user?.id || null,
+        metadata: {
+          source: 'manual-publish-check',
+          triggeredBy: req.user?.email || req.user?.id || null,
+        },
+      });
+    }
+
     res.json({
       message: result?.promoted
         ? 'Scheduled publish promoted to live'
         : 'Publish workflow check completed',
       result,
       publishWorkflow: settings.publishWorkflow || {},
+    });
+  } catch (err) {
+    forwardError(res, next, err);
+  }
+};
+
+/* =====================
+   Reset Storefront Defaults (Admin)
+===================== */
+exports.resetStorefrontDefaults = async (req, res, next) => {
+  try {
+    const settings = await SiteSettings.getSettings();
+
+    const defaultHomeSections = {
+      heroSection: SITE_SETTINGS_DEFAULTS.heroSection,
+      featuredProducts: SITE_SETTINGS_DEFAULTS.featuredProducts,
+      madeToOrder: SITE_SETTINGS_DEFAULTS.homeSections?.madeToOrder || {},
+      newsletter: SITE_SETTINGS_DEFAULTS.homeSections?.newsletter || {},
+    };
+
+    const defaultLayout = normalizeLayoutSchema([
+      {
+        id: 'hero',
+        type: 'hero',
+        enabled: defaultHomeSections.heroSection?.enabled !== false,
+        data: defaultHomeSections.heroSection,
+      },
+      {
+        id: 'products',
+        type: 'products',
+        enabled: defaultHomeSections.featuredProducts?.enabled !== false,
+        data: defaultHomeSections.featuredProducts,
+      },
+      {
+        id: 'madeToOrder',
+        type: 'madeToOrder',
+        enabled: defaultHomeSections.madeToOrder?.enabled !== false,
+        data: defaultHomeSections.madeToOrder,
+      },
+      {
+        id: 'newsletter',
+        type: 'newsletter',
+        enabled: defaultHomeSections.newsletter?.enabled !== false,
+        data: defaultHomeSections.newsletter,
+      },
+    ]);
+
+    settings.branding = {
+      logo: { url: '', alt: 'Logo' },
+      favicon: { url: '' },
+      siteName: 'Radeo',
+    };
+    settings.banners = [];
+    settings.announcementBar = SITE_SETTINGS_DEFAULTS.announcementBar;
+    settings.layout = defaultLayout;
+    settings.layoutSchemaVersion = CURRENT_LAYOUT_SCHEMA_VERSION;
+    settings.homeSections = deriveHomeSectionsFromLayout(defaultLayout, defaultHomeSections);
+    settings.theme = {
+      primaryColor: '#3B2F2F',
+      secondaryColor: '#E5D3B3',
+      fontFamily: 'Inter',
+      borderRadius: '8px',
+    };
+    settings.publishWorkflow = {
+      status: 'live',
+      scheduledAt: null,
+      publishedAt: new Date(),
+      updatedAt: new Date(),
+      lockOwner: null,
+      lockUntil: null,
+    };
+
+    settings.publishedSnapshot = createSnapshotPayload(settings);
+
+    appendVersionSnapshot(settings, {
+      label: 'Reset to defaults',
+      userId: req.user?.id || null,
+    });
+
+    await settings.save();
+
+    await bulkUpsertSettings({
+      items: PUBLIC_SETTING_KEYS.map((key) => ({
+        key,
+        value: SITE_SETTINGS_DEFAULTS[key],
+      })),
+      updatedBy: req.user?.id || null,
+      metadata: {
+        source: 'admin-reset-defaults',
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      },
+    });
+
+    res.json({
+      message: 'Storefront reset to default settings successfully',
+      settings,
     });
   } catch (err) {
     forwardError(res, next, err);

@@ -7,6 +7,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed:products": "node seed/products.seed.js",
+    "migrate:layout-schema-v2": "node scripts/migrate-layout-schema-v2.js",
     "test": "jest --watch",
     "test:ci": "jest --ci --coverage --forceExit",
     "test:coverage": "jest --coverage --forceExit"

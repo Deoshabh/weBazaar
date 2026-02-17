@@ -131,7 +131,7 @@ export default function AdminUsersPage() {
               />
             </div>
               <div className="flex gap-2">
-                {['all', 'customer', 'admin'].map((role) => (
+                {['all', 'customer', 'designer', 'publisher', 'admin'].map((role) => (
                   <button
                     key={role}
                     onClick={() => setFilterRole(role)}
@@ -202,6 +202,8 @@ export default function AdminUsersPage() {
                           className="px-3 py-1 rounded-lg border border-primary-300 bg-white text-primary-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
                         >
                           <option value="customer">Customer</option>
+                          <option value="designer">Designer</option>
+                          <option value="publisher">Publisher</option>
                           <option value="admin">Admin</option>
                         </select>
                       </td>

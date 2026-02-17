@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { JsonLd, generateWebsiteJsonLd, generateOrganizationJsonLd } from '@/utils/seo';
 import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
 import HomeSections from '@/components/storefront/HomeSections';
+import { normalizeSettingsLayout, resolveFeaturedProductsConfig } from '@/utils/layoutSchema';
 
 // Force dynamic rendering since we rely on external API data that changes
 export const dynamic = 'force-dynamic';
@@ -70,9 +71,9 @@ async function getFeaturedProducts(limit = 8, selection = 'latest', manualIds = 
 // --- Main Page Component ---
 
 export default async function Home() {
-  const settings = await getSiteSettings();
+  const settings = normalizeSettingsLayout(await getSiteSettings());
 
-  const featuredSection = settings.homeSections?.featuredProducts || {};
+  const featuredSection = resolveFeaturedProductsConfig(settings);
   const products = await getFeaturedProducts(
     featuredSection.productLimit,
     featuredSection.productSelection,

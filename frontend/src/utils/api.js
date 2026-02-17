@@ -113,6 +113,7 @@ export const productAPI = {
 
 export const settingsAPI = {
   getPublicSettings: () => api.get("/settings/public"),
+  getPublicCmsPage: (slug) => api.get(`/cms/pages/${slug}`),
 };
 
 export const adminAPI = {
@@ -122,6 +123,13 @@ export const adminAPI = {
   getAllSettings: () => api.get("/settings"), // GET /api/v1/settings (Singleton - Branding/Banners)
   getAdvancedSettings: () => api.get("/admin/settings"), // GET /api/v1/admin/settings (Key-Value List)
   updateSettings: (data) => api.put("/settings", data), // PUT /api/v1/settings
+  getCmsPages: (params) => api.get('/admin/cms/pages', { params }),
+  resetFrontendDefaults: () => api.post('/settings/reset-defaults'),
+  getCmsPage: (id) => api.get(`/admin/cms/pages/${id}`),
+  createCmsPage: (data) => api.post('/admin/cms/pages', data),
+  updateCmsPage: (id, data) => api.put(`/admin/cms/pages/${id}`, data),
+  publishCmsPage: (id) => api.post(`/admin/cms/pages/${id}/publish`),
+  deleteCmsPage: (id) => api.delete(`/admin/cms/pages/${id}`),
 
   // Products, Orders, etc. (keep existing)
   getAllProducts: (params) => api.get("/admin/products", { params }),

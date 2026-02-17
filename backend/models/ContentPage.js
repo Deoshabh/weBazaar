@@ -16,6 +16,13 @@ const contentBlockSchema = new mongoose.Schema(
         "columns",
         "accordion",
         "table",
+        "row",
+        "column",
+        "container",
+        "heading",
+        "button",
+        "divider",
+        "spacer",
       ],
     },
     position: {

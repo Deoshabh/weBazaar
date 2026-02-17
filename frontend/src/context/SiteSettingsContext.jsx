@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { settingsAPI } from '@/utils/api';
 import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
+import { normalizeSettingsLayout } from '@/utils/layoutSchema';
 
 const CACHE_KEY = 'site-settings-cache-v1';
 const CACHE_TTL_MS = 60 * 60 * 1000;
@@ -48,7 +49,9 @@ const deepMerge = (base, incoming) => {
   return merged;
 };
 
-const normalizeSettings = (incoming) => deepMerge(SITE_SETTINGS_DEFAULTS, incoming || {});
+const normalizeSettings = (incoming) => normalizeSettingsLayout(
+  deepMerge(SITE_SETTINGS_DEFAULTS, incoming || {}),
+);
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 

@@ -9,7 +9,7 @@ import RevenueChart from '@/components/admin/charts/RevenueChart';
 import SalesCategoryPieChart from '@/components/admin/charts/SalesCategoryPieChart';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/utils/api';
-import { FiDollarSign, FiShoppingBag, FiUsers, FiBox, FiSettings, FiLayout, FiTruck } from 'react-icons/fi';
+import { FiDollarSign, FiShoppingBag, FiUsers, FiBox, FiSettings, FiLayout, FiTruck, FiTool } from 'react-icons/fi';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -113,6 +113,12 @@ export default function AdminDashboard() {
       description: 'Customize homepage layout',
       icon: FiLayout,
       href: '/admin/visual-editor'
+    },
+    {
+      title: 'Storefront Builder',
+      description: 'Edit live page blocks and create pages',
+      icon: FiTool,
+      href: '/admin/storefront-builder'
     }
   ];
 

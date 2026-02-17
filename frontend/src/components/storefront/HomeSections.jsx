@@ -8,7 +8,8 @@ import HeroAnimate from '@/components/ui/HeroAnimate';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { getIconComponent } from '@/utils/iconMapper';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
     analyzeBlockPerformance,
     compileGlobalClassCss,
@@ -19,6 +20,127 @@ import {
     resolveExperimentVariant,
     resolveResponsiveProps,
 } from '@/utils/visualBuilder';
+import {
+    CURRENT_LAYOUT_SCHEMA_VERSION,
+    deriveHomeSectionsFromLayout,
+    getLayoutSectionData,
+    normalizeLayoutSchema,
+    normalizeSettingsLayout,
+} from '@/utils/layoutSchema';
+import { adminAPI } from '@/utils/api';
+import BlockTreeEditor from '@/components/admin/cms/BlockTreeEditor';
+import { useAuth } from '@/context/AuthContext';
+
+const resolveAnimationClass = (animationType = 'none') => {
+    if (animationType === 'fade-up') return 'animate-fade-up';
+    if (animationType === 'slide-in') return 'animate-slide-in';
+    if (animationType === 'zoom-in') return 'animate-zoom-in';
+    return '';
+};
+
+function DynamicFormBlock({ id, props = {}, className = '' }) {
+    const [status, setStatus] = useState('idle');
+    const fields = Array.isArray(props.fields) ? props.fields : [
+        { name: 'name', label: 'Name', type: 'text', required: true },
+        { name: 'email', label: 'Email', type: 'email', required: true },
+        { name: 'message', label: 'Message', type: 'textarea', required: true },
+    ];
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+            setStatus('submitting');
+            const targetUrl = props.webhookUrl || `${process.env.NEXT_PUBLIC_API_URL || '/api/v1'}/contact`;
+            const response = await fetch(targetUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error('Form request failed');
+            }
+
+            setStatus('success');
+            event.currentTarget.reset();
+        } catch {
+            setStatus('error');
+        }
+    };
+
+    return (
+        <form key={id} onSubmit={handleSubmit} className={className || 'space-y-3 rounded-lg border border-primary-200 p-4'}>
+            {fields.map((field) => (
+                <div key={field.name} className="space-y-1">
+                    <label className="text-xs font-medium text-primary-700">{field.label || field.name}</label>
+                    {field.type === 'textarea' ? (
+                        <textarea
+                            name={field.name}
+                            required={Boolean(field.required)}
+                            className="w-full border border-primary-200 rounded px-3 py-2 text-sm"
+                            rows={Number(field.rows) || 4}
+                            placeholder={field.placeholder || ''}
+                        />
+                    ) : (
+                        <input
+                            type={field.type || 'text'}
+                            name={field.name}
+                            required={Boolean(field.required)}
+                            className="w-full border border-primary-200 rounded px-3 py-2 text-sm"
+                            placeholder={field.placeholder || ''}
+                        />
+                    )}
+                </div>
+            ))}
+            <button type="submit" className="btn btn-primary text-sm" disabled={status === 'submitting'}>
+                {status === 'submitting' ? 'Submitting...' : props.submitText || 'Submit'}
+            </button>
+            {status === 'success' && <p className="text-xs text-emerald-700">Submitted successfully.</p>}
+            {status === 'error' && <p className="text-xs text-red-700">Submission failed.</p>}
+        </form>
+    );
+}
+
+function PopupBuilder({ popupConfig = {} }) {
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        if (!popupConfig?.enabled) return;
+
+        const delayMs = Number(popupConfig.delayMs || 0);
+        const timer = setTimeout(() => {
+            setIsVisible(true);
+        }, Math.max(0, delayMs));
+
+        return () => clearTimeout(timer);
+    }, [popupConfig]);
+
+    if (!popupConfig?.enabled || !isVisible) return null;
+
+    return (
+        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl relative">
+                <button
+                    type="button"
+                    onClick={() => setIsVisible(false)}
+                    className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                >
+                    ✕
+                </button>
+                <h3 className="text-xl font-semibold text-primary-900 mb-2">{popupConfig.title || 'Announcement'}</h3>
+                <p className="text-primary-700 mb-4">{popupConfig.description || ''}</p>
+                {popupConfig.buttonLink && (
+                    <Link href={popupConfig.buttonLink} className="btn btn-primary" onClick={() => setIsVisible(false)}>
+                        {popupConfig.buttonText || 'Learn More'}
+                    </Link>
+                )}
+            </div>
+        </div>
+    );
+}
 
 // --- Sub-components ---
 
@@ -98,16 +220,39 @@ const renderDynamicBlocks = (blocksInput, context, zone = 'after') => {
     if (visibleBlocks.length === 0) return null;
 
     const renderBlockNode = (block, keyPrefix) => {
-        const dynamicProps = resolveDynamicObject(block.props || {}, context.binding);
+        const globalWidgetId = block?.props?.globalWidgetId || block?.globalWidgetId;
+        const globalWidgetMap = context?.binding?.settings?.theme?.globalWidgets || {};
+        const globalWidgetNode = globalWidgetId ? globalWidgetMap?.[globalWidgetId] : null;
+
+        const effectiveBlock = globalWidgetNode
+            ? {
+                ...globalWidgetNode,
+                ...block,
+                props: {
+                    ...(globalWidgetNode.props || {}),
+                    ...(block.props || {}),
+                },
+                children:
+                    Array.isArray(block.children) && block.children.length > 0
+                        ? block.children
+                        : (globalWidgetNode.children || []),
+            }
+            : block;
+
+        const dynamicProps = resolveDynamicObject(effectiveBlock.props || {}, context.binding);
         const resolvedProps = resolveResponsiveProps(dynamicProps, context.runtime.device);
-        const blockType = block.type || 'text';
+        const blockType = effectiveBlock.type || 'text';
         const globalClassName = resolvedProps.globalClassName || '';
-        const className = [resolvedProps.className || '', globalClassName].filter(Boolean).join(' ').trim();
-        const childNodes = Array.isArray(block.children) ? block.children : [];
+        const animationClass = resolveAnimationClass(resolvedProps.animationType || resolvedProps.animation || 'none');
+        const stickyClass = resolvedProps.sticky ? 'sticky top-4 z-10' : '';
+        const className = [resolvedProps.className || '', globalClassName, animationClass, stickyClass, resolvedProps.hoverClassName || ''].filter(Boolean).join(' ').trim();
+        const childNodes = Array.isArray(effectiveBlock.children) ? effectiveBlock.children : [];
         const visibleChildren = childNodes.filter((child) =>
             evaluateVisibilityRules(child.visibilityRules, context.runtime),
         );
-        const id = block.id || keyPrefix;
+        const id = effectiveBlock.id || keyPrefix;
+
+        if (resolvedProps.hidden === true) return null;
 
         if (blockType === 'row') {
             const columns = Math.min(Math.max(Number(resolvedProps.columns) || 2, 1), 6);
@@ -157,6 +302,10 @@ const renderDynamicBlocks = (blocksInput, context, zone = 'after') => {
             );
         }
 
+        if (blockType === 'form') {
+            return <DynamicFormBlock key={id} id={id} props={resolvedProps} className={className} />;
+        }
+
         if (blockType === 'image') {
             const src = resolvedProps.src || '';
             if (!src) return null;
@@ -192,8 +341,17 @@ const renderDynamicBlocks = (blocksInput, context, zone = 'after') => {
     return <div className="space-y-3">{visibleBlocks.map((block, index) => renderBlockNode(block, `${zone}-${index}`))}</div>;
 };
 
+const isSectionEnabled = (section = {}) => {
+    if (typeof section?.enabled === 'boolean') return section.enabled;
+
+    const data = getLayoutSectionData(section);
+    if (typeof data?.enabled === 'boolean') return data.enabled;
+
+    return true;
+};
+
 const withExperimentData = (section = {}, runtime = {}) => {
-    const baseData = section.data || {};
+    const baseData = getLayoutSectionData(section);
     const variant = resolveExperimentVariant(baseData.experiments, `${runtime.seed}:${section.id}:${runtime.pathname}`);
     if (!variant?.data) return baseData;
     return {
@@ -461,6 +619,15 @@ const TrustBadgesSection = ({ settings }) => {
 
 export default function HomeSections({ initialSettings, initialProducts }) {
     const { settings: clientSettings, loading } = useSiteSettings();
+    const { user, isAuthenticated } = useAuth();
+    const [builderLayout, setBuilderLayout] = useState([]);
+    const [selectedBuilderSectionId, setSelectedBuilderSectionId] = useState(null);
+    const [isBuilderSaving, setIsBuilderSaving] = useState(false);
+    const [pageDraft, setPageDraft] = useState({ title: '', slug: '' });
+    const [globalWidgetsJson, setGlobalWidgetsJson] = useState('{}');
+    const [globalWidgetsDraft, setGlobalWidgetsDraft] = useState({});
+    const [showRawWidgetsJson, setShowRawWidgetsJson] = useState(false);
+    const [popupConfigJson, setPopupConfigJson] = useState('{"enabled":false}');
 
     // Prefer client settings if loaded (which includes live previews), otherwise fallback to server settings (SSR)
     const activeSettings = useMemo(() => {
@@ -469,8 +636,8 @@ export default function HomeSections({ initialSettings, initialProducts }) {
         // However, deepMerge in Context ensures we have data. 
         // If loading is true, 'clientSettings' might be defaults.
         // So:
-        if (loading) return initialSettings;
-        return clientSettings;
+        const baseSettings = loading ? initialSettings : clientSettings;
+        return normalizeSettingsLayout(baseSettings);
     }, [loading, clientSettings, initialSettings]);
 
     const runtimeContext = useMemo(() => {
@@ -480,6 +647,7 @@ export default function HomeSections({ initialSettings, initialProducts }) {
         const query = hasWindow ? new URLSearchParams(window.location.search) : new URLSearchParams('');
         const pathname = hasWindow ? window.location.pathname : '/';
         const isEmbeddedPreview = hasWindow && query.get('visualEditor') === '1';
+        const isStorefrontBuilder = hasWindow && query.get('storefrontBuilder') === '1';
         const seed = hasWindow
             ? window.localStorage.getItem('vb-seed') || `${Date.now()}`
             : 'server';
@@ -494,26 +662,73 @@ export default function HomeSections({ initialSettings, initialProducts }) {
             pathname,
             seed,
             isEmbeddedPreview,
+            isStorefrontBuilder,
             isLoggedIn: false,
         };
     }, []);
+
+    useEffect(() => {
+        if (!runtimeContext.isStorefrontBuilder) return;
+        const normalizedLayout = normalizeLayoutSchema(activeSettings.layout || []);
+        setBuilderLayout(normalizedLayout);
+        const initialWidgets = activeSettings?.theme?.globalWidgets || {};
+        setGlobalWidgetsDraft(initialWidgets);
+        setGlobalWidgetsJson(JSON.stringify(initialWidgets, null, 2));
+        setPopupConfigJson(JSON.stringify(activeSettings?.theme?.popupBuilder || { enabled: false }, null, 2));
+        if (!selectedBuilderSectionId && normalizedLayout[0]?.id) {
+            setSelectedBuilderSectionId(normalizedLayout[0].id);
+        }
+    }, [
+        runtimeContext.isStorefrontBuilder,
+        activeSettings.layout,
+        activeSettings?.theme?.globalWidgets,
+        activeSettings?.theme?.popupBuilder,
+        selectedBuilderSectionId,
+    ]);
+
+    const canEditStorefront = useMemo(() => {
+        if (!isAuthenticated) return false;
+        return ['admin', 'designer', 'publisher'].includes(user?.role);
+    }, [isAuthenticated, user?.role]);
+
+    const canPublishStorefront = useMemo(() => {
+        if (!isAuthenticated) return false;
+        return ['admin', 'publisher'].includes(user?.role);
+    }, [isAuthenticated, user?.role]);
+
+    const effectiveSettings = useMemo(() => {
+        if (!runtimeContext.isStorefrontBuilder) return activeSettings;
+        if (!Array.isArray(builderLayout) || builderLayout.length === 0) return activeSettings;
+
+        const normalizedLayout = normalizeLayoutSchema(builderLayout);
+        const derivedHomeSections = deriveHomeSectionsFromLayout(
+            normalizedLayout,
+            activeSettings.homeSections || {},
+        );
+
+        return {
+            ...activeSettings,
+            layout: normalizedLayout,
+            homeSections: derivedHomeSections,
+        };
+    }, [runtimeContext.isStorefrontBuilder, builderLayout, activeSettings]);
 
     // Determine Layout Order
     // Use settings.layout if available, otherwise fallback to default structure
     let renderOrder = [];
 
-    if (activeSettings.layout && activeSettings.layout.length > 0) {
-        renderOrder = activeSettings.layout.filter((item) => {
-            if (!item.enabled) return false;
+    if (effectiveSettings.layout && effectiveSettings.layout.length > 0) {
+        renderOrder = effectiveSettings.layout.filter((item) => {
+            if (!isSectionEnabled(item)) return false;
             const effectiveData = withExperimentData(item, runtimeContext);
             return evaluateVisibilityRules(effectiveData.visibilityRules, runtimeContext);
         });
     } else {
         // Default fallback
-        if (activeSettings.homeSections?.heroSection?.enabled) renderOrder.push({ id: 'hero', type: 'hero' });
-        if (activeSettings.homeSections?.featuredProducts?.enabled) renderOrder.push({ id: 'products', type: 'products' });
-        if (activeSettings.homeSections?.madeToOrder?.enabled) renderOrder.push({ id: 'madeToOrder', type: 'madeToOrder' });
-        if (activeSettings.homeSections?.newsletter?.enabled) renderOrder.push({ id: 'newsletter', type: 'newsletter' });
+        if (effectiveSettings.homeSections?.heroSection?.enabled) renderOrder.push({ id: 'hero', type: 'hero' });
+        if (effectiveSettings.homeSections?.featuredProducts?.enabled) renderOrder.push({ id: 'products', type: 'products' });
+        if (effectiveSettings.homeSections?.madeToOrder?.enabled) renderOrder.push({ id: 'madeToOrder', type: 'madeToOrder' });
+        if (effectiveSettings.homeSections?.newsletter?.enabled) renderOrder.push({ id: 'newsletter', type: 'newsletter' });
     }
 
     // Helper to render section by type
@@ -523,28 +738,28 @@ export default function HomeSections({ initialSettings, initialProducts }) {
         switch (section.type) {
             case 'hero': {
                 const heroSettings = mergeHeroSettings(
-                    activeSettings.homeSections?.heroSection || {},
+                    effectiveSettings.homeSections?.heroSection || {},
                     sectionData || {}
                 );
-                return <HeroSection key={section.id} banners={activeSettings.banners} heroSettings={heroSettings} />;
+                return <HeroSection key={section.id} banners={effectiveSettings.banners} heroSettings={heroSettings} />;
             }
             case 'products': {
                 const productsSettings = mergeSectionSettings(
-                    activeSettings.homeSections?.featuredProducts || {},
+                    effectiveSettings.homeSections?.featuredProducts || {},
                     sectionData || {}
                 );
                 return <FeaturedProductsSection key={section.id} sectionData={productsSettings} products={initialProducts} />;
             }
             case 'madeToOrder': {
                 const madeToOrderSettings = mergeSectionSettings(
-                    activeSettings.homeSections?.madeToOrder || {},
+                    effectiveSettings.homeSections?.madeToOrder || {},
                     sectionData || {}
                 );
                 return <MadeToOrderSection key={section.id} sectionData={madeToOrderSettings} />;
             }
             case 'newsletter': {
                 const newsletterSettings = mergeSectionSettings(
-                    activeSettings.homeSections?.newsletter || {},
+                    effectiveSettings.homeSections?.newsletter || {},
                     sectionData || {}
                 );
                 return <NewsletterSection key={section.id} sectionData={newsletterSettings} />;
@@ -590,6 +805,251 @@ export default function HomeSections({ initialSettings, initialProducts }) {
         return () => document.removeEventListener('click', onClickCapture, true);
     }, []);
 
+    const selectedBuilderSection = useMemo(
+        () => builderLayout.find((section) => section.id === selectedBuilderSectionId) || null,
+        [builderLayout, selectedBuilderSectionId],
+    );
+
+    const updateSelectedSectionBlocks = (nextBlocks) => {
+        if (!selectedBuilderSectionId) return;
+
+        setBuilderLayout((prev) => prev.map((section) => {
+            if (section.id !== selectedBuilderSectionId) return section;
+            return {
+                ...section,
+                data: {
+                    ...(section.data || {}),
+                    blocks: nextBlocks,
+                },
+            };
+        }));
+    };
+
+    const handleStorefrontBuilderSave = async () => {
+        try {
+            setIsBuilderSaving(true);
+            const normalizedLayout = normalizeLayoutSchema(builderLayout);
+            const homeSections = deriveHomeSectionsFromLayout(
+                normalizedLayout,
+                activeSettings.homeSections || {},
+            );
+
+            let parsedGlobalWidgets = {};
+            let parsedPopupConfig = { enabled: false };
+
+            try {
+                parsedGlobalWidgets = showRawWidgetsJson
+                    ? JSON.parse(globalWidgetsJson || '{}')
+                    : (globalWidgetsDraft || {});
+            } catch {
+                toast.error('Global widgets JSON is invalid');
+                setIsBuilderSaving(false);
+                return;
+            }
+
+            try {
+                parsedPopupConfig = JSON.parse(popupConfigJson || '{"enabled":false}');
+            } catch {
+                toast.error('Popup config JSON is invalid');
+                setIsBuilderSaving(false);
+                return;
+            }
+
+            await adminAPI.updateSettings({
+                layout: normalizedLayout,
+                homeSections,
+                layoutSchemaVersion: CURRENT_LAYOUT_SCHEMA_VERSION,
+                theme: {
+                    ...(activeSettings.theme || {}),
+                    globalWidgets: parsedGlobalWidgets,
+                    popupBuilder: parsedPopupConfig,
+                },
+            });
+
+            toast.success('Storefront builder changes saved');
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to save storefront builder changes');
+        } finally {
+            setIsBuilderSaving(false);
+        }
+    };
+
+    const handleQuickAddButton = () => {
+        if (!canEditStorefront) {
+            toast.error('Your role cannot edit builder content');
+            return;
+        }
+        if (!selectedBuilderSectionId) {
+            toast.error('Select a section first');
+            return;
+        }
+
+        const existingBlocks = Array.isArray(selectedBuilderSection?.data?.blocks)
+            ? selectedBuilderSection.data.blocks
+            : [];
+
+        updateSelectedSectionBlocks([
+            ...existingBlocks,
+            {
+                id: `button-${Date.now()}`,
+                type: 'button',
+                zone: 'after',
+                props: {
+                    text: 'New Button',
+                    link: '/products',
+                    className: 'btn btn-primary',
+                },
+                children: [],
+            },
+        ]);
+    };
+
+    const handleAddGlobalWidget = () => {
+        const defaultId = `widget-${Date.now()}`;
+        setGlobalWidgetsDraft((prev) => {
+            const next = {
+                ...(prev || {}),
+                [defaultId]: {
+                    id: defaultId,
+                    type: 'button',
+                    props: {
+                        text: 'New Global Widget',
+                        link: '/products',
+                        className: 'btn btn-primary',
+                    },
+                    children: [],
+                },
+            };
+            setGlobalWidgetsJson(JSON.stringify(next, null, 2));
+            return next;
+        });
+    };
+
+    const handleUpdateGlobalWidget = (widgetId, key, value) => {
+        setGlobalWidgetsDraft((prev) => {
+            const current = prev?.[widgetId] || { type: 'text', props: {} };
+            const next = {
+                ...(prev || {}),
+                [widgetId]: {
+                    ...current,
+                    type: key === 'type' ? value : current.type,
+                    props: {
+                        ...(current.props || {}),
+                        ...(key === 'text' ? { text: value } : {}),
+                        ...(key === 'link' ? { link: value, href: value } : {}),
+                        ...(key === 'className' ? { className: value } : {}),
+                    },
+                },
+            };
+            setGlobalWidgetsJson(JSON.stringify(next, null, 2));
+            return next;
+        });
+    };
+
+    const handleRenameGlobalWidgetId = (oldId, newIdRaw) => {
+        const newId = String(newIdRaw || '').trim();
+        if (!newId || newId === oldId) return;
+
+        setGlobalWidgetsDraft((prev) => {
+            if (!prev?.[oldId]) return prev;
+            if (prev?.[newId]) {
+                toast.error('Global widget id already exists');
+                return prev;
+            }
+
+            const next = { ...(prev || {}) };
+            const widget = { ...(next[oldId] || {}), id: newId };
+            delete next[oldId];
+            next[newId] = widget;
+            setGlobalWidgetsJson(JSON.stringify(next, null, 2));
+            return next;
+        });
+    };
+
+    const handleDeleteGlobalWidget = (widgetId) => {
+        setGlobalWidgetsDraft((prev) => {
+            const next = { ...(prev || {}) };
+            delete next[widgetId];
+            setGlobalWidgetsJson(JSON.stringify(next, null, 2));
+            return next;
+        });
+    };
+
+    const handleCreatePageFromSection = async () => {
+        if (!canPublishStorefront) {
+            toast.error('Only admin/publisher can create pages');
+            return;
+        }
+        const title = pageDraft.title.trim();
+        const slug = pageDraft.slug.trim().toLowerCase();
+
+        if (!title || !slug) {
+            toast.error('Page title and slug are required');
+            return;
+        }
+
+        const sourceBlocks = Array.isArray(selectedBuilderSection?.data?.blocks)
+            ? selectedBuilderSection.data.blocks
+            : [];
+
+        const contentBlocks = sourceBlocks.map((block, index) => ({
+            type: block?.type || 'text',
+            position: index,
+            visibility: 'all',
+            config: {
+                ...(block || {}),
+            },
+        }));
+
+        try {
+            await adminAPI.createCmsPage({
+                title,
+                slug,
+                path: `/pages/${slug}`,
+                status: 'draft',
+                category: 'page',
+                template: 'default',
+                blocks: contentBlocks,
+            });
+
+            toast.success(`Page created at /pages/${slug}`);
+            setPageDraft({ title: '', slug: '' });
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to create page');
+        }
+    };
+
+    const handleResetStorefrontDefaults = async () => {
+        if (!canPublishStorefront) {
+            toast.error('Only admin/publisher can reset storefront');
+            return;
+        }
+        const confirmed = window.confirm(
+            'Reset all frontend settings to default and publish live now? This will overwrite current settings.',
+        );
+        if (!confirmed) return;
+
+        const typedConfirmation = window.prompt('Type RESET to confirm full storefront reset:');
+        if (typedConfirmation !== 'RESET') {
+            toast.error('Reset cancelled. Confirmation text did not match.');
+            return;
+        }
+
+        try {
+            setIsBuilderSaving(true);
+            await adminAPI.resetFrontendDefaults();
+            toast.success('Frontend reset to defaults');
+            window.location.reload();
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to reset defaults');
+        } finally {
+            setIsBuilderSaving(false);
+        }
+    };
+
     return (
         <>
             {renderOrder.map(section => (
@@ -600,7 +1060,7 @@ export default function HomeSections({ initialSettings, initialProducts }) {
                     const compiledGlobalClassCss = compileGlobalClassCss(scopeSelector, effectiveSectionData.globalClassStyles);
                     const renderCost = analyzeBlockPerformance(effectiveSectionData.blocks);
                     const bindingContext = {
-                        settings: activeSettings,
+                        settings: effectiveSettings,
                         section: effectiveSectionData,
                     };
 
@@ -640,11 +1100,212 @@ export default function HomeSections({ initialSettings, initialProducts }) {
                                 { runtime: runtimeContext, binding: bindingContext },
                                 'after',
                             )}
-                            {section.type === 'hero' && <TrustBadgesSection settings={activeSettings} />}
+                            {section.type === 'hero' && <TrustBadgesSection settings={effectiveSettings} />}
                         </div>
                     );
                 })()
             ))}
+
+            <PopupBuilder popupConfig={effectiveSettings?.theme?.popupBuilder || { enabled: false }} />
+
+            {runtimeContext.isStorefrontBuilder && (
+                <div className="fixed top-4 right-4 w-[360px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-2xl z-50 p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-800">Storefront Builder</h3>
+                        <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">Live Edit</span>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Select Section</label>
+                        <select
+                            value={selectedBuilderSectionId || ''}
+                            onChange={(event) => setSelectedBuilderSectionId(event.target.value)}
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+                        >
+                            <option value="">Choose section</option>
+                            {builderLayout.map((section) => (
+                                <option key={section.id} value={section.id}>{section.type} ({section.id})</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={handleQuickAddButton}
+                            className="btn btn-secondary text-xs"
+                            type="button"
+                        >
+                            Add Button Block
+                        </button>
+                        <button
+                            onClick={handleStorefrontBuilderSave}
+                            className="btn btn-primary text-xs"
+                            type="button"
+                            disabled={isBuilderSaving || !canEditStorefront}
+                        >
+                            {isBuilderSaving ? 'Saving...' : 'Save Theme'}
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={handleResetStorefrontDefaults}
+                        className="btn btn-secondary w-full text-xs"
+                        type="button"
+                        disabled={isBuilderSaving || !canPublishStorefront}
+                    >
+                        Reset to Default Frontend
+                    </button>
+
+                    {selectedBuilderSection && (
+                        <div>
+                            <p className="text-xs font-medium text-gray-600 mb-2">Drag & Drop Components</p>
+                            <BlockTreeEditor
+                                value={selectedBuilderSection?.data?.blocks || []}
+                                onChange={updateSelectedSectionBlocks}
+                            />
+                        </div>
+                    )}
+
+                    <div className="rounded border border-gray-200 p-2 space-y-2">
+                        <p className="text-xs font-semibold text-gray-700">Create Page (Elementor-style)</p>
+                        <input
+                            type="text"
+                            value={pageDraft.title}
+                            onChange={(event) => setPageDraft((prev) => ({ ...prev, title: event.target.value }))}
+                            placeholder="Page title"
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+                        />
+                        <input
+                            type="text"
+                            value={pageDraft.slug}
+                            onChange={(event) => setPageDraft((prev) => ({ ...prev, slug: event.target.value }))}
+                            placeholder="page-slug"
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+                        />
+                        <button
+                            onClick={handleCreatePageFromSection}
+                            className="btn btn-secondary w-full text-xs"
+                            type="button"
+                            disabled={!canPublishStorefront}
+                        >
+                            Create Draft Page from Section Blocks
+                        </button>
+                    </div>
+
+                    <div className="rounded border border-gray-200 p-2 space-y-2">
+                        <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold text-gray-700">Global Widgets</p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={handleAddGlobalWidget}
+                                    className="btn btn-secondary text-[11px] px-2 py-1"
+                                    disabled={!canEditStorefront}
+                                >
+                                    Add Widget
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowRawWidgetsJson((prev) => !prev)}
+                                    className="btn btn-secondary text-[11px] px-2 py-1"
+                                >
+                                    {showRawWidgetsJson ? 'Visual Mode' : 'JSON Mode'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {showRawWidgetsJson ? (
+                            <textarea
+                                value={globalWidgetsJson}
+                                onChange={(event) => {
+                                    setGlobalWidgetsJson(event.target.value);
+                                    try {
+                                        const parsed = JSON.parse(event.target.value || '{}');
+                                        setGlobalWidgetsDraft(parsed);
+                                    } catch {
+                                        // keep invalid JSON in textarea until user fixes
+                                    }
+                                }}
+                                rows={6}
+                                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs font-mono"
+                                placeholder='{"promoButton":{"type":"button","props":{"text":"Shop","link":"/products"}}}'
+                            />
+                        ) : (
+                            <div className="space-y-2 max-h-52 overflow-y-auto">
+                                {Object.keys(globalWidgetsDraft || {}).length === 0 && (
+                                    <p className="text-[11px] text-gray-500">No global widgets yet.</p>
+                                )}
+                                {Object.entries(globalWidgetsDraft || {}).map(([widgetId, widget]) => (
+                                    <div key={widgetId} className="rounded border border-gray-200 p-2 space-y-1">
+                                        <div className="grid grid-cols-2 gap-1">
+                                            <input
+                                                type="text"
+                                                value={widgetId}
+                                                onChange={(event) => handleRenameGlobalWidgetId(widgetId, event.target.value)}
+                                                className="border border-gray-300 rounded px-2 py-1 text-xs"
+                                            />
+                                            <select
+                                                value={widget?.type || 'text'}
+                                                onChange={(event) => handleUpdateGlobalWidget(widgetId, 'type', event.target.value)}
+                                                className="border border-gray-300 rounded px-2 py-1 text-xs"
+                                            >
+                                                <option value="text">text</option>
+                                                <option value="heading">heading</option>
+                                                <option value="button">button</option>
+                                                <option value="image">image</option>
+                                                <option value="form">form</option>
+                                            </select>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={widget?.props?.text || ''}
+                                            onChange={(event) => handleUpdateGlobalWidget(widgetId, 'text', event.target.value)}
+                                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                                            placeholder="Text"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={widget?.props?.link || widget?.props?.href || ''}
+                                            onChange={(event) => handleUpdateGlobalWidget(widgetId, 'link', event.target.value)}
+                                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                                            placeholder="Link (/products)"
+                                        />
+                                        <div className="flex items-center gap-1">
+                                            <input
+                                                type="text"
+                                                value={widget?.props?.className || ''}
+                                                onChange={(event) => handleUpdateGlobalWidget(widgetId, 'className', event.target.value)}
+                                                className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs"
+                                                placeholder="Class"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteGlobalWidget(widgetId)}
+                                                className="btn btn-secondary text-[11px] px-2 py-1"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <p className="text-[10px] text-gray-500">Use block field <strong>globalWidgetId</strong> to reuse widgets across sections/pages.</p>
+                    </div>
+
+                    <div className="rounded border border-gray-200 p-2 space-y-2">
+                        <p className="text-xs font-semibold text-gray-700">Popup Builder (JSON)</p>
+                        <textarea
+                            value={popupConfigJson}
+                            onChange={(event) => setPopupConfigJson(event.target.value)}
+                            rows={5}
+                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs font-mono"
+                            placeholder='{"enabled":true,"title":"Welcome","description":"Sale live","delayMs":1500,"buttonText":"Shop","buttonLink":"/products"}'
+                        />
+                    </div>
+                </div>
+            )}
         </>
     );
 }

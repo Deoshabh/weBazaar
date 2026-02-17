@@ -76,6 +76,10 @@ const siteSettingsSchema = new mongoose.Schema(
         data: { type: mongoose.Schema.Types.Mixed, default: {} }, // Flexible data storage
       }
     ],
+    layoutSchemaVersion: {
+      type: Number,
+      default: 2,
+    },
     // Global Theme Validation
     theme: {
       type: mongoose.Schema.Types.Mixed,
@@ -107,6 +111,8 @@ const siteSettingsSchema = new mongoose.Schema(
       scheduledAt: { type: Date, default: null },
       publishedAt: { type: Date, default: null },
       updatedAt: { type: Date, default: Date.now },
+      lockOwner: { type: String, default: null },
+      lockUntil: { type: Date, default: null },
     },
     publishedSnapshot: {
       type: mongoose.Schema.Types.Mixed,
