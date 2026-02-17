@@ -46,7 +46,7 @@ export default function ProductCard({ product, priority = false }) {
 
   // Compute Card Classes based on Theme
   const getCardClasses = () => {
-    let classes = 'card group overflow-hidden h-full flex flex-col transition-all duration-300 ';
+    let classes = 'card group overflow-hidden h-full flex flex-col transition-all duration-300 rounded-none ';
 
     // Card Style
     switch (cardStyle) {
@@ -56,19 +56,13 @@ export default function ProductCard({ product, priority = false }) {
       case 'shadow': default: classes += 'bg-white shadow-sm '; break;
     }
 
-    // Hover Effect
-    switch (hoverEffect) {
-      case 'lift': classes += 'hover:-translate-y-1 hover:shadow-lg '; break;
-      case 'none': break;
-      // Zoom and Color Shift handled in image/content
-      default: classes += 'hover:shadow-md '; break;
-    }
+    // Hover Effect — always lift slightly
+    classes += 'hover:-translate-y-1 hover:shadow-lg ';
     return classes;
   };
 
   const getHoverImageClasses = () => {
-    let classes = 'object-cover transition-transform duration-500 ';
-    if (hoverEffect === 'zoom') classes += 'group-hover:scale-110 ';
+    let classes = 'object-cover transition-transform duration-700 group-hover:scale-105 ';
     return classes;
   };
 
@@ -159,7 +153,7 @@ export default function ProductCard({ product, priority = false }) {
     <Link href={`/products/${product.slug}`}>
       <div className={getCardClasses()}>
         {/* Image Container */}
-        <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden bg-primary-100">
+        <div className="relative aspect-[3/4] overflow-hidden bg-primary-100">
           <Image
             src={product.images?.[0]?.url || product.images?.[0] || getProductFallbackImage(product)}
             alt={product.name}
@@ -175,12 +169,12 @@ export default function ProductCard({ product, priority = false }) {
           <button
             onClick={handleToggleWishlist}
             aria-label={isProductInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-            className={`absolute top-2 right-2 sm:top-4 sm:right-4 p-2 sm:p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md ${isProductInWishlist
+            className={`absolute top-2 right-2 sm:top-4 sm:right-4 w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-sm transition-all shadow-md ${isProductInWishlist
               ? 'bg-red-500 text-white'
               : 'bg-white/90 text-primary-900 hover:bg-white active:scale-95'
               }`}
           >
-            <FiHeart className={`w-4 h-4 sm:w-5 sm:h-5 ${isProductInWishlist ? 'fill-current' : ''}`} />
+            <FiHeart className={`w-4 h-4 ${isProductInWishlist ? 'fill-current' : ''}`} />
           </button>
 
           {/* Availability Badge */}
@@ -198,7 +192,7 @@ export default function ProductCard({ product, priority = false }) {
           )}
 
           {/* Action Buttons on Hover - Hidden on mobile, shown on hover on desktop */}
-          <div className="hidden sm:flex absolute bottom-4 left-4 right-4 gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+          <div className="hidden sm:flex absolute bottom-0 left-0 right-0 gap-2 p-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-sm bg-black/10">
             {product.inStock ? (
               <>
                 <button

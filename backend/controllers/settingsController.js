@@ -325,7 +325,12 @@ exports.importThemeJson = async (req, res, next) => {
 ===================== */
 exports.getAdminSettings = async (req, res, next) => {
   try {
-    const settings = await getSettingsByKeys(PUBLIC_SETTING_KEYS);
+    const settingsArr = await getSettingsByKeys(PUBLIC_SETTING_KEYS);
+    // Convert array to { key: value } object so the CMS frontend can consume it directly
+    const settings = settingsArr.reduce((acc, item) => {
+      if (item?.key) acc[item.key] = item.value;
+      return acc;
+    }, {});
     res.json({ settings });
   } catch (err) {
     forwardError(res, next, err);
@@ -369,6 +374,17 @@ exports.updateSetting = async (req, res, next) => {
         userAgent: req.get('user-agent'),
       },
     });
+
+    // Dual-write: sync theme to StorefrontConfig singleton so published snapshot stays current
+    if (key === 'theme') {
+      try {
+        const singleton = await StorefrontConfig.getSettings();
+        singleton.theme = value;
+        await singleton.save();
+      } catch (dualWriteErr) {
+        console.error('[settingsController] theme dual-write failed:', dualWriteErr.message);
+      }
+    }
 
     res.json(saved);
   } catch (err) {
@@ -481,7 +497,8 @@ exports.getPublicSettings = async (req, res, next) => {
     }
 
     if (publishedSnapshot?.theme) {
-      publicSettings.theme = publishedSnapshot.theme;
+      // Merge rather than override so key-value store theme prefs are preserved
+      publicSettings.theme = { ...(publicSettings.theme || {}), ...publishedSnapshot.theme };
     }
 
     publicSettings.publishWorkflow = {

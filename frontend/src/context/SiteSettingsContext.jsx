@@ -279,6 +279,15 @@ export function SiteSettingsProvider({ children }) {
       theme.textColor ||
       '#1c1917';
 
+    // Resolve expanded theme colors (new 6)
+    const activeAccentColor = theme.accentColor || '#C9A96E';
+    const activeAccentHoverColor = theme.accentHoverColor || '#B8943D';
+    const activeHeadingColor = theme.headingColor || activeTextColor;
+    const activeBodyTextColor = theme.textColor || '#44403c';
+    const activeMutedTextColor = theme.mutedTextColor || '#78716c';
+    const activeSubtleBgColor = theme.subtleBgColor || (activeMode === 'dark' ? '#1f2937' : '#f5f5f4');
+    const activeBorderColor = theme.borderColor || (activeMode === 'dark' ? '#374151' : '#e7e5e4');
+
     const primaryScale = buildPrimaryScale(activePrimaryColor);
 
     root.style.setProperty('--theme-font-family', theme.fontFamily || 'var(--font-inter)');
@@ -307,6 +316,15 @@ export function SiteSettingsProvider({ children }) {
     root.style.setProperty('--color-primary-700', primaryScale[700]);
     root.style.setProperty('--color-primary-800', primaryScale[800]);
     root.style.setProperty('--color-primary-900', primaryScale[900]);
+
+    // Expanded theme CSS variables
+    root.style.setProperty('--color-accent', activeAccentColor);
+    root.style.setProperty('--color-accent-hover', activeAccentHoverColor);
+    root.style.setProperty('--color-heading', activeHeadingColor);
+    root.style.setProperty('--color-body-text', activeBodyTextColor);
+    root.style.setProperty('--color-muted', activeMutedTextColor);
+    root.style.setProperty('--color-subtle-bg', activeSubtleBgColor);
+    root.style.setProperty('--color-border-divider', activeBorderColor);
 
     root.dataset.themeHeaderVariant = theme.headerVariant || 'minimal';
     root.dataset.themeMode = activeMode;

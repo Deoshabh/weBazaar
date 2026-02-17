@@ -206,7 +206,9 @@ export default function CheckoutPage() {
             contact: selectedAddress.phone,
           },
           theme: {
-            color: '#8B4513',
+            color: typeof document !== 'undefined'
+              ? getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-color').trim() || '#3B2F2F'
+              : '#3B2F2F',
           },
           modal: {
             ondismiss: () => {

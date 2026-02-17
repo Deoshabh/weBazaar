@@ -458,6 +458,12 @@ export const SITE_SETTINGS_DEFAULTS = {
     secondaryColor: '#E5D3B3',
     backgroundColor: '#fafaf9',
     textColor: '#1c1917',
+    accentColor: '#C9A96E',
+    accentHoverColor: '#B8943D',
+    headingColor: '#1c1917',
+    mutedTextColor: '#78716c',
+    subtleBgColor: '#f5f5f4',
+    borderColor: '#e7e5e4',
     colorModes: {
       light: {
         primaryColor: '#3B2F2F',

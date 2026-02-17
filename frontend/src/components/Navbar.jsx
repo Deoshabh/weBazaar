@@ -289,7 +289,7 @@ export default function Navbar() {
               {isCategoriesOpen && (
                 <div
                   ref={categoriesDropdownRef}
-                  className="absolute top-full left-0 w-80 rounded-lg shadow-2xl border overflow-hidden"
+                  className="absolute top-full left-0 w-80 pt-2 rounded-lg shadow-2xl border overflow-hidden"
                   style={{
                     backgroundColor: 'var(--color-surface)',
                     borderColor: 'var(--color-border)',
@@ -323,12 +323,12 @@ export default function Navbar() {
                               alt={category.name}
                               width={48}
                               height={48}
-                              className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-200"
+                              className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-300"
                             />
                           </div>
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
-                            <span className="text-primary-700 font-bold text-lg">{category.name.charAt(0)}</span>
+                            <span className="font-bold text-lg text-primary-700" style={{ fontFamily: "'Playfair Display', serif" }}>{category.name.charAt(0)}</span>
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
@@ -418,7 +418,7 @@ export default function Navbar() {
             {/* Wishlist */}
             <Link href="/wishlist" className="relative hover:text-brand-brown transition-colors" aria-label="Wishlist">
               <div ref={wishlistRef}>
-                <FiHeart className="w-6 h-6" />
+                <FiHeart className="w-5 h-5" />
               </div>
               {wishlistCount > 0 && (
                 <span className="absolute -top-2 -right-2 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: 'var(--theme-primary-color)' }}>
@@ -430,7 +430,7 @@ export default function Navbar() {
             {/* Cart */}
             <Link href="/cart" id="cart-icon-container" className="relative hover:text-brand-brown transition-colors" aria-label="Cart">
               <div ref={cartRef}>
-                <FiShoppingCart className="w-6 h-6" />
+                <FiShoppingCart className="w-5 h-5" />
               </div>
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: 'var(--theme-primary-color)' }}>
@@ -494,7 +494,7 @@ export default function Navbar() {
               className="lg:hidden text-primary-900 hover:text-brand-brown transition-colors"
               aria-label="Toggle mobile menu"
             >
-              {isMobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
             </button>
           </div>
         </div>
