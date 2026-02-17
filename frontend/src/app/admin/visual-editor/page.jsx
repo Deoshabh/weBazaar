@@ -193,6 +193,7 @@ export default function VisualEditorPage() {
     const [liveSnapshot, setLiveSnapshot] = useState(null);
     const [showVersionHistory, setShowVersionHistory] = useState(false);
     const [showPublishTools, setShowPublishTools] = useState(false);
+    const [showOperationsDrawer, setShowOperationsDrawer] = useState(false);
     const [compareModal, setCompareModal] = useState({
         open: false,
         label: '',
@@ -956,104 +957,16 @@ export default function VisualEditorPage() {
                             </label>
                         </div>
 
-                        <div className="mb-3 border border-gray-200 rounded bg-white">
-                            <button
-                                type="button"
-                                onClick={() => setShowVersionHistory((prev) => !prev)}
-                                className="w-full px-3 py-2 flex items-center justify-between text-[11px] font-semibold text-gray-500 uppercase tracking-wider"
-                            >
-                                Version History
-                                {showVersionHistory ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
-                            </button>
-                            {showVersionHistory && (
-                                <div className="max-h-32 overflow-y-auto px-3 pb-2">
-                                    {versionHistory.length === 0 && (
-                                        <p className="text-xs text-gray-400">No snapshots yet</p>
-                                    )}
-                                    {versionHistory.slice(0, 8).map((item) => (
-                                        <div key={item.id} className="flex items-center justify-between text-xs py-1">
-                                            <span className="truncate pr-2">{item.label || 'Snapshot'}</span>
-                                            <button
-                                                onClick={() => handleRestoreVersion(item.id)}
-                                                disabled={isRestoring}
-                                                className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
-                                                title="Restore this version"
-                                            >
-                                                <FiRotateCcw />
-                                            </button>
-                                            <button
-                                                onClick={() => handleCompareVersion(item)}
-                                                className="text-gray-600 hover:text-gray-800"
-                                                title="Compare with current draft"
-                                            >
-                                                ≈
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mb-3 rounded border border-gray-200 bg-white text-xs">
-                            <button
-                                type="button"
-                                onClick={() => setShowPublishTools((prev) => !prev)}
-                                className="w-full px-3 py-2 flex items-center justify-between"
-                            >
-                                <span className="font-semibold text-gray-500 uppercase tracking-wider">Publish Status</span>
-                                <div className="flex items-center gap-2">
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${publishStatus === 'live'
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : publishStatus === 'scheduled'
-                                                ? 'bg-amber-100 text-amber-700'
-                                                : 'bg-slate-100 text-slate-700'
-                                        }`}>
-                                        {publishStatus}
-                                    </span>
-                                    {showPublishTools ? <FiChevronUp size={14} className="text-gray-500" /> : <FiChevronDown size={14} className="text-gray-500" />}
-                                </div>
-                            </button>
-                            {showPublishTools && (
-                                <div className="p-2 pt-0 space-y-2">
-                                    <p className="text-[11px] text-gray-500">Last published: {publishedAtLabel}</p>
-                                    <input
-                                        type="datetime-local"
-                                        value={scheduledPublishAt}
-                                        onChange={(e) => setScheduledPublishAt(e.target.value)}
-                                        className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs"
-                                    />
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button
-                                            onClick={handleSchedulePublish}
-                                            disabled={isSaving}
-                                            className="btn btn-secondary text-xs"
-                                        >
-                                            Schedule
-                                        </button>
-                                        <button
-                                            onClick={handlePublishNow}
-                                            disabled={isSaving}
-                                            className="btn btn-primary text-xs"
-                                        >
-                                            Publish Now
-                                        </button>
-                                    </div>
-                                    <button
-                                        onClick={handleRunPublishCheck}
-                                        disabled={isSaving}
-                                        className="btn btn-secondary text-xs w-full"
-                                    >
-                                        Run Publish Check
-                                    </button>
-                                    {scheduleCountdownLabel && (
-                                        <p className="text-[11px] text-amber-700">{scheduleCountdownLabel}</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowOperationsDrawer(true)}
+                            className="btn btn-secondary w-full mb-3 text-xs"
+                        >
+                            Open History & Publish Tools
+                        </button>
 
                         <button
-                            onClick={() => handleSave({ publishMode: 'draft' })}
+                            onClick={() => handleSave({ publishMode: 'live' })}
                             disabled={isSaving}
                             className="btn btn-primary w-full flex items-center justify-center gap-2"
                         >
@@ -1062,7 +975,7 @@ export default function VisualEditorPage() {
                             ) : (
                                 <FiSave />
                             )}
-                            {isSaving ? 'Saving...' : 'Save Draft'}
+                            {isSaving ? 'Saving...' : 'Save & Publish'}
                         </button>
 
                         {publishStatus !== 'live' && (
@@ -1084,6 +997,122 @@ export default function VisualEditorPage() {
                         </button>
                     </div>
                 </aside>
+
+                {showOperationsDrawer && (
+                    <div className="fixed inset-0 z-[110] bg-black/35 flex justify-end">
+                        <div className="w-[360px] h-full bg-white border-l border-gray-200 p-4 overflow-y-auto">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-sm font-semibold text-gray-800">History & Publish</h3>
+                                <button type="button" onClick={() => setShowOperationsDrawer(false)} className="text-gray-500 hover:text-gray-700">
+                                    <FiX size={18} />
+                                </button>
+                            </div>
+
+                            <div className="mb-3 border border-gray-200 rounded bg-white">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowVersionHistory((prev) => !prev)}
+                                    className="w-full px-3 py-2 flex items-center justify-between text-[11px] font-semibold text-gray-500 uppercase tracking-wider"
+                                >
+                                    Version History
+                                    {showVersionHistory ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+                                </button>
+                                {showVersionHistory && (
+                                    <div className="max-h-48 overflow-y-auto px-3 pb-2">
+                                        {versionHistory.length === 0 && (
+                                            <p className="text-xs text-gray-400">No snapshots yet</p>
+                                        )}
+                                        {versionHistory.slice(0, 12).map((item) => (
+                                            <div key={item.id} className="flex items-center justify-between text-xs py-1">
+                                                <span className="truncate pr-2">{item.label || 'Snapshot'}</span>
+                                                <button
+                                                    onClick={() => handleRestoreVersion(item.id)}
+                                                    disabled={isRestoring}
+                                                    className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                                                    title="Restore this version"
+                                                >
+                                                    <FiRotateCcw />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleCompareVersion(item)}
+                                                    className="text-gray-600 hover:text-gray-800"
+                                                    title="Compare with current draft"
+                                                >
+                                                    ≈
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3 rounded border border-gray-200 bg-white text-xs">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPublishTools((prev) => !prev)}
+                                    className="w-full px-3 py-2 flex items-center justify-between"
+                                >
+                                    <span className="font-semibold text-gray-500 uppercase tracking-wider">Publish Status</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${publishStatus === 'live'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : publishStatus === 'scheduled'
+                                                    ? 'bg-amber-100 text-amber-700'
+                                                    : 'bg-slate-100 text-slate-700'
+                                            }`}>
+                                            {publishStatus}
+                                        </span>
+                                        {showPublishTools ? <FiChevronUp size={14} className="text-gray-500" /> : <FiChevronDown size={14} className="text-gray-500" />}
+                                    </div>
+                                </button>
+                                {showPublishTools && (
+                                    <div className="p-2 pt-0 space-y-2">
+                                        <p className="text-[11px] text-gray-500">Last published: {publishedAtLabel}</p>
+                                        <input
+                                            type="datetime-local"
+                                            value={scheduledPublishAt}
+                                            onChange={(e) => setScheduledPublishAt(e.target.value)}
+                                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs"
+                                        />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={handleSchedulePublish}
+                                                disabled={isSaving}
+                                                className="btn btn-secondary text-xs"
+                                            >
+                                                Schedule
+                                            </button>
+                                            <button
+                                                onClick={handlePublishNow}
+                                                disabled={isSaving}
+                                                className="btn btn-primary text-xs"
+                                            >
+                                                Publish Now
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={handleRunPublishCheck}
+                                            disabled={isSaving}
+                                            className="btn btn-secondary text-xs w-full"
+                                        >
+                                            Run Publish Check
+                                        </button>
+                                        <button
+                                            onClick={() => handleSave({ publishMode: 'draft' })}
+                                            disabled={isSaving}
+                                            className="btn btn-secondary text-xs w-full"
+                                        >
+                                            Save Draft Only
+                                        </button>
+                                        {scheduleCountdownLabel && (
+                                            <p className="text-[11px] text-amber-700">{scheduleCountdownLabel}</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Right Preview Area */}
                 <main className="flex-1 flex flex-col min-w-0 bg-gray-100 relative">

@@ -624,6 +624,8 @@ export default function HomeSections({ initialSettings, initialProducts }) {
     const [selectedBuilderSectionId, setSelectedBuilderSectionId] = useState(null);
     const [isBuilderSaving, setIsBuilderSaving] = useState(false);
     const [pageDraft, setPageDraft] = useState({ title: '', slug: '' });
+    const [builderTab, setBuilderTab] = useState('structure');
+    const [isWidgetDragActive, setIsWidgetDragActive] = useState(false);
     const [globalWidgetsJson, setGlobalWidgetsJson] = useState('{}');
     const [globalWidgetsDraft, setGlobalWidgetsDraft] = useState({});
     const [showRawWidgetsJson, setShowRawWidgetsJson] = useState(false);
@@ -905,6 +907,60 @@ export default function HomeSections({ initialSettings, initialProducts }) {
         ]);
     };
 
+    const handleQuickAddBlockType = (type) => {
+        if (!canEditStorefront) {
+            toast.error('Your role cannot edit builder content');
+            return;
+        }
+        if (!selectedBuilderSectionId) {
+            toast.error('Select a section first');
+            return;
+        }
+
+        const existingBlocks = Array.isArray(selectedBuilderSection?.data?.blocks)
+            ? selectedBuilderSection.data.blocks
+            : [];
+
+        const defaultPropsByType = {
+            text: { text: 'Text block' },
+            heading: { text: 'Heading block' },
+            button: { text: 'Button', link: '/products', className: 'btn btn-primary' },
+            image: { src: '', alt: 'Image' },
+            form: { submitText: 'Submit' },
+            row: { columns: 2 },
+            container: {},
+        };
+
+        updateSelectedSectionBlocks([
+            ...existingBlocks,
+            {
+                id: `${type}-${Date.now()}`,
+                type,
+                zone: 'after',
+                props: defaultPropsByType[type] || {},
+                children: [],
+            },
+        ]);
+    };
+
+    const handleWidgetDragStart = (event, type) => {
+        event.dataTransfer.setData('application/x-widget-type', type);
+        event.dataTransfer.effectAllowed = 'copy';
+        setIsWidgetDragActive(true);
+    };
+
+    const handleWidgetDragEnd = () => {
+        setIsWidgetDragActive(false);
+    };
+
+    const handleDropWidgetToSection = (event) => {
+        event.preventDefault();
+        const type = event.dataTransfer.getData('application/x-widget-type');
+        setIsWidgetDragActive(false);
+        if (!type) return;
+        handleQuickAddBlockType(type);
+    };
+
     const handleAddGlobalWidget = () => {
         const defaultId = `widget-${Date.now()}`;
         setGlobalWidgetsDraft((prev) => {
@@ -1109,10 +1165,34 @@ export default function HomeSections({ initialSettings, initialProducts }) {
             <PopupBuilder popupConfig={effectiveSettings?.theme?.popupBuilder || { enabled: false }} />
 
             {runtimeContext.isStorefrontBuilder && (
-                <div className="fixed top-4 right-4 w-[360px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-2xl z-50 p-3 space-y-3">
+                <div className="fixed top-4 right-4 w-[440px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-2xl z-50 p-3 space-y-3">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-gray-800">Storefront Builder</h3>
                         <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">Live Edit</span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setBuilderTab('structure')}
+                            className={`text-xs px-2 py-1.5 rounded border ${builderTab === 'structure' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-gray-300 text-gray-600'}`}
+                        >
+                            Structure
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setBuilderTab('widgets')}
+                            className={`text-xs px-2 py-1.5 rounded border ${builderTab === 'widgets' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-gray-300 text-gray-600'}`}
+                        >
+                            Widgets
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setBuilderTab('page')}
+                            className={`text-xs px-2 py-1.5 rounded border ${builderTab === 'page' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-gray-300 text-gray-600'}`}
+                        >
+                            Page
+                        </button>
                     </div>
 
                     <div>
@@ -1131,19 +1211,19 @@ export default function HomeSections({ initialSettings, initialProducts }) {
 
                     <div className="grid grid-cols-2 gap-2">
                         <button
-                            onClick={handleQuickAddButton}
-                            className="btn btn-secondary text-xs"
-                            type="button"
-                        >
-                            Add Button Block
-                        </button>
-                        <button
                             onClick={handleStorefrontBuilderSave}
                             className="btn btn-primary text-xs"
                             type="button"
                             disabled={isBuilderSaving || !canEditStorefront}
                         >
                             {isBuilderSaving ? 'Saving...' : 'Save Theme'}
+                        </button>
+                        <button
+                            onClick={handleQuickAddButton}
+                            className="btn btn-secondary text-xs"
+                            type="button"
+                        >
+                            Quick Add Button
                         </button>
                     </div>
 
@@ -1156,8 +1236,21 @@ export default function HomeSections({ initialSettings, initialProducts }) {
                         Reset to Default Frontend
                     </button>
 
-                    {selectedBuilderSection && (
+                    {builderTab === 'structure' && selectedBuilderSection && (
                         <div>
+                            <div
+                                className={`mb-2 rounded border-2 border-dashed px-3 py-2 text-xs transition-colors ${isWidgetDragActive ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-500 bg-gray-50'}`}
+                                onDragOver={(event) => {
+                                    event.preventDefault();
+                                    setIsWidgetDragActive(true);
+                                }}
+                                onDragLeave={() => setIsWidgetDragActive(false)}
+                                onDrop={handleDropWidgetToSection}
+                            >
+                                {isWidgetDragActive
+                                    ? 'Drop widget here to add into selected section'
+                                    : 'Drag widget from Widgets tab and drop here'}
+                            </div>
                             <p className="text-xs font-medium text-gray-600 mb-2">Drag & Drop Components</p>
                             <BlockTreeEditor
                                 value={selectedBuilderSection?.data?.blocks || []}
@@ -1166,6 +1259,31 @@ export default function HomeSections({ initialSettings, initialProducts }) {
                         </div>
                     )}
 
+                    {builderTab === 'widgets' && (
+                        <div className="rounded border border-gray-200 p-2 space-y-2">
+                            <p className="text-xs font-semibold text-gray-700">Widget Library</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['heading', 'text', 'button', 'image', 'form', 'row', 'container'].map((type) => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        onClick={() => handleQuickAddBlockType(type)}
+                                        draggable
+                                        onDragStart={(event) => handleWidgetDragStart(event, type)}
+                                        onDragEnd={handleWidgetDragEnd}
+                                        className="btn btn-secondary text-xs"
+                                        disabled={!canEditStorefront}
+                                    >
+                                        Add {type}
+                                    </button>
+                                ))}
+                            </div>
+                            <p className="text-[10px] text-gray-500">Select a section first, then add widgets here like Elementor panel.</p>
+                        </div>
+                    )}
+
+                    {builderTab === 'page' && (
+                    <>
                     <div className="rounded border border-gray-200 p-2 space-y-2">
                         <p className="text-xs font-semibold text-gray-700">Create Page (Elementor-style)</p>
                         <input
@@ -1304,6 +1422,8 @@ export default function HomeSections({ initialSettings, initialProducts }) {
                             placeholder='{"enabled":true,"title":"Welcome","description":"Sale live","delayMs":1500,"buttonText":"Shop","buttonLink":"/products"}'
                         />
                     </div>
+                    </>
+                    )}
                 </div>
             )}
         </>

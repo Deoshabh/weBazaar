@@ -227,7 +227,7 @@ const extractNodeByPath = (nodes, path = []) => {
   };
 };
 
-function ChildDropZone({ id, onAutoExpand, containerId }) {
+function ChildDropZone({ id, onAutoExpand, containerId, onExternalDrop }) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
   useEffect(() => {
@@ -243,6 +243,18 @@ function ChildDropZone({ id, onAutoExpand, containerId }) {
   return (
     <div
       ref={setNodeRef}
+      onDragOver={(event) => {
+        if (event.dataTransfer?.types?.includes('application/x-widget-type')) {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'copy';
+        }
+      }}
+      onDrop={(event) => {
+        const type = event.dataTransfer?.getData('application/x-widget-type');
+        if (!type) return;
+        event.preventDefault();
+        onExternalDrop?.(type, 'inside');
+      }}
       className={`text-xs border border-dashed rounded px-2 py-2 text-center transition-colors ${
         isOver ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-400 hover:border-gray-400'
       }`}
@@ -252,13 +264,25 @@ function ChildDropZone({ id, onAutoExpand, containerId }) {
   );
 }
 
-function EdgeDropZone({ id, position = 'before' }) {
+function EdgeDropZone({ id, position = 'before', onExternalDrop }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const label = position === 'after' ? 'After' : 'Before';
 
   return (
     <div
       ref={setNodeRef}
+      onDragOver={(event) => {
+        if (event.dataTransfer?.types?.includes('application/x-widget-type')) {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'copy';
+        }
+      }}
+      onDrop={(event) => {
+        const type = event.dataTransfer?.getData('application/x-widget-type');
+        if (!type) return;
+        event.preventDefault();
+        onExternalDrop?.(type, position);
+      }}
       className={`h-4 rounded-sm border border-dashed transition-colors flex items-center justify-end px-2 ${
         isOver
           ? 'border-blue-400 bg-blue-100 text-blue-700'
@@ -317,6 +341,7 @@ function NodeEditor({
   onToggleExpand,
   onAutoExpand,
   isTopLevel = false,
+    onExternalDrop,
 }) {
   const childIds = useMemo(() => (node.children || []).map((child) => child.id), [node.children]);
 
@@ -378,7 +403,11 @@ function NodeEditor({
 
   return (
     <div className="space-y-1">
-      <EdgeDropZone id={`edge-before-${node.id}`} position="before" />
+        <EdgeDropZone
+        id={`edge-before-${node.id}`}
+        position="before"
+        onExternalDrop={(type, position) => onExternalDrop(node.id, position, type)}
+        />
       <div
         role="button"
         tabIndex={0}
@@ -582,6 +611,7 @@ function NodeEditor({
                       id={`drop-${node.id}`}
                       containerId={node.id}
                       onAutoExpand={onAutoExpand}
+                      onExternalDrop={(type, position) => onExternalDrop(node.id, position, type)}
                     />
                   </>
                 ) : (
@@ -595,6 +625,7 @@ function NodeEditor({
                           onChangeNode={onChangeNode}
                           onDeleteNode={onDeleteNode}
                           onAddChild={onAddChild}
+                          onExternalDrop={onExternalDrop}
                           selectedNodeId={selectedNodeId}
                           onSelectNode={onSelectNode}
                           selectedBreakpoint={selectedBreakpoint}
@@ -607,6 +638,7 @@ function NodeEditor({
                         id={`drop-${node.id}`}
                         containerId={node.id}
                         onAutoExpand={onAutoExpand}
+                        onExternalDrop={(type, position) => onExternalDrop(node.id, position, type)}
                       />
                     </div>
                   </SortableContext>
@@ -617,7 +649,11 @@ function NodeEditor({
         )}
       />
       </div>
-      <EdgeDropZone id={`edge-after-${node.id}`} position="after" />
+        <EdgeDropZone
+        id={`edge-after-${node.id}`}
+        position="after"
+        onExternalDrop={(type, position) => onExternalDrop(node.id, position, type)}
+        />
     </div>
   );
 }
@@ -763,6 +799,35 @@ export default function BlockTreeEditor({ value, onChange }) {
       }),
     );
   };
+
+  const handleExternalDrop = useCallback((targetNodeId, position, widgetType) => {
+    if (!targetNodeId || !widgetType) return;
+
+    updateTree((tree) => {
+      const nextNode = createNode(widgetType);
+      const targetPath = findPathById(tree, targetNodeId);
+      if (!targetPath) return [...tree, nextNode];
+
+      if (position === 'inside') {
+        return updateByPath(tree, targetPath, (node) => {
+          const baseNode = node || createNode('container');
+          const nodeType = DEFAULT_LAYOUT_TYPES.includes(baseNode.type) ? baseNode.type : 'container';
+          return {
+            ...baseNode,
+            type: nodeType,
+            children: [...(baseNode.children || []), nextNode],
+          };
+        });
+      }
+
+      const parentPath = targetPath.slice(0, -1);
+      const siblings = [...getChildrenByPath(tree, parentPath)];
+      const targetIndex = targetPath[targetPath.length - 1];
+      const insertIndex = position === 'after' ? targetIndex + 1 : targetIndex;
+      siblings.splice(insertIndex, 0, nextNode);
+      return setChildrenByPath(tree, parentPath, siblings);
+    });
+  }, [updateTree]);
 
   const handleToggleExpand = (nodeId) => {
     setExpandedNodeIds((prev) => {
@@ -1364,6 +1429,7 @@ export default function BlockTreeEditor({ value, onChange }) {
                   onChangeNode={handleChangeNode}
                   onDeleteNode={handleDeleteNode}
                   onAddChild={handleAddChild}
+                  onExternalDrop={handleExternalDrop}
                   selectedNodeId={selectedNodeId}
                   onSelectNode={setSelectedNodeId}
                   selectedBreakpoint={selectedBreakpoint}
