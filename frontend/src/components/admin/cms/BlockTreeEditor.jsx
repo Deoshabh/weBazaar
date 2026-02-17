@@ -4,9 +4,13 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { FiPlus, FiTrash2, FiMove, FiChevronDown, FiRotateCcw, FiRotateCw, FiCopy, FiClipboard, FiLayers } from 'react-icons/fi';
 import { analyzeBlockPerformance } from '@/utils/visualBuilder';
+import {
+  createEditorBlock,
+  EDITOR_LAYOUT_TYPES as DEFAULT_LAYOUT_TYPES,
+  EDITOR_WIDGET_TYPES as DEFAULT_WIDGET_TYPES,
+  normalizeEditorBlockTree,
+} from '@/components/editor/sharedEditorContract';
 
-const DEFAULT_WIDGET_TYPES = ['text', 'heading', 'button', 'image', 'divider', 'spacer', 'form'];
-const DEFAULT_LAYOUT_TYPES = ['row', 'column', 'container'];
 const MAX_HISTORY_SIZE = 80;
 const PRESET_STORAGE_KEY = 'visual-builder-block-presets-v1';
 const STYLE_PROP_KEYS = [
@@ -29,13 +33,7 @@ const STYLE_PROP_KEYS = [
   'columns',
 ];
 
-const createNode = (type = 'text') => ({
-  id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-  type,
-  zone: 'after',
-  props: {},
-  children: [],
-});
+const createNode = (type = 'text') => createEditorBlock({ type, idPrefix: 'node' });
 
 const cloneNodeWithNewIds = (node) => ({
   ...(node || {}),
@@ -55,20 +53,17 @@ const extractStylePayload = (props = {}) => {
 };
 
 const normalizeNodes = (nodes) => {
-  if (!Array.isArray(nodes)) return [];
-
-  return nodes
-    .filter(Boolean)
-    .map((node) => ({
-      id: node.id || `node-${Math.random().toString(36).slice(2, 8)}`,
-      type: node.type || 'text',
-      zone: node.zone || 'after',
-      props: node.props && typeof node.props === 'object' ? node.props : {},
-      children: normalizeNodes(node.children),
-    }));
+  return normalizeEditorBlockTree(nodes, { defaultType: 'text', idPrefix: 'node' });
 };
 
-const cloneTree = (tree) => JSON.parse(JSON.stringify(tree || []));
+const cloneTree = (tree) => {
+  const source = tree || [];
+  if (typeof structuredClone === 'function') {
+    return structuredClone(source);
+  }
+
+  return JSON.parse(JSON.stringify(source));
+};
 
 const flattenNodes = (nodes = [], parentPath = []) => {
   const result = [];
@@ -151,6 +146,20 @@ const findPathById = (nodes, nodeId, prefix = []) => {
   }
 
   return null;
+};
+
+const buildPathIndex = (nodes = [], parentPath = [], pathMap = new Map()) => {
+  (nodes || []).forEach((node, index) => {
+    const path = [...parentPath, index];
+    if (node?.id) {
+      pathMap.set(node.id, path);
+    }
+    if (Array.isArray(node?.children) && node.children.length > 0) {
+      buildPathIndex(node.children, path, pathMap);
+    }
+  });
+
+  return pathMap;
 };
 
 const getChildrenByPath = (nodes, parentPath = []) => {
@@ -747,6 +756,8 @@ export default function BlockTreeEditor({ value, onChange }) {
     commitTree(nextTree, options);
   }, [commitTree, nodes]);
 
+  const nodePathIndex = useMemo(() => buildPathIndex(nodes), [nodes]);
+
   const handleUndo = useCallback(() => {
     if (historyPast.length === 0) return;
 
@@ -936,13 +947,13 @@ export default function BlockTreeEditor({ value, onChange }) {
 
   const handleCopySelected = useCallback(() => {
     if (!selectedNodeId) return;
-    const selectedPath = findPathById(nodes, selectedNodeId);
+    const selectedPath = nodePathIndex.get(selectedNodeId) || null;
     if (!selectedPath) return;
     const selectedNode = getNodeByPath(nodes, selectedPath);
     if (!selectedNode) return;
 
     setClipboardNode(cloneTree(selectedNode));
-  }, [nodes, selectedNodeId]);
+  }, [nodePathIndex, nodes, selectedNodeId]);
 
   const handlePasteClipboard = useCallback(() => {
     if (!clipboardNode) return;
@@ -971,7 +982,7 @@ export default function BlockTreeEditor({ value, onChange }) {
   const handleCopyStyle = useCallback(() => {
     if (!selectedNodeId) return;
 
-    const selectedPath = findPathById(nodes, selectedNodeId);
+    const selectedPath = nodePathIndex.get(selectedNodeId) || null;
     if (!selectedPath) return;
 
     const selectedNode = getNodeByPath(nodes, selectedPath);
@@ -981,7 +992,7 @@ export default function BlockTreeEditor({ value, onChange }) {
     if (Object.keys(stylePayload).length === 0) return;
 
     setStyleClipboard(stylePayload);
-  }, [nodes, selectedNodeId]);
+  }, [nodePathIndex, nodes, selectedNodeId]);
 
   const handlePasteStyle = useCallback(() => {
     if (!selectedNodeId || !styleClipboard) return;
@@ -1024,7 +1035,7 @@ export default function BlockTreeEditor({ value, onChange }) {
   const handleSavePreset = useCallback(() => {
     if (!selectedNodeId) return;
 
-    const selectedPath = findPathById(nodes, selectedNodeId);
+    const selectedPath = nodePathIndex.get(selectedNodeId) || null;
     if (!selectedPath) return;
     const selectedNode = getNodeByPath(nodes, selectedPath);
     if (!selectedNode) return;
@@ -1042,7 +1053,7 @@ export default function BlockTreeEditor({ value, onChange }) {
     ];
     persistPresets(nextPresets);
     setSelectedPresetName(name);
-  }, [nodes, persistPresets, presets, selectedNodeId]);
+  }, [nodePathIndex, nodes, persistPresets, presets, selectedNodeId]);
 
   const handleInsertPreset = useCallback(() => {
     const preset = presets.find((item) => item.name === selectedPresetName);
@@ -1053,10 +1064,10 @@ export default function BlockTreeEditor({ value, onChange }) {
 
   const handleDeleteSelected = useCallback(() => {
     if (!selectedNodeId) return;
-    const selectedPath = findPathById(nodes, selectedNodeId);
+    const selectedPath = nodePathIndex.get(selectedNodeId) || null;
     if (!selectedPath) return;
     handleDeleteNode(selectedPath);
-  }, [handleDeleteNode, nodes, selectedNodeId]);
+  }, [handleDeleteNode, nodePathIndex, selectedNodeId]);
 
   const moveSelectedByDelta = useCallback((delta) => {
     if (!selectedNodeId || !Number.isFinite(delta)) return;
@@ -1175,7 +1186,7 @@ export default function BlockTreeEditor({ value, onChange }) {
       `${item.type} ${item.label}`.toLowerCase().includes(query),
     );
   }, [navigatorItems, navigatorQuery]);
-  const activeDragPath = activeDragId ? findPathById(nodes, String(activeDragId)) : null;
+  const activeDragPath = activeDragId ? nodePathIndex.get(String(activeDragId)) || null : null;
   const activeDragNode = activeDragPath ? getNodeByPath(nodes, activeDragPath) : null;
 
   const handleExportTemplates = () => {

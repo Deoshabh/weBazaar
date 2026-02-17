@@ -7,6 +7,10 @@ const SECTION_KEY_BY_TYPE = {
   products: 'featuredProducts',
   madeToOrder: 'madeToOrder',
   newsletter: 'newsletter',
+  testimonials: 'testimonials',
+  brands: 'brands',
+  categories: 'categories',
+  videoHero: 'videoHero',
 };
 
 export const getLayoutSectionData = (section = {}) => {

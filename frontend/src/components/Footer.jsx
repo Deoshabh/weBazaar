@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   FiFacebook,
   FiTwitter,
@@ -20,6 +21,8 @@ const SOCIAL_ICON_MAP = {
 export default function Footer() {
   const { settings } = useSiteSettings();
   const currentYear = new Date().getFullYear();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('idle');
 
   const footerContent = settings.footerContent || {};
   const footerTheme = settings.theme?.footer || {};
@@ -38,10 +41,52 @@ export default function Footer() {
     .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   // Theme Styles
-  const bgColor = footerTheme.colors?.background || '#000000'; // Default to primary-900 equivalent logic
-  const textColor = footerTheme.colors?.text || '#ffffff';
+  const bgColor = footerTheme.colors?.background || 'var(--color-primary-900)';
+  const textColor = footerTheme.colors?.text || 'var(--color-background)';
   const showNewsletter = footerTheme.showNewsletter !== false;
   const showSocials = footerTheme.showSocialLinks !== false;
+  const footerLayout = footerTheme.layout || '4-col';
+
+  const handleNewsletterSubmit = async (event) => {
+    event.preventDefault();
+    if (!newsletterEmail.trim()) {
+      return;
+    }
+
+    try {
+      setNewsletterStatus('submitting');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/v1'}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Newsletter Subscriber',
+          email: newsletterEmail.trim(),
+          message: 'Newsletter subscription request from footer',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Newsletter request failed');
+      }
+
+      setNewsletterEmail('');
+      setNewsletterStatus('success');
+    } catch {
+      setNewsletterStatus('error');
+    }
+  };
+
+  const gridClassByLayout = {
+    '4-col': 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8',
+    '2-col': 'grid grid-cols-1 md:grid-cols-2 gap-8',
+  };
+
+  const isCenteredLayout = footerLayout === 'centered';
+  const isMinimalLayout = footerLayout === 'minimal';
+  const shouldShowContact = !isMinimalLayout;
+  const contentContainerClass = isCenteredLayout
+    ? 'max-w-5xl mx-auto text-center'
+    : (gridClassByLayout[footerLayout] || gridClassByLayout['4-col']);
 
   return (
     <footer
@@ -49,7 +94,7 @@ export default function Footer() {
       style={{ backgroundColor: bgColor, color: textColor }}
     >
       <div className="container-custom py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={contentContainerClass}>
           <div>
             <h3 className="text-2xl font-serif font-bold mb-4">{footerContent.brand?.name || 'Radeo'}</h3>
             <p className="opacity-80 mb-4">
@@ -57,7 +102,7 @@ export default function Footer() {
                 'Premium handcrafted shoes made with timeless craftsmanship and finest materials.'}
             </p>
             {showSocials && socialLinks.length > 0 && (
-              <div className="flex gap-4">
+              <div className={`flex gap-4 ${isCenteredLayout ? 'justify-center' : ''}`}>
                 {socialLinks.map((social) => {
                   const Icon = SOCIAL_ICON_MAP[social.platform] || FiInstagram;
                   return (
@@ -77,7 +122,7 @@ export default function Footer() {
             )}
           </div>
 
-          {columns.map((column) => (
+          {!isMinimalLayout && columns.map((column) => (
             <div key={column.id || column.title}>
               <h4 className="text-lg font-semibold mb-4">{column.title}</h4>
               <ul className="space-y-2">
@@ -99,6 +144,7 @@ export default function Footer() {
             </div>
           ))}
 
+          {shouldShowContact && (
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
             <ul className="space-y-3">
@@ -129,6 +175,7 @@ export default function Footer() {
               )}
             </ul>
           </div>
+          )}
         </div>
 
         {footerTheme.showNewsletter !== false && (
@@ -136,21 +183,31 @@ export default function Footer() {
             <div className="max-w-md mx-auto text-center">
               <h4 className="text-lg font-semibold mb-2">{footerContent.newsletter?.title || 'Subscribe to Our Newsletter'}</h4>
               <p className="opacity-80 mb-4">{footerContent.newsletter?.description || 'Get updates on new products and exclusive offers'}</p>
-              <form className="flex gap-2">
+              <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
                 <input
                   type="email"
+                  value={newsletterEmail}
+                  onChange={(event) => setNewsletterEmail(event.target.value)}
+                  required
                   placeholder={footerContent.newsletter?.placeholder || 'Enter your email'}
                   className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brand-tan placeholder-white/50"
                   style={{ color: textColor, borderColor: `${textColor}33` }}
                 />
                 <button
                   type="submit"
+                  disabled={newsletterStatus === 'submitting'}
                   className="btn px-6 font-medium"
                   style={{ backgroundColor: textColor, color: bgColor }}
                 >
                   {footerContent.newsletter?.buttonText || 'Subscribe'}
                 </button>
               </form>
+              {newsletterStatus === 'success' && (
+                <p className="mt-3 text-sm opacity-80">Subscription request sent successfully.</p>
+              )}
+              {newsletterStatus === 'error' && (
+                <p className="mt-3 text-sm text-red-300">Unable to subscribe right now. Please try again.</p>
+              )}
             </div>
           </div>
         )}

@@ -7,6 +7,8 @@ import { normalizeSettingsLayout } from '@/utils/layoutSchema';
 
 const CACHE_KEY = 'site-settings-cache-v1';
 const CACHE_TTL_MS = 60 * 60 * 1000;
+const THEME_PREVIEW_MODE_KEY = 'theme-preview-mode-v1';
+const THEME_PREVIEW_MODE_EVENT = 'theme-preview-mode-changed';
 
 const SiteSettingsContext = createContext(null);
 
@@ -76,6 +78,15 @@ const mixRgb = (base, target, amount) => ({
   b: base.b + (target.b - base.b) * amount,
 });
 
+const resolveActiveThemeMode = (mode, prefersDark = false) => {
+  if (mode === 'dark') return 'dark';
+  if (mode === 'light') return 'light';
+  if (prefersDark) {
+    return 'dark';
+  }
+  return 'light';
+};
+
 const buildPrimaryScale = (baseHex) => {
   const base = hexToRgb(baseHex) || { r: 59, g: 47, b: 47 };
   const white = { r: 255, g: 255, b: 255 };
@@ -138,6 +149,61 @@ export function SiteSettingsProvider({ children }) {
   const [settings, setSettings] = useState(SITE_SETTINGS_DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [prefersDark, setPrefersDark] = useState(false);
+  const [themePreviewMode, setThemePreviewMode] = useState('default');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const readPreviewMode = () => {
+      const raw = window.localStorage.getItem(THEME_PREVIEW_MODE_KEY) || 'default';
+      const validModes = new Set(['default', 'light', 'dark', 'system']);
+      return validModes.has(raw) ? raw : 'default';
+    };
+
+    const applyPreviewMode = () => {
+      setThemePreviewMode(readPreviewMode());
+    };
+
+    applyPreviewMode();
+
+    const handleStorage = (event) => {
+      if (event.key && event.key !== THEME_PREVIEW_MODE_KEY) return;
+      applyPreviewMode();
+    };
+
+    const handleCustomChange = () => {
+      applyPreviewMode();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(THEME_PREVIEW_MODE_EVENT, handleCustomChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(THEME_PREVIEW_MODE_EVENT, handleCustomChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const applyPreference = () => setPrefersDark(mediaQuery.matches);
+    applyPreference();
+
+    const handleChange = (event) => {
+      setPrefersDark(Boolean(event.matches));
+    };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
 
   const fetchSettings = useCallback(async ({ force = false } = {}) => {
     try {
@@ -181,19 +247,56 @@ export function SiteSettingsProvider({ children }) {
     const root = document.documentElement;
     const theme = settings?.theme || {};
     const effects = theme.effects || {};
-    const primaryScale = buildPrimaryScale(theme.primaryColor || '#3B2F2F');
+    const previewResolvedMode = resolveActiveThemeMode(themePreviewMode || 'default', prefersDark);
+    const configuredMode = resolveActiveThemeMode(theme.mode || 'light', prefersDark);
+    const activeMode = themePreviewMode && themePreviewMode !== 'default' ? previewResolvedMode : configuredMode;
+    const lightModeTheme = theme.colorModes?.light || {};
+    const darkModeTheme = theme.colorModes?.dark || {};
+    const activeModeTheme = activeMode === 'dark' ? darkModeTheme : lightModeTheme;
+
+    const activePrimaryColor =
+      activeModeTheme.primaryColor ||
+      (activeMode === 'dark' ? darkModeTheme.primaryColor : undefined) ||
+      lightModeTheme.primaryColor ||
+      theme.primaryColor ||
+      '#3B2F2F';
+    const activeSecondaryColor =
+      activeModeTheme.secondaryColor ||
+      (activeMode === 'dark' ? darkModeTheme.secondaryColor : undefined) ||
+      lightModeTheme.secondaryColor ||
+      theme.secondaryColor ||
+      '#E5D3B3';
+    const activeBackgroundColor =
+      activeModeTheme.backgroundColor ||
+      (activeMode === 'dark' ? darkModeTheme.backgroundColor : undefined) ||
+      lightModeTheme.backgroundColor ||
+      theme.backgroundColor ||
+      '#fafaf9';
+    const activeTextColor =
+      activeModeTheme.textColor ||
+      (activeMode === 'dark' ? darkModeTheme.textColor : undefined) ||
+      lightModeTheme.textColor ||
+      theme.textColor ||
+      '#1c1917';
+
+    const primaryScale = buildPrimaryScale(activePrimaryColor);
 
     root.style.setProperty('--theme-font-family', theme.fontFamily || 'var(--font-inter)');
     root.style.setProperty('--theme-font-scale', String(theme.fontScale || 1));
     root.style.setProperty('--theme-border-radius', theme.borderRadius || '0.5rem');
     root.style.setProperty('--theme-container-width', theme.containerWidth || '1280px');
-    root.style.setProperty('--theme-bg-color', theme.backgroundColor || '#fafaf9');
-    root.style.setProperty('--theme-text-color', theme.textColor || '#1c1917');
-    root.style.setProperty('--theme-primary-color', theme.primaryColor || '#3B2F2F');
-    root.style.setProperty('--theme-secondary-color', theme.secondaryColor || '#E5D3B3');
-    root.style.setProperty('--color-brand-brown', theme.primaryColor || '#3d2f28');
-    root.style.setProperty('--color-brand-tan', theme.secondaryColor || '#8b7355');
-    root.style.setProperty('--color-brand-cream', theme.secondaryColor || '#d4c4b0');
+    root.style.setProperty('--theme-bg-color', activeBackgroundColor);
+    root.style.setProperty('--theme-text-color', activeTextColor);
+    root.style.setProperty('--theme-primary-color', activePrimaryColor);
+    root.style.setProperty('--theme-secondary-color', activeSecondaryColor);
+    root.style.setProperty('--color-background', activeBackgroundColor);
+    root.style.setProperty('--color-surface', activeMode === 'dark' ? '#1f2937' : '#ffffff');
+    root.style.setProperty('--color-text-primary', activeTextColor);
+    root.style.setProperty('--color-text-secondary', activeMode === 'dark' ? '#D1D5DB' : '#57534e');
+    root.style.setProperty('--color-border', activeMode === 'dark' ? '#374151' : '#e7e5e4');
+    root.style.setProperty('--color-brand-brown', activePrimaryColor || '#3d2f28');
+    root.style.setProperty('--color-brand-tan', activeSecondaryColor || '#8b7355');
+    root.style.setProperty('--color-brand-cream', activeSecondaryColor || '#d4c4b0');
     root.style.setProperty('--color-primary-50', primaryScale[50]);
     root.style.setProperty('--color-primary-100', primaryScale[100]);
     root.style.setProperty('--color-primary-200', primaryScale[200]);
@@ -206,6 +309,8 @@ export function SiteSettingsProvider({ children }) {
     root.style.setProperty('--color-primary-900', primaryScale[900]);
 
     root.dataset.themeHeaderVariant = theme.headerVariant || 'minimal';
+    root.dataset.themeMode = activeMode;
+    root.dataset.themePreviewMode = themePreviewMode || 'default';
     root.dataset.themePageTransition = effects.pageTransitions || 'fade';
     root.dataset.themeScrollAnimations = effects.scrollAnimations === false ? 'false' : 'true';
     root.dataset.themeScrollAnimationType = effects.scrollAnimationType || 'fade-in';
@@ -263,7 +368,7 @@ export function SiteSettingsProvider({ children }) {
       window.removeEventListener('mouseup', handleUp);
       cursorEl.remove();
     };
-  }, [settings]);
+  }, [settings, prefersDark, themePreviewMode]);
 
   // Live Preview Listener
   useEffect(() => {

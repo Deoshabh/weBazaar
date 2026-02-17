@@ -38,6 +38,64 @@ export const SITE_SETTINGS_DEFAULTS = {
       placeholder: 'Enter your email',
       buttonText: 'Subscribe',
     },
+    testimonials: {
+      enabled: true,
+      title: 'What Our Customers Say',
+      description: 'Real feedback from customers who wear Radeo every day.',
+      items: [
+        {
+          id: 'testimonial-1',
+          quote: 'Exceptional comfort and craftsmanship. The fit is perfect and the finish is premium.',
+          name: 'Aarav Mehta',
+          role: 'Business Consultant',
+        },
+        {
+          id: 'testimonial-2',
+          quote: 'The quality is outstanding. I get compliments every time I wear them.',
+          name: 'Rohan Kapoor',
+          role: 'Product Manager',
+        },
+        {
+          id: 'testimonial-3',
+          quote: 'Stylish, durable, and comfortable enough for long days. Highly recommended.',
+          name: 'Nikhil Verma',
+          role: 'Architect',
+        },
+      ],
+    },
+    brands: {
+      enabled: true,
+      title: 'Trusted Brand Partners',
+      description: 'We collaborate with quality-focused partners and manufacturers.',
+      items: [
+        { id: 'brand-1', name: 'Radeo Atelier', logoText: 'RA' },
+        { id: 'brand-2', name: 'Heritage Line', logoText: 'HL' },
+        { id: 'brand-3', name: 'Prime Leather Co.', logoText: 'PL' },
+        { id: 'brand-4', name: 'Urban Classics', logoText: 'UC' },
+      ],
+    },
+    categories: {
+      enabled: true,
+      title: 'Shop by Category',
+      description: 'Find footwear by style and occasion.',
+      items: [
+        { id: 'category-oxfords', name: 'Oxfords', link: '/products?category=oxfords' },
+        { id: 'category-loafers', name: 'Loafers', link: '/products?category=loafers' },
+        { id: 'category-boots', name: 'Boots', link: '/products?category=boots' },
+        { id: 'category-sneakers', name: 'Sneakers', link: '/products?category=sneakers' },
+      ],
+    },
+    videoHero: {
+      enabled: false,
+      title: 'Craftsmanship in Motion',
+      description: 'See how each pair is crafted with precision and care.',
+      videoUrl: '',
+      posterUrl: '',
+      primaryButtonText: 'Shop Collection',
+      primaryButtonLink: '/products',
+      secondaryButtonText: 'Our Story',
+      secondaryButtonLink: '/about',
+    },
   },
   trustBadges: [
     {
@@ -392,8 +450,25 @@ export const SITE_SETTINGS_DEFAULTS = {
     allowedIPs: [],
   },
   theme: {
+    mode: 'light',
     primaryColor: '#3B2F2F',
     secondaryColor: '#E5D3B3',
+    backgroundColor: '#fafaf9',
+    textColor: '#1c1917',
+    colorModes: {
+      light: {
+        primaryColor: '#3B2F2F',
+        secondaryColor: '#E5D3B3',
+        backgroundColor: '#fafaf9',
+        textColor: '#1c1917',
+      },
+      dark: {
+        primaryColor: '#C9B18F',
+        secondaryColor: '#6F5A43',
+        backgroundColor: '#111827',
+        textColor: '#F9FAFB',
+      },
+    },
     fontFamily: 'var(--font-inter)',
     borderRadius: '0.5rem',
   },
