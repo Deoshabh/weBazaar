@@ -83,11 +83,6 @@ export default function useHomeSectionComposition({
     builderLayout,
     initialProducts,
 }) {
-    const effectiveBanners =
-        effectiveSettings?.banners ||
-        effectiveSettings?.bannerSystem?.banners ||
-        [];
-
     const effectiveSettings = useMemo(() => {
         if (!runtimeContext.isStorefrontBuilder) return activeSettings;
         if (!Array.isArray(builderLayout) || builderLayout.length === 0) return activeSettings;
@@ -104,6 +99,11 @@ export default function useHomeSectionComposition({
             homeSections: derivedHomeSections,
         };
     }, [runtimeContext.isStorefrontBuilder, builderLayout, activeSettings]);
+
+    const effectiveBanners =
+        effectiveSettings?.banners ||
+        effectiveSettings?.bannerSystem?.banners ||
+        [];
 
     const renderOrder = useMemo(() => {
         if (effectiveSettings.layout && effectiveSettings.layout.length > 0) {
