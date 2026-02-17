@@ -119,8 +119,8 @@ if (process.env.NODE_ENV !== "test") {
 // CORS (Production safe)
 // ===============================
 const allowedOrigins = [
-  "https://weBazaar.in",
-  "https://www.weBazaar.in",
+  "https://webazaar.in",
+  "https://www.webazaar.in",
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
   ...(process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [])
 ];
@@ -133,13 +133,15 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       
-      // Check for allowed origins
-      if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      // Check for allowed origins (case-insensitive)
+      const originLower = origin.toLowerCase();
+      const isAllowed = allowedOrigins.some(o => o.toLowerCase() === originLower);
+      if (isAllowed || process.env.NODE_ENV === 'development') {
         return callback(null, true);
       }
 
-      // Optional wildcard allow for weBazaar.in subdomains (disabled by default)
-      if (allowWildcardSubdomains && /^https:\/\/[a-z0-9-]+\.weBazaar\.in$/i.test(origin)) {
+      // Optional wildcard allow for webazaar.in subdomains (disabled by default)
+      if (allowWildcardSubdomains && /^https:\/\/[a-z0-9-]+\.webazaar\.in$/i.test(origin)) {
         return callback(null, true);
       }
       
