@@ -1,10 +1,10 @@
 const request = require('supertest');
 const app = require('../server');
-const SiteSettings = require('../models/SiteSettings');
+const StorefrontConfig = require('../models/StorefrontConfig');
 
 describe('Public settings publish contract', () => {
   it('serves published snapshot when workflow status is draft', async () => {
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     settings.homeSections.heroSection.title = 'Draft Hero';
     settings.publishedSnapshot = {
@@ -40,7 +40,7 @@ describe('Public settings publish contract', () => {
   });
 
   it('keeps live snapshot while status is scheduled until due', async () => {
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     settings.homeSections.heroSection.title = 'Scheduled Draft Hero';
     settings.publishedSnapshot = {

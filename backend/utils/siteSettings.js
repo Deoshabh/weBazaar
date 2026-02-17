@@ -1,4 +1,4 @@
-const SiteSetting = require('../models/SiteSetting');
+const KeyValueSetting = require('../models/KeyValueSetting');
 const SettingAuditLog = require('../models/SettingAuditLog');
 const {
   SITE_SETTINGS_DEFAULTS,
@@ -34,7 +34,7 @@ const ensurePayloadSize = (value) => {
 
 const getSettingsByKeys = async (keys = PUBLIC_SETTING_KEYS) => {
   const normalizedKeys = keys.filter((key) => isKnownSettingKey(key));
-  const docs = await SiteSetting.find({ key: { $in: normalizedKeys } }).lean();
+  const docs = await KeyValueSetting.find({ key: { $in: normalizedKeys } }).lean();
   const docMap = new Map(docs.map((doc) => [doc.key, doc]));
 
   return normalizedKeys.map((key) => {
@@ -72,10 +72,10 @@ const upsertSetting = async ({
   ensurePayloadSize(value);
 
   const category = SETTING_CATEGORY_MAP[key] || 'general';
-  const existing = await SiteSetting.findOne({ key });
+  const existing = await KeyValueSetting.findOne({ key });
 
   if (!existing) {
-    const created = await SiteSetting.create({
+    const created = await KeyValueSetting.create({
       key,
       category,
       value,

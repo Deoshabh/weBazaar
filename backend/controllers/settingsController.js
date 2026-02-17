@@ -1,4 +1,4 @@
-const SiteSettings = require('../models/SiteSettings');
+const StorefrontConfig = require('../models/StorefrontConfig');
 const SettingAuditLog = require('../models/SettingAuditLog');
 const {
   PUBLIC_SETTING_KEYS,
@@ -91,7 +91,7 @@ const appendVersionSnapshot = (settings, { label, userId } = {}) => {
 ===================== */
 exports.getAllSettings = async (req, res, next) => {
   try {
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
     res.json({ settings });
   } catch (err) {
     next(err);
@@ -107,7 +107,7 @@ exports.updateSettings = async (req, res, next) => {
     
     // Validate inputs if necessary
     
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
     
     if (branding) {
       if (branding.logo) settings.branding.logo = { ...settings.branding.logo, ...branding.logo };
@@ -180,7 +180,7 @@ exports.updateSettings = async (req, res, next) => {
 
 exports.getThemeVersionHistory = async (req, res, next) => {
   try {
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     const history = (settings.versionHistory || [])
       .slice()
@@ -213,7 +213,7 @@ exports.restoreThemeVersion = async (req, res, next) => {
       return res.status(400).json({ message: 'historyId is required' });
     }
 
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
     const historyItem = (settings.versionHistory || []).find(
       (item) => String(item._id) === String(historyId),
     );
@@ -260,7 +260,7 @@ exports.restoreThemeVersion = async (req, res, next) => {
 
 exports.exportThemeJson = async (_req, res, next) => {
   try {
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     const payload = {
       exportedAt: new Date().toISOString(),
@@ -283,7 +283,7 @@ exports.importThemeJson = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid theme JSON payload' });
     }
 
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     if (importedSettings.branding) settings.branding = importedSettings.branding;
     if (importedSettings.banners) settings.banners = importedSettings.banners;
@@ -448,7 +448,7 @@ exports.getPublicSettings = async (req, res, next) => {
       return acc;
     }, {});
 
-    const singletonSettings = await SiteSettings.getSettings();
+    const singletonSettings = await StorefrontConfig.getSettings();
     const publishedSnapshot = getPublishedSnapshot(singletonSettings);
 
     if (publishedSnapshot?.announcementBar) {
@@ -503,7 +503,7 @@ exports.getPublicSettings = async (req, res, next) => {
 exports.runPublishWorkflowNow = async (req, res, next) => {
   try {
     const result = await runScheduledPublishCheck();
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     if (result?.promoted) {
       await SettingAuditLog.create({
@@ -541,7 +541,7 @@ exports.runPublishWorkflowNow = async (req, res, next) => {
 ===================== */
 exports.resetStorefrontDefaults = async (req, res, next) => {
   try {
-    const settings = await SiteSettings.getSettings();
+    const settings = await StorefrontConfig.getSettings();
 
     const defaultHomeSections = {
       heroSection: SITE_SETTINGS_DEFAULTS.heroSection,

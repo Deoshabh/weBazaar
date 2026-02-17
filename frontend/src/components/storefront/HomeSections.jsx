@@ -43,7 +43,7 @@ export default function HomeSections({ initialSettings, initialProducts }) {
     );
 
     return (
-        <>
+        <div className="flex flex-col gap-0">
             {sectionRenderItems.map(({ section, effectiveSectionData }) => (
                 <SectionRenderWrapper
                     key={section.id}
@@ -56,6 +56,6 @@ export default function HomeSections({ initialSettings, initialProducts }) {
             ))}
 
             <PopupBuilder popupConfig={popupConfig} />
-        </>
+        </div>
     );
 }

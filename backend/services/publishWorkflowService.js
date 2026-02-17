@@ -1,4 +1,4 @@
-const SiteSettings = require('../models/SiteSettings');
+const StorefrontConfig = require('../models/StorefrontConfig');
 const SettingAuditLog = require('../models/SettingAuditLog');
 
 const DEFAULT_INTERVAL_MS = Number(process.env.PUBLISH_WORKFLOW_INTERVAL_MS || 60000);
@@ -19,7 +19,7 @@ const runScheduledPublishCheck = async () => {
     const now = new Date();
     const leaseUntil = new Date(Date.now() + WORKER_LEASE_MS);
 
-    const settings = await SiteSettings.findOneAndUpdate(
+    const settings = await StorefrontConfig.findOneAndUpdate(
       {
         isDefault: true,
         $or: [

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
+/* Inter + Playfair Display loaded via next/font/google in layout.jsx */
 
 :root {
   --font-inter: 'Inter', sans-serif;
@@ -163,11 +163,11 @@ body {
   }
   
   .section-padding {
-    @apply py-12 lg:py-16;
+    @apply py-16 lg:py-20;
   }
   
   .page-padding {
-    @apply py-8 lg:py-12;
+    @apply py-10 lg:py-14;
   }
   
   /* Prevent content from going under fixed navbar */

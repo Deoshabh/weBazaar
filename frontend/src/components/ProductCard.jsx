@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { toast } from 'react-hot-toast';
 import anime from 'animejs';
+import { getProductFallbackImage } from '@/constants/defaultImages';
 
 const BLUR_DATA_URL = 'data:image/gray;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
@@ -160,7 +161,7 @@ export default function ProductCard({ product, priority = false }) {
         {/* Image Container */}
         <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden bg-primary-100">
           <Image
-            src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.svg'}
+            src={product.images?.[0]?.url || product.images?.[0] || getProductFallbackImage(product)}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

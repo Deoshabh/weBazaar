@@ -25,9 +25,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = generateSEOMetadata({
-  title: 'weBazaar - Premium Handcrafted Shoes',
-  description: 'Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship.',
-  keywords: ['shoes', 'handcrafted', 'premium', 'leather', 'oxford', 'derby', 'brogue', 'loafer'],
+  title: 'weBazaar - Premium Vegan Leather Shoes',
+  description: 'Discover beautifully crafted vegan leather shoes — cruelty-free, sustainable, and designed for modern living.',
+  keywords: ['vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear', 'ethical shoes', 'oxford', 'sneakers', 'loafer'],
 });
 
 import QueryProvider from '@/providers/QueryProvider';

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const app = require("../server");
 const User = require("../models/User");
-const SiteSetting = require("../models/SiteSetting");
+const KeyValueSetting = require("../models/KeyValueSetting");
 
 describe("Settings API", () => {
   let adminToken;
@@ -40,7 +40,7 @@ describe("Settings API", () => {
   });
 
   afterAll(async () => {
-    await SiteSetting.deleteMany({ key: { $in: ["heroSection"] } });
+    await KeyValueSetting.deleteMany({ key: { $in: ["heroSection"] } });
   });
 
   it("returns public settings with defaults", async () => {

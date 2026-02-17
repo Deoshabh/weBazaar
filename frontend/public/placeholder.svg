@@ -1,8 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-  <rect width="400" height="400" fill="#f3f4f6"/>
-  <text x="200" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#9ca3af">No Image</text>
-  <text x="200" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af">Available</text>
-  <path d="M170 140 h60 v50 h-60z" fill="none" stroke="#d1d5db" stroke-width="2"/>
-  <circle cx="185" cy="155" r="5" fill="#d1d5db"/>
-  <path d="M170 180 l20-15 l15 10 l10-5 l15 10 v10 h-60z" fill="#d1d5db"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <rect width="600" height="600" fill="#f5f0eb"/>
+  <g transform="translate(300,280)" opacity="0.35">
+    <!-- Shoe silhouette -->
+    <path d="M-80 20 C-80 20 -75-30 -40-45 C-10-58 30-55 60-40 C90-25 110-5 120 15 C125 25 130 35 125 42 L-85 42 C-90 42 -85 30 -80 20Z" fill="#a89279" stroke="#8b7355" stroke-width="1.5"/>
+    <path d="M-85 42 L125 42 L130 55 C130 60 125 65 120 65 L-90 65 C-95 65 -95 60 -90 55 Z" fill="#8b7355"/>
+    <ellipse cx="-55" cy="-15" rx="8" ry="5" fill="#c4b49a" opacity="0.5"/>
+  </g>
+  <text x="300" y="380" text-anchor="middle" font-family="'Inter', sans-serif" font-size="15" fill="#a89279" letter-spacing="2">NO IMAGE AVAILABLE</text>
 </svg>

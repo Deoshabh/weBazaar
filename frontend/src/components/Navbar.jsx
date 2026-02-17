@@ -383,7 +383,7 @@ export default function Navbar() {
                   >
                     <div className="relative w-16 h-16 flex-shrink-0">
                       <Image
-                        src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.jpg'}
+                        src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.svg'}
                         alt={product.name}
                         fill
                         sizes="64px"

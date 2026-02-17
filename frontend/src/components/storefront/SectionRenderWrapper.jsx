@@ -46,6 +46,9 @@ export default function SectionRenderWrapper({
             data-editor-section="true"
             data-section-id={section.id}
             data-section-type={section.type}
+            style={{
+                marginBottom: section.type === 'hero' || section.type === 'video-hero' ? 0 : undefined,
+            }}
         >
             {compiledCss && <style>{compiledCss}</style>}
             {compiledGlobalClassCss && <style>{compiledGlobalClassCss}</style>}

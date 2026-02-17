@@ -80,8 +80,8 @@ export const HeroSection = ({ banners, heroSettings }) => {
             >
                 <div className="container-custom">
                     <div className="max-w-2xl text-white">
-                        <h2 className="text-5xl lg:text-7xl font-bold mb-4 leading-tight">{bannerTitle}</h2>
-                        {bannerSubtitle && <p className="text-xl text-white/90 mb-8">{bannerSubtitle}</p>}
+                        <h2 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">{bannerTitle}</h2>
+                        {bannerSubtitle && <p className="text-xl text-white/90 mb-10">{bannerSubtitle}</p>}
                         {(bannerPrimaryLink || bannerSecondaryLink) && (
                             <div className="inline-flex flex-col sm:flex-row gap-4">
                                 {bannerPrimaryLink && (
@@ -200,13 +200,13 @@ export const FeaturedProductsSection = ({ sectionData = {}, products }) => {
         <ScrollReveal delay={200}>
             <section className="section-padding bg-primary-50">
                 <div className="container-custom">
-                    <div className="text-center mb-12">
-                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-4">{sectionData.title}</h2>
+                    <div className="text-center mb-14">
+                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-5">{sectionData.title}</h2>
                         <p className="text-lg text-primary-600 max-w-2xl mx-auto">{sectionData.description}</p>
                     </div>
 
                     {visibleProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                             {visibleProducts.map((product, idx) => (
                                 <ProductCard key={product._id} product={product} priority={idx < 4} />
                             ))}
@@ -238,7 +238,7 @@ export const MadeToOrderSection = ({ sectionData = {} }) => {
             <section className="section-padding bg-white text-center">
                 <div className="container-custom max-w-4xl">
                     <h2 className="font-serif text-4xl font-bold text-primary-900 mb-6">{sectionData.title}</h2>
-                    <p className="text-lg text-primary-600 mb-8">{sectionData.description}</p>
+                    <p className="text-lg text-primary-600 mb-10">{sectionData.description}</p>
                     <div className="flex flex-wrap justify-center gap-4 text-sm text-primary-600">
                         {featureList.map((feature) => (
                             <span key={feature} className="bg-primary-50 px-3 py-1 rounded-full">{feature}</span>
@@ -291,8 +291,8 @@ export const NewsletterSection = ({ sectionData = {} }) => {
         <ScrollReveal delay={100}>
             <section className="section-padding bg-brand-brown text-white text-center">
                 <div className="container-custom max-w-2xl">
-                    <h2 className="font-serif text-3xl font-bold mb-4">{sectionData.title}</h2>
-                    <p className="text-white/80 mb-8">{sectionData.description}</p>
+                    <h2 className="font-serif text-3xl font-bold mb-5">{sectionData.title}</h2>
+                    <p className="text-white/80 mb-10">{sectionData.description}</p>
                     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
                         <input
                             type="email"
@@ -332,13 +332,13 @@ export const TestimonialsSection = ({ sectionData = {} }) => {
         <ScrollReveal delay={100}>
             <section className="section-padding bg-primary-50">
                 <div className="container-custom">
-                    <div className="text-center mb-12">
-                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-4">{sectionData.title}</h2>
+                    <div className="text-center mb-14">
+                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-5">{sectionData.title}</h2>
                         {sectionData.description && (
                             <p className="text-lg text-primary-600 max-w-2xl mx-auto">{sectionData.description}</p>
                         )}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {testimonials.map((item, index) => (
                             <article
                                 key={item.id || `${item.name || 'testimonial'}-${index}`}
@@ -375,17 +375,17 @@ export const BrandsSection = ({ sectionData = {} }) => {
         <ScrollReveal delay={100}>
             <section className="section-padding bg-white">
                 <div className="container-custom">
-                    <div className="text-center mb-10">
-                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-4">{sectionData.title}</h2>
+                    <div className="text-center mb-12">
+                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-5">{sectionData.title}</h2>
                         {sectionData.description && (
                             <p className="text-lg text-primary-600 max-w-2xl mx-auto">{sectionData.description}</p>
                         )}
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {brands.map((brand, index) => (
                             <div
                                 key={brand.id || `${brand.name || 'brand'}-${index}`}
-                                className="rounded-lg border p-5 text-center"
+                                className="rounded-lg border p-6 text-center"
                                 style={{
                                     backgroundColor: 'color-mix(in srgb, var(--color-surface) 80%, var(--color-background) 20%)',
                                     borderColor: 'var(--color-border)',
@@ -424,18 +424,18 @@ export const CategoriesSection = ({ sectionData = {} }) => {
         <ScrollReveal delay={100}>
             <section className="section-padding bg-primary-50">
                 <div className="container-custom">
-                    <div className="text-center mb-10">
-                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-4">{sectionData.title}</h2>
+                    <div className="text-center mb-12">
+                        <h2 className="font-serif text-4xl font-bold text-primary-900 mb-5">{sectionData.title}</h2>
                         {sectionData.description && (
                             <p className="text-lg text-primary-600 max-w-2xl mx-auto">{sectionData.description}</p>
                         )}
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {categories.map((category, index) => (
                             <Link
                                 key={category.id || `${category.name || 'category'}-${index}`}
                                 href={category.link || '/products'}
-                                className="rounded-lg border px-4 py-5 text-center transition-colors"
+                                className="rounded-lg border px-5 py-6 text-center transition-colors"
                                 style={{
                                     backgroundColor: 'var(--color-surface)',
                                     borderColor: 'var(--color-border)',
@@ -487,9 +487,9 @@ export const VideoHeroSection = ({ sectionData = {} }) => {
             <div className="relative z-10 min-h-[calc(100vh-80px)] flex items-center">
                 <div className="container-custom">
                     <div className="max-w-2xl">
-                        <h2 className="font-serif text-5xl md:text-7xl font-bold mb-5">{sectionData.title}</h2>
+                        <h2 className="font-serif text-5xl md:text-7xl font-bold mb-6">{sectionData.title}</h2>
                         {sectionData.description && (
-                            <p className="text-lg md:text-xl text-white/90 mb-8">{sectionData.description}</p>
+                            <p className="text-lg md:text-xl text-white/90 mb-10">{sectionData.description}</p>
                         )}
                         <div className="flex flex-col sm:flex-row gap-4">
                             {primaryLink && (
@@ -517,7 +517,7 @@ export const TrustBadgesSection = ({ settings }) => {
         <ScrollReveal>
             <section className="section-padding bg-white">
                 <div className="container-custom">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                         {settings.trustBadges.map((badge) => {
                             const Icon = getIconComponent(badge.icon);
                             return (

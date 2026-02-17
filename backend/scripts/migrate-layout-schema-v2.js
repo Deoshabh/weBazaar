@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const SiteSettings = require('../models/SiteSettings');
+const StorefrontConfig = require('../models/StorefrontConfig');
 const {
   CURRENT_LAYOUT_SCHEMA_VERSION,
   normalizeLayoutSchema,
@@ -12,7 +12,7 @@ dotenv.config();
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
 
-  const settings = await SiteSettings.getSettings();
+  const settings = await StorefrontConfig.getSettings();
   const normalizedLayout = normalizeLayoutSchema(settings.layout || []);
   const baseHomeSections = settings.homeSections?.toObject
     ? settings.homeSections.toObject()

@@ -7,8 +7,4 @@ const { validateCoupon } = require("../controllers/adminCouponController");
 // @access  Public
 router.post("/validate", validateCoupon);
 
-router.get("/test", (req, res) => {
-  res.json({ message: "Coupon routes working" });
-});
-
 module.exports = router;

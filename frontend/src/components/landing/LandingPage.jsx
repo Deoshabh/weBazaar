@@ -57,16 +57,7 @@ export default function LandingPage() {
 
   // Smooth scroll behavior for the landing page
   useEffect(() => {
-    // Load the Cormorant Garamond font
-    const link = document.createElement('link');
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-
-    return () => {
-      document.head.removeChild(link);
-    };
+    // Cormorant Garamond font loaded globally via globals.css
   }, []);
 
   return (

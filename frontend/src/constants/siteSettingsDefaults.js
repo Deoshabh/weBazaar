@@ -3,20 +3,21 @@ export const SITE_SETTINGS_DEFAULTS = {
     heroSection: {
       enabled: true,
       title: 'Step Into',
-      subtitle: 'Timeless Elegance',
+      subtitle: 'Conscious Style',
       description:
-        'Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship. Each pair is a masterpiece designed to elevate your style.',
+        'Discover beautifully crafted vegan leather shoes — cruelty-free, sustainable, and designed for modern living. Every pair is a statement of compassion and style.',
       primaryButtonText: 'Explore Collection',
       primaryButtonLink: '/products',
       secondaryButtonText: 'Our Story',
       secondaryButtonLink: '/about',
+      imageUrl: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=1920&h=800&fit=crop&q=80',
       backgroundGradient: 'from-primary-50 via-brand-cream/20 to-primary-100',
     },
     featuredProducts: {
       enabled: true,
       title: 'Featured Collection',
       description:
-        'Explore our handpicked selection of premium shoes crafted for the discerning gentleman.',
+        'Explore our handpicked selection of vegan leather shoes — stylish, durable, and 100% cruelty-free.',
       productLimit: 8,
       productSelection: 'latest',
       manualProductIds: [],
@@ -27,8 +28,8 @@ export const SITE_SETTINGS_DEFAULTS = {
       enabled: true,
       title: 'Made to Order',
       description:
-        'All our shoes are crafted to order, ensuring perfect fit and uncompromising quality. Each pair takes 7-10 business days to create.',
-      features: ['Custom Crafted', 'Premium Leather', 'Expert Artisans', '7-10 Days Delivery'],
+        'All our vegan leather shoes are crafted to order, ensuring perfect fit and uncompromising quality. Each pair takes 7-10 business days to create.',
+      features: ['Vegan Leather', 'Cruelty-Free', 'Sustainable Materials', 'Expert Artisans', '7-10 Days Delivery'],
     },
     newsletter: {
       enabled: true,
@@ -101,9 +102,9 @@ export const SITE_SETTINGS_DEFAULTS = {
     {
       id: 'badge-quality',
       icon: 'FiAward',
-      title: 'Handcrafted Quality',
+      title: 'Vegan & Cruelty-Free',
       description:
-        'Each pair is meticulously crafted by skilled artisans using traditional techniques.',
+        'Every pair is made with 100% vegan leather — no animal products, ever.',
       enabled: true,
       order: 1,
     },
