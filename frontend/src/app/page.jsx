@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { JsonLd, generateWebsiteJsonLd, generateOrganizationJsonLd } from '@/utils/seo';
+import { JsonLd, generateWebsiteJsonLd, generateOrganizationJsonLd, generateMetadata as generateSEOMetadata } from '@/utils/seo';
 import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
 import HomeSections from '@/components/storefront/HomeSections';
 import { normalizeSettingsLayout, resolveFeaturedProductsConfig } from '@/utils/layoutSchema';
@@ -9,6 +9,12 @@ import { normalizeSettingsLayout, resolveFeaturedProductsConfig } from '@/utils/
 // Force dynamic rendering since we rely on external API data that changes
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export const metadata = generateSEOMetadata({
+  title: 'weBazaar — Premium Vegan Leather Shoes | Shop Online India',
+  description: 'Shop handcrafted vegan leather shoes at weBazaar. Cruelty-free, sustainable, and stylish footwear for men and women. Free shipping across India.',
+  keywords: ['vegan shoes', 'vegan leather', 'cruelty-free footwear', 'sustainable shoes', 'online shoe store India', 'weBazaar'],
+});
 
 // --- Data Fetching ---
 

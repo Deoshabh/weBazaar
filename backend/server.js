@@ -232,8 +232,10 @@ app.use("/api/v1/admin/filters", require("./routes/adminFilterRoutes"));
 app.use("/api/v1/admin/shiprocket", require("./routes/shiprocketRoutes"));
 app.use("/api/v1/admin/reviews", require("./routes/adminReviewRoutes"));
 app.use("/api/v1/admin/settings", require("./routes/adminSettingsRoutes"));
+app.use("/api/v1/admin/seo", require("./routes/adminSeoRoutes"));
 app.use('/api/v1/admin/cms', adminCMSRouter);
 app.use('/api/v1/cms', publicCMSRouter);
+app.use("/api/v1/seo", require("./routes/seoRoutes"));
 
 app.use("/api/v1/coupons", require("./routes/couponRoutes"));
 app.use("/api/v1/categories", require("./routes/categoryRoutes"));

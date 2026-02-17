@@ -1,15 +1,11 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authAPI } from '@/utils/api';
 import Cookies from 'js-cookie';
-import toast from 'react-hot-toast';
 import {
-  loginWithEmail,
-  registerWithEmail,
   logoutFirebase,
   onAuthStateChange,
-  getFirebaseToken
 } from '@/utils/firebaseAuth';
 
 const AuthContext = createContext();
@@ -18,55 +14,47 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Guard: when true an explicit login/register is in progress — the
+  // onAuthStateChanged listener must NOT race it with its own backend call.
+  const loginInProgressRef = useRef(false);
+
   useEffect(() => {
-    // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      // If an explicit login/register call is running, skip — the caller
+      // will set user + cookie itself once the backend responds.
+      if (loginInProgressRef.current) return;
+
       try {
         if (firebaseUser) {
-          // User is signed in to Firebase
-          const token = await firebaseUser.getIdToken();
           const accessToken = Cookies.get('accessToken');
 
           if (accessToken) {
+            // We already have a backend token — just validate it.
             try {
               const response = await authAPI.getCurrentUser();
               setUser(response.data);
             } catch {
-              try {
-                const response = await authAPI.firebaseLogin({
-                  firebaseToken: token,
-                  email: firebaseUser.email,
-                  uid: firebaseUser.uid,
-                });
-                const { accessToken: nextAccessToken, user: backendUser } = response.data;
-                Cookies.set('accessToken', nextAccessToken, { expires: 1 });
-                setUser(backendUser);
-              } catch (syncErr) {
-                console.error('Failed to auto-sync backend session:', syncErr);
-              }
-            }
-          } else {
-            try {
-              const response = await authAPI.firebaseLogin({
-                firebaseToken: token,
-                email: firebaseUser.email,
-                uid: firebaseUser.uid,
-              });
-              const { accessToken: nextAccessToken, user: backendUser } = response.data;
-              Cookies.set('accessToken', nextAccessToken, { expires: 1 });
-              setUser(backendUser);
-            } catch (syncErr) {
-              console.error('Failed to establish backend session from Firebase user:', syncErr);
+              // Token expired / invalid — clear it and let the user re-login.
+              Cookies.remove('accessToken');
               setUser(null);
             }
+          } else {
+            // Firebase says signed-in but we have no backend token.
+            // This happens on a hard refresh where the Firebase SDK
+            // restores the session from IndexedDB but the JS cookie is gone.
+            // We could try to auto-sync, but without a recaptchaToken the
+            // backend may reject firebaseLogin in production.  Safest to
+            // just leave the user as null and let them click "Log in" again.
+            setUser(null);
           }
         } else {
-          // User is signed out of Firebase
+          // Signed out of Firebase.
           setUser(null);
           Cookies.remove('accessToken');
         }
       } catch (error) {
         console.error('Auth state change error:', error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -75,60 +63,28 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  /**
+   * Sync a Firebase user with the backend.  Called by explicit login flows
+   * (email, Google, phone) which already obtained a recaptchaToken.
+   *
+   * Sets the loginInProgressRef guard so onAuthStateChanged does not race.
+   */
+  const syncWithBackend = useCallback(async (payload) => {
+    const response = await authAPI.firebaseLogin(payload);
+    const { accessToken, user: backendUser } = response.data;
+    if (accessToken) Cookies.set('accessToken', accessToken, { expires: 1 });
+    setUser(backendUser);
+    return response.data;
+  }, []);
+
   const login = async (credentials) => {
-    try {
-      // 1. Login with Firebase
-      const { user: firebaseUser, token } = await loginWithEmail(credentials.email, credentials.password);
-
-      if (!firebaseUser) return { success: false, error: 'Firebase login failed' };
-
-      // 2. Sync with Backend
-      const response = await authAPI.firebaseLogin({
-        firebaseToken: token,
-        email: firebaseUser.email,
-        uid: firebaseUser.uid
-      });
-
-      const { accessToken, user: backendUser } = response.data;
-
-      // Store accessToken
-      Cookies.set('accessToken', accessToken, { expires: 1 });
-
-      setUser(backendUser);
-      return { success: true };
-    } catch (error) {
-      console.error('Login context error:', error);
-      const message = error.response?.data?.message || error.message || 'Login failed';
-      return { success: false, error: message };
-    }
+    // Handled entirely by the firebase-login page now — this method is kept
+    // for backwards-compat but should not be the primary path.
+    return { success: false, error: 'Use the Firebase login page' };
   };
 
   const register = async (userData) => {
-    try {
-      // 1. Register with Firebase
-      const { user: firebaseUser, token } = await registerWithEmail(userData.email, userData.password, userData.name);
-
-      if (!firebaseUser) return { success: false, error: 'Firebase registration failed' };
-
-      // 2. Create User in Backend
-      const response = await authAPI.firebaseLogin({
-        firebaseToken: token,
-        email: firebaseUser.email,
-        uid: firebaseUser.uid,
-        displayName: userData.name,
-      });
-
-      const { accessToken, user: backendUser } = response.data;
-
-      Cookies.set('accessToken', accessToken, { expires: 1 });
-
-      setUser(backendUser);
-      return { success: true };
-    } catch (error) {
-      console.error('Registration context error:', error);
-      const message = error.response?.data?.message || error.message || 'Registration failed';
-      return { success: false, error: message };
-    }
+    return { success: false, error: 'Use the Firebase register page' };
   };
 
   const logout = async () => {
@@ -143,9 +99,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (userData) => {
+  const updateUser = useCallback((userData) => {
     setUser(userData);
-  };
+  }, []);
 
   const value = {
     user,
@@ -154,6 +110,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    syncWithBackend,
+    loginInProgressRef,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
   };

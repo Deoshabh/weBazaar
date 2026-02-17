@@ -99,7 +99,7 @@ export const loginWithEmail = async (email, password) => {
       };
     }
 
-    toast.success("Login successful!");
+    // No toast here — the calling page shows toast after full backend sync
     return {
       success: true,
       user: userCredential.user,
@@ -301,7 +301,7 @@ export const verifyOTP = async (confirmationResult, otp) => {
   try {
     const userCredential = await confirmationResult.confirm(otp);
 
-    toast.success("Phone verification successful!");
+    // No toast — the calling page shows toast after backend sync
     return {
       success: true,
       user: userCredential.user,
@@ -485,7 +485,7 @@ export const loginWithGoogle = async () => {
       });
     }
 
-    toast.success(`Signed in as ${signedInUser.email}`);
+    // No toast here — the calling page shows toast after full backend sync
     return {
       success: true,
       user: signedInUser,

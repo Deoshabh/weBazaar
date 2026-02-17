@@ -1,6 +1,7 @@
 export default function ProductSchema({ product }) {
     if (!product) return null;
 
+    const productUrl = `https://weBazaar.in/products/${product.slug}`;
     const schema = {
         '@context': 'https://schema.org',
         '@type': 'Product',
@@ -14,13 +15,18 @@ export default function ProductSchema({ product }) {
         },
         offers: {
             '@type': 'Offer',
-            url: typeof window !== 'undefined' ? window.location.href : '',
+            url: productUrl,
             priceCurrency: 'INR',
             price: product.price,
+            priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
             availability: product.inStock
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
             itemCondition: 'https://schema.org/NewCondition',
+            seller: {
+                '@type': 'Organization',
+                name: 'weBazaar',
+            },
         },
     };
 

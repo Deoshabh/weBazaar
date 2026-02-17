@@ -30,11 +30,33 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const title = `${product.name} | weBazaar`;
+  const description = product.description?.substring(0, 160) || `Buy ${product.name} — premium vegan leather shoes at weBazaar. Free shipping across India.`;
+  const image = product.images?.[0]?.url || product.images?.[0] || 'https://weBazaar.in/og-image.jpg';
+  const url = `https://weBazaar.in/products/${params.slug}`;
+
   return {
-    title: `${product.name} | weBazaar`,
-    description: product.description?.substring(0, 160),
+    title,
+    description,
+    keywords: [product.name, product.brand, product.category?.name, 'vegan shoes', 'buy online India'].filter(Boolean).join(', '),
     openGraph: {
-      images: product.images?.[0]?.url || [],
+      title,
+      description,
+      url,
+      siteName: 'weBazaar',
+      images: [{ url: image, width: 1200, height: 630, alt: product.name }],
+      locale: 'en_IN',
+      type: 'product',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+      site: '@weBazaar_in',
+    },
+    alternates: {
+      canonical: url,
     },
   };
 }

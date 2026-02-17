@@ -1,0 +1,18 @@
+# weBazaar — robots.txt
+# https://weBazaar.in
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /checkout/
+Disallow: /orders/
+Disallow: /profile/
+Disallow: /cart
+
+# Sitemap
+Sitemap: https://weBazaar.in/sitemap.xml
+
+# Crawl-delay (optional, for polite crawling)
+Crawl-delay: 1

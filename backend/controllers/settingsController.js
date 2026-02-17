@@ -121,17 +121,19 @@ exports.updateSettings = async (req, res, next) => {
     }
 
     if (announcementBar) {
-      settings.announcementBar = { ...settings.announcementBar.toObject(), ...announcementBar };
+      const currentAB = (typeof settings.announcementBar?.toObject === 'function')
+        ? settings.announcementBar.toObject()
+        : (settings.announcementBar || {});
+      settings.announcementBar = { ...currentAB, ...announcementBar };
     }
 
     if (homeSections && !req.body.layout) {
-      // Deep merge for homeSections to avoid overwriting partial updates if needed, 
-      // but usually the admin sends the whole object for a section.
-      // Let's assume we replace the specific sections provided.
-      if (homeSections.heroSection) settings.homeSections.heroSection = { ...settings.homeSections.heroSection.toObject(), ...homeSections.heroSection };
-      if (homeSections.featuredProducts) settings.homeSections.featuredProducts = { ...settings.homeSections.featuredProducts.toObject(), ...homeSections.featuredProducts };
-      if (homeSections.madeToOrder) settings.homeSections.madeToOrder = { ...settings.homeSections.madeToOrder.toObject(), ...homeSections.madeToOrder };
-      if (homeSections.newsletter) settings.homeSections.newsletter = { ...settings.homeSections.newsletter.toObject(), ...homeSections.newsletter };
+      // Merge incoming sections into existing homeSections (Mixed type)
+      const currentHS = (typeof settings.homeSections?.toObject === 'function')
+        ? settings.homeSections.toObject()
+        : (settings.homeSections || {});
+      settings.homeSections = { ...currentHS, ...homeSections };
+      settings.markModified('homeSections');
     }
 
     if (req.body.layout) {

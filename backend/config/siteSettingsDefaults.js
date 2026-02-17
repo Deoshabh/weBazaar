@@ -516,6 +516,20 @@ const SITE_SETTINGS_DEFAULTS = {
     allowAdminAccess: true,
     allowedIPs: [],
   },
+  theme: {
+    primaryColor: '#3B2F2F',
+    secondaryColor: '#E5D3B3',
+    accentColor: '#C9A96E',
+    accentHoverColor: '#B8943D',
+    headingColor: '#1c1917',
+    textColor: '#44403c',
+    mutedTextColor: '#78716c',
+    backgroundColor: '#fafaf9',
+    subtleBgColor: '#f5f5f4',
+    borderColor: '#e7e5e4',
+    fontFamily: 'Inter',
+    borderRadius: '8px',
+  },
 };
 
 const SETTING_CATEGORY_MAP = {
@@ -534,6 +548,7 @@ const SETTING_CATEGORY_MAP = {
   shippingPolicy: 'policies',
   returnsPolicy: 'policies',
   maintenanceMode: 'system',
+  theme: 'appearance',
 };
 
 const PUBLIC_SETTING_KEYS = [
@@ -552,6 +567,7 @@ const PUBLIC_SETTING_KEYS = [
   'shippingPolicy',
   'returnsPolicy',
   'maintenanceMode',
+  'theme',
 ];
 
 const isKnownSettingKey = (key) => Boolean(SITE_SETTINGS_DEFAULTS[key]);

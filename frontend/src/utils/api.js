@@ -293,3 +293,16 @@ export const wishlistAPI = {
   add: (productId) => api.post("/wishlist/toggle", { productId }),
   remove: (productId) => api.post("/wishlist/toggle", { productId }),
 };
+
+export const seoAPI = {
+  // Public
+  getByPageKey: (pageKey) => api.get(`/seo/${pageKey}`),
+  // Admin
+  getAll: () => api.get("/admin/seo"),
+  getDefaults: () => api.get("/admin/seo/defaults"),
+  upsert: (pageKey, data) => api.put(`/admin/seo/${pageKey}`, data),
+  remove: (pageKey) => api.delete(`/admin/seo/${pageKey}`),
+  resetToDefault: (pageKey) => api.post(`/admin/seo/${pageKey}/reset`),
+  bulkCopy: (data) => api.post("/admin/seo/bulk-copy", data),
+  getHistory: (pageKey) => api.get(`/admin/seo/${pageKey}/history`),
+};

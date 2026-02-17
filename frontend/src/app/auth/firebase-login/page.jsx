@@ -7,16 +7,14 @@ import { FiArrowLeft, FiMail, FiPhone } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from '@/components/auth/EmailAuth';
 import PhoneAuth from '@/components/auth/PhoneAuth';
-import { authAPI } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import { loginWithGoogle } from '@/utils/firebaseAuth';
 import { useRecaptcha, RECAPTCHA_ACTIONS } from '@/utils/recaptcha';
 import toast from 'react-hot-toast';
-import Cookies from 'js-cookie';
 
 export default function FirebaseLoginPage() {
   const router = useRouter();
-  const { updateUser, isAuthenticated, loading } = useAuth();
+  const { updateUser, isAuthenticated, loading, syncWithBackend, loginInProgressRef } = useAuth();
   const { getToken } = useRecaptcha();
   const [authMethod, setAuthMethod] = useState('email'); // 'email' or 'phone'
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -41,21 +39,25 @@ export default function FirebaseLoginPage() {
    * - Reject if email mismatch between Firebase and backend
    */
   const handleFirebaseSuccess = async (result) => {
+    // Raise the guard so AuthContext's onAuthStateChanged listener
+    // does NOT fire a competing firebaseLogin call.
+    loginInProgressRef.current = true;
+
     try {
       const { user, token } = result;
 
-      // ✅ SECURITY CHECK #1: Verify Firebase user email
       if (!user?.email) {
-        toast.error("Unable to retrieve your email from Google. Please try again.");
+        toast.error("Unable to retrieve your email. Please try again.");
         return;
       }
 
+      if (!token) {
+        toast.error("Failed to get Firebase ID token. Please try again.");
+        return;
+      }
 
-
-      // Get reCAPTCHA token for backend verification
       const recaptchaToken = await getToken(RECAPTCHA_ACTIONS.LOGIN);
 
-      // Validate token before sending
       const payload = {
         firebaseToken: token,
         email: user.email,
@@ -63,44 +65,19 @@ export default function FirebaseLoginPage() {
         displayName: user.displayName,
         photoURL: user.photoURL,
         uid: user.uid,
-        recaptchaToken
+        recaptchaToken,
       };
 
+      const data = await syncWithBackend(payload);
 
-
-      if (!payload.firebaseToken) {
-        toast.error("Failed to get Firebase ID token. Please try again.");
-        return;
-      }
-
-      // Send Firebase token to backend to create/sync user session
-      const response = await authAPI.firebaseLogin(payload);
-
-      // ✅ SECURITY CHECK #2: Verify returned user email matches Firebase
-      if (response.data?.user) {
-        const backendUserEmail = response.data.user.email;
-        // console.log(`🔐 Backend returned user: ${backendUserEmail}`);
-
-        // CRITICAL: Email must match between Firebase and backend
-        if (backendUserEmail !== user.email) {
-          console.error(`⚠️  EMAIL MISMATCH:`, {
-            firebaseEmail: user.email,
-            backendEmail: backendUserEmail,
-            firebaseUid: user.uid,
-            backendId: response.data.user.id,
-          });
-
-          toast.error(
-            `Email mismatch detected. Firebase: ${user.email}, Backend: ${backendUserEmail}. Please contact support.`,
-          );
+      if (data?.user) {
+        // Verify email consistency between Firebase and backend
+        if (data.user.email !== user.email) {
+          console.error('EMAIL MISMATCH:', { firebaseEmail: user.email, backendEmail: data.user.email });
+          toast.error('Email mismatch detected. Please contact support.');
           return;
         }
 
-        // ✅ ALL CHECKS PASSED: Store token and update auth context
-        if (response.data.accessToken) {
-          Cookies.set('accessToken', response.data.accessToken, { expires: 1 });
-        }
-        updateUser(response.data.user);
         toast.success(`Logged in as ${user.email}`);
         router.push('/');
       } else {
@@ -111,10 +88,8 @@ export default function FirebaseLoginPage() {
         status: error.response?.status,
         message: error.message,
         responseData: error.response?.data,
-        errorCode: error.code,
       });
 
-      // Check if error is FIREBASE_UID_MISMATCH (account hijack prevention)
       if (error.response?.data?.error === 'FIREBASE_UID_MISMATCH') {
         toast.error(
           'Account security check failed. This email is already linked to another account. ' +
@@ -123,9 +98,12 @@ export default function FirebaseLoginPage() {
         return;
       }
 
-      // Show detailed error if available
       const errorMessage = error.response?.data?.message || 'Failed to sync with server. Please try again.';
       toast.error(errorMessage);
+    } finally {
+      // Release the guard so future onAuthStateChanged calls work normally
+      // (e.g. on page refresh after login, on logout, etc.)
+      loginInProgressRef.current = false;
     }
   };
 
