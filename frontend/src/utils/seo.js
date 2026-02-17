@@ -7,7 +7,8 @@ const SITE_NAME = "weBazaar";
 const SITE_URL = "https://weBazaar.in";
 const SITE_DESCRIPTION =
   "Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship. Shop the finest collection of luxury footwear at weBazaar.";
-const SITE_IMAGE = `${SITE_URL}/og-image.jpg`;
+const SITE_IMAGE = `${SITE_URL}/og/webazaar-og-banner.jpg`;
+const SITE_IMAGE_ALT = "weBazaar — Premium Leather & Vegan Shoes";
 const TWITTER_HANDLE = "@weBazaar_in";
 
 /**
@@ -49,7 +50,7 @@ export const generateMetadata = ({
           url: image,
           width: 1200,
           height: 630,
-          alt: fullTitle,
+          alt: image === SITE_IMAGE ? SITE_IMAGE_ALT : fullTitle,
         },
       ],
       locale: "en_IN",

@@ -25,9 +25,10 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = generateSEOMetadata({
-  title: 'weBazaar - Premium Vegan Leather Shoes',
-  description: 'Discover beautifully crafted vegan leather shoes — cruelty-free, sustainable, and designed for modern living.',
-  keywords: ['vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear', 'ethical shoes', 'oxford', 'sneakers', 'loafer'],
+  title: 'weBazaar — Premium Leather & Vegan Shoes',
+  description: 'Conscious style, delivered. Shop premium leather & vegan shoes at weBazaar — cruelty-free, sustainable, and designed for modern living.',
+  image: 'https://webazaar.in/og/webazaar-og-banner.jpg',
+  keywords: ['vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear', 'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes'],
 });
 
 import QueryProvider from '@/providers/QueryProvider';

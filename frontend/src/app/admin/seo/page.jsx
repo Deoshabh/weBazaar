@@ -600,7 +600,7 @@ export default function AdminSeoPage() {
                             value={formData.og_image}
                             onChange={e => setFormData(p => ({ ...p, og_image: e.target.value }))}
                             className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                            placeholder="https://weBazaar.in/og-image.jpg"
+                            placeholder="https://webazaar.in/og/webazaar-og-banner.jpg"
                           />
                         </div>
                         <div>

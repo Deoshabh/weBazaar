@@ -32,7 +32,7 @@ export async function generateMetadata({ params }) {
 
   const title = `${product.name} | weBazaar`;
   const description = product.description?.substring(0, 160) || `Buy ${product.name} — premium vegan leather shoes at weBazaar. Free shipping across India.`;
-  const image = product.images?.[0]?.url || product.images?.[0] || 'https://weBazaar.in/og-image.jpg';
+  const image = product.images?.[0]?.url || product.images?.[0] || 'https://weBazaar.in/og/webazaar-og-banner.jpg';
   const url = `https://weBazaar.in/products/${params.slug}`;
 
   return {
