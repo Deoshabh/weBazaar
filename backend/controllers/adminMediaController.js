@@ -9,9 +9,9 @@ const { getOrSetCache, invalidateCache } = require("../utils/cache");
  */
 exports.getUploadUrl = async (req, res) => {
   try {
-    const { fileName, fileType, productSlug } = req.body;
+    const { fileName, fileType, productSlug, folder } = req.body;
     
-    console.log("Values:" , req.body); // Debug log
+    console.log("Upload URL request:", { fileName, fileType, folder, productSlug });
 
     // Validate input
     if (!fileName || !fileType) {
@@ -21,8 +21,8 @@ exports.getUploadUrl = async (req, res) => {
       });
     }
 
-    // Use provided slug or default to 'uploads'
-    const folder = productSlug || 'uploads';
+    // Determine storage path prefix
+    const pathPrefix = folder || (productSlug ? `products/${productSlug}` : 'uploads');
 
     // Validate file size (if provided)
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -41,7 +41,7 @@ exports.getUploadUrl = async (req, res) => {
 
     // Generate unique object key
     const timestamp = Date.now();
-    const key = `products/${folder}/${timestamp}-${sanitizedFileName}`;
+    const key = `${pathPrefix}/${timestamp}-${sanitizedFileName}`;
 
     // Generate signed URL
     const result = await generateSignedUploadUrl(key, fileType);
