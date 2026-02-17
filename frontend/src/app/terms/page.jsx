@@ -24,7 +24,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold text-primary-900 mb-4">Introduction</h2>
               <p className="leading-relaxed">
-                Welcome to Radeo (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). These Terms of Service (&quot;Terms&quot;) govern your 
+                Welcome to weBazaar (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). These Terms of Service (&quot;Terms&quot;) govern your 
                 access to and use of our website and services. By accessing or using our services, you 
                 agree to be bound by these Terms. If you do not agree with any part of these Terms, you 
                 may not access our services.
@@ -151,7 +151,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-primary-900 mb-4">Intellectual Property</h2>
               <p className="leading-relaxed">
                 All content on our website, including text, graphics, logos, images, and software, is the 
-                property of Radeo or its licensors and is protected by copyright, trademark, and other 
+                property of weBazaar or its licensors and is protected by copyright, trademark, and other 
                 intellectual property laws. You may not reproduce, distribute, modify, or create derivative 
                 works without our express written permission.
               </p>
@@ -218,8 +218,8 @@ export default function TermsPage() {
                 If you have any questions about these Terms of Service, please contact us:
               </p>
               <div className="bg-primary-50 rounded-lg p-6 space-y-2">
-                <p><strong>Email:</strong> support@radeo.in</p>
-                <p><strong>Website:</strong> www.radeo.in</p>
+                <p><strong>Email:</strong> support@weBazaar.in</p>
+                <p><strong>Website:</strong> www.weBazaar.in</p>
               </div>
             </section>
           </div>

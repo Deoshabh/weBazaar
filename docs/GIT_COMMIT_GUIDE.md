@@ -253,8 +253,8 @@ git push origin fix/traefik-cors
 ## Testing
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -i
 # Expected: HTTP 204 with CORS headers

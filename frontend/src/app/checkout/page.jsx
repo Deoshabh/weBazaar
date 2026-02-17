@@ -181,7 +181,7 @@ export default function CheckoutPage() {
           key: key, // Use key from backend API
           amount: amount,
           currency: currency,
-          name: 'Radeo',
+          name: 'weBazaar',
           description: `Order ${order.orderId}`,
           order_id: razorpayOrderId,
           handler: async (response) => {

@@ -7,7 +7,7 @@
 
 set -e
 
-echo "🚀 Starting Radeo Stack with Traefik..."
+echo "🚀 Starting weBazaar Stack with Traefik..."
 
 # Check if .env file exists
 if [ ! -f ".env" ]; then
@@ -52,15 +52,15 @@ echo "✅ Stack is running!"
 echo ""
 echo "📍 Access Points:"
 echo "================="
-echo "🌐 Frontend:        https://radeo.in"
-echo "🌐 Frontend (www):  https://www.radeo.in"
-echo "🔌 Backend API:     https://api.radeo.in"
+echo "🌐 Frontend:        https://weBazaar.in"
+echo "🌐 Frontend (www):  https://www.weBazaar.in"
+echo "🔌 Backend API:     https://api.weBazaar.in"
 echo "📊 Traefik:         http://localhost:8080 (Dashboard)"
 echo ""
 echo "🔗 Test CORS:"
 echo "============"
-echo "curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \\"
-echo "  -H 'Origin: https://radeo.in' \\"
+echo "curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \\"
+echo "  -H 'Origin: https://weBazaar.in' \\"
 echo "  -H 'Access-Control-Request-Method: POST' \\"
 echo "  -v"
 echo ""

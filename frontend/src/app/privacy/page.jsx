@@ -24,7 +24,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-2xl font-semibold text-primary-900 mb-4">Introduction</h2>
               <p className="leading-relaxed">
-                Welcome to Radeo. We respect your privacy and are committed to protecting your personal data. 
+                Welcome to weBazaar. We respect your privacy and are committed to protecting your personal data. 
                 This privacy policy will inform you about how we look after your personal data when you visit 
                 our website and tell you about your privacy rights and how the law protects you.
               </p>
@@ -169,8 +169,8 @@ export default function PrivacyPage() {
                 If you have any questions about this privacy policy or our privacy practices, please contact us:
               </p>
               <div className="bg-primary-50 rounded-lg p-6 space-y-2">
-                <p><strong>Email:</strong> privacy@radeo.in</p>
-                <p><strong>Website:</strong> www.radeo.in</p>
+                <p><strong>Email:</strong> privacy@weBazaar.in</p>
+                <p><strong>Website:</strong> www.weBazaar.in</p>
               </div>
             </section>
           </div>

@@ -45,7 +45,7 @@ Since you mentioned Soketi is already running on your VPS via Dokploy:
    - App ID
    - App Key
    - App Secret
-   - Host URL (e.g., `ws.radeo.in` or `soketi.radeo.in`)
+   - Host URL (e.g., `ws.weBazaar.in` or `soketi.weBazaar.in`)
 
 3. **Update both environment files** with your actual values:
 
@@ -55,7 +55,7 @@ Since you mentioned Soketi is already running on your VPS via Dokploy:
 SOKETI_APP_ID=your-actual-app-id
 SOKETI_APP_KEY=your-actual-app-key
 SOKETI_APP_SECRET=your-actual-app-secret
-SOKETI_HOST=ws.radeo.in  # or your Soketi subdomain
+SOKETI_HOST=ws.weBazaar.in  # or your Soketi subdomain
 SOKETI_PORT=6001
 SOKETI_USE_TLS=true
 ```
@@ -64,7 +64,7 @@ SOKETI_USE_TLS=true
 
 ```env
 NEXT_PUBLIC_SOKETI_KEY=your-actual-app-key  # Same as SOKETI_APP_KEY
-NEXT_PUBLIC_SOKETI_HOST=ws.radeo.in  # Same as SOKETI_HOST
+NEXT_PUBLIC_SOKETI_HOST=ws.weBazaar.in  # Same as SOKETI_HOST
 NEXT_PUBLIC_SOKETI_PORT=6001
 NEXT_PUBLIC_SOKETI_TLS=true
 ```
@@ -83,7 +83,7 @@ SHIPROCKET_PASSWORD=your-actual-shiprocket-password
 1. **Login to Shiprocket Dashboard**
 2. **Go to**: Settings → API → Webhooks
 3. **Add New Webhook**:
-   - **URL**: `https://api.radeo.in/api/webhooks/shiprocket`
+   - **URL**: `https://api.weBazaar.in/api/webhooks/shiprocket`
    - **Method**: POST
    - **Custom Headers**: Add header
      - Name: `x-api-key`
@@ -139,13 +139,13 @@ git push
 ### 1. Test Backend is Running
 
 ```bash
-curl https://api.radeo.in/api/health
+curl https://api.weBazaar.in/api/health
 ```
 
 ### 2. Test Webhook Endpoint
 
 ```bash
-curl -X POST https://api.radeo.in/api/webhooks/shiprocket \
+curl -X POST https://api.weBazaar.in/api/webhooks/shiprocket \
   -H "Content-Type: application/json" \
   -H "x-api-key: 48f6cc854c7a94beb4ea1144ca8242ba7e78a0f5a07127364250cade5083f7a2" \
   -d '{
@@ -229,7 +229,7 @@ Open browser console on your frontend:
 
 ```bash
 # Via API (needs admin auth)
-curl https://api.radeo.in/api/webhooks/logs?page=1&limit=20 \
+curl https://api.weBazaar.in/api/webhooks/logs?page=1&limit=20 \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
 ```
 
@@ -274,7 +274,7 @@ db.orders.find({"shipping.awb_code": {$exists: true}})
 ### Webhook URL:
 
 ```
-Production: https://api.radeo.in/api/webhooks/shiprocket
+Production: https://api.weBazaar.in/api/webhooks/shiprocket
 NOT using: ngrok (since you're on VPS)
 ```
 

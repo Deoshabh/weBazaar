@@ -26,12 +26,12 @@ export async function generateMetadata({ params }) {
 
   if (!product) {
     return {
-      title: 'Product Not Found | Radeo',
+      title: 'Product Not Found | weBazaar',
     };
   }
 
   return {
-    title: `${product.name} | Radeo`,
+    title: `${product.name} | weBazaar`,
     description: product.description?.substring(0, 160),
     openGraph: {
       images: product.images?.[0]?.url || [],

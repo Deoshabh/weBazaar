@@ -26,7 +26,7 @@ export default function AdminCMSPage() {
     const [branding, setBranding] = useState({
         logo: { url: '', alt: 'Logo' },
         favicon: { url: '' },
-        siteName: 'Radeo',
+        siteName: 'weBazaar',
     });
 
     const [banners, setBanners] = useState([]);

@@ -131,7 +131,7 @@ module.exports = (req, res, next) => {
 ### Express Backend (`backend/server.js`)
 
 ✅ CORS middleware: Applied globally  
-✅ Allowed origins: `https://radeo.in`, `https://www.radeo.in`  
+✅ Allowed origins: `https://weBazaar.in`, `https://www.weBazaar.in`  
 ✅ Credentials: Enabled  
 ✅ No `app.options("*")` call: Correctly avoided  
 ✅ Port: 5000
@@ -145,11 +145,11 @@ module.exports = (req, res, next) => {
 ```
 1. Browser initiates preflight (same origin different port)
    └─ OPTIONS /api/v1/auth/login
-   └─ Origin: https://radeo.in
+   └─ Origin: https://weBazaar.in
    └─ Access-Control-Request-Method: POST
 
 2. Traefik receives (websecure entrypoint)
-   └─ Checks routing rule: Host(api.radeo.in)
+   └─ Checks routing rule: Host(api.weBazaar.in)
    └─ Applies cors-headers middleware
    └─ Adds CORS headers to request context
 
@@ -167,7 +167,7 @@ module.exports = (req, res, next) => {
 
 6. Response sent back to browser
    └─ Status: 204 No Content
-   └─ Headers: access-control-allow-origin: https://radeo.in
+   └─ Headers: access-control-allow-origin: https://weBazaar.in
    └─ Headers: access-control-allow-methods: GET, POST, ...
    └─ Headers: access-control-allow-credentials: true
 
@@ -193,22 +193,22 @@ module.exports = (req, res, next) => {
 ### Test 1: Health Check
 
 ```bash
-curl -i https://api.radeo.in/health
+curl -i https://api.weBazaar.in/health
 # Expected: HTTP/2 200 OK
 ```
 
 ### Test 2: OPTIONS Preflight
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -H 'Access-Control-Request-Headers: Authorization, Content-Type' \
   -i
 
 # Expected: HTTP/2 204 No Content (or 200)
 # With headers:
-# access-control-allow-origin: https://radeo.in
+# access-control-allow-origin: https://weBazaar.in
 # access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 # access-control-allow-headers: Authorization, Content-Type, X-Requested-With
 # access-control-allow-credentials: true
@@ -217,8 +217,8 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
 ### Test 3: Actual Login Request
 
 ```bash
-curl -X POST https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X POST https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Content-Type: application/json' \
   -d '{"email":"test@example.com","password":"password"}' \
   -i
@@ -230,8 +230,8 @@ curl -X POST https://api.radeo.in/api/v1/auth/login \
 ### Test 4: Browser Test (Console)
 
 ```javascript
-// On https://radeo.in, open console and run:
-fetch("https://api.radeo.in/api/v1/categories")
+// On https://weBazaar.in, open console and run:
+fetch("https://api.weBazaar.in/api/v1/categories")
   .then((r) => r.json())
   .then((d) => console.log("✅ Success:", d))
   .catch((e) => console.error("❌ Error:", e.message));
@@ -243,8 +243,8 @@ fetch("https://api.radeo.in/api/v1/categories")
 ### Test 5: Login from Frontend
 
 ```javascript
-// On https://radeo.in, test actual login:
-fetch("https://api.radeo.in/api/v1/auth/login", {
+// On https://weBazaar.in, test actual login:
+fetch("https://api.weBazaar.in/api/v1/auth/login", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -297,7 +297,7 @@ docker-compose -f docker-compose.traefik.yml build backend
 docker-compose -f docker-compose.traefik.yml restart backend
 
 # 4. View logs
-docker logs -f radeo-backend
+docker logs -f weBazaar-backend
 
 # 5. Run tests (see Testing Commands above)
 ```
@@ -318,8 +318,8 @@ docker-compose -f docker-compose.traefik.yml up -d --build
 docker-compose -f docker-compose.traefik.yml logs -f
 
 # 5. Run smoke tests
-curl https://api.radeo.in/health
-curl https://api.radeo.in/api/v1/categories
+curl https://api.weBazaar.in/health
+curl https://api.weBazaar.in/api/v1/categories
 # etc.
 ```
 
@@ -339,8 +339,8 @@ curl https://api.radeo.in/api/v1/categories
 2. **Check OPTIONS response headers:**
 
    ```bash
-   curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-     -H 'Origin: https://radeo.in' \
+   curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+     -H 'Origin: https://weBazaar.in' \
      -v
    # Look for: access-control-allow-origin header
    ```
@@ -348,7 +348,7 @@ curl https://api.radeo.in/api/v1/categories
 3. **Check backend logs:**
 
    ```bash
-   docker logs radeo-backend | head -50
+   docker logs weBazaar-backend | head -50
    # Should NOT show 401 errors for OPTIONS requests
    ```
 
@@ -363,7 +363,7 @@ curl https://api.radeo.in/api/v1/categories
 1. **Check backend is running:**
 
    ```bash
-   docker ps | grep radeo-backend
+   docker ps | grep weBazaar-backend
    # Should be running and healthy
    ```
 

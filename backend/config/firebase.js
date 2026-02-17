@@ -27,7 +27,7 @@ if (!admin.apps.length) {
     ) {
       admin.initializeApp({
         credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID || "radeo-2026",
+          projectId: process.env.FIREBASE_PROJECT_ID || "webazaar-62921",
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
           privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
         }),
@@ -37,7 +37,7 @@ if (!admin.apps.length) {
     // Option 3: Fallback for development (limited functionality)
     else {
       admin.initializeApp({
-        projectId: process.env.FIREBASE_PROJECT_ID || "radeo-2026",
+        projectId: process.env.FIREBASE_PROJECT_ID || "webazaar-62921",
       });
       console.log(
         "⚠️  Firebase Admin initialized without credentials (limited functionality)",

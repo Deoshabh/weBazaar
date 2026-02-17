@@ -34,7 +34,7 @@ git push origin main
 
 ### **Step 3: Try Creating a Product Again**
 
-1. Go to your admin panel: `https://radeo.in/admin/products`
+1. Go to your admin panel: `https://weBazaar.in/admin/products`
 2. Click "Add Product"
 3. Fill in all required fields
 4. Upload images
@@ -60,7 +60,7 @@ If you see this ✅ message, the product was saved successfully!
 
 ### **Step 5: Try Fetching Products**
 
-1. Refresh your products page: `https://radeo.in/products`
+1. Refresh your products page: `https://weBazaar.in/products`
 2. Check backend logs again
 
 You should see:
@@ -132,16 +132,16 @@ db.products.find({ isActive: true }).count()
 
 ```bash
 # Public endpoint (should show products)
-curl https://api.radeo.in/api/v1/products
+curl https://api.weBazaar.in/api/v1/products
 
 # Admin endpoint (requires auth)
-curl https://api.radeo.in/api/v1/admin/products \
+curl https://api.weBazaar.in/api/v1/admin/products \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Check Frontend Console
 
-1. Open `https://radeo.in/products`
+1. Open `https://weBazaar.in/products`
 2. Press F12 → Console tab
 3. Look for errors
 4. Check Network tab → Filter by "products"
@@ -192,7 +192,7 @@ curl https://api.radeo.in/api/v1/admin/products \
 
 **Solution:** Check MinIO configuration:
 
-- `MINIO_ENDPOINT` should be `minio-api.radeo.in` (as shown in your logs)
+- `MINIO_ENDPOINT` should be `minio-api.weBazaar.in` (as shown in your logs)
 - `MINIO_BUCKET` should be `product-media`
 - Images should be publicly accessible
 

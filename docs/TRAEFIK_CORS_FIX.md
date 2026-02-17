@@ -19,10 +19,10 @@ This file contains the complete Traefik setup with:
 
 #### Traefik Routes Configuration
 
-**Backend API (api.radeo.in)**
+**Backend API (api.weBazaar.in)**
 
 ```yaml
-traefik.http.routers.backend.rule=Host(`api.radeo.in`)
+traefik.http.routers.backend.rule=Host(`api.weBazaar.in`)
 traefik.http.routers.backend.entrypoints=websecure  # ✅ ONLY HTTPS, no HTTP
 traefik.http.routers.backend.middlewares=cors-headers
 traefik.http.services.backend.loadbalancer.server.port=5000
@@ -37,7 +37,7 @@ traefik.http.services.backend.loadbalancer.server.port=5000
 #### CORS Headers Middleware
 
 ```yaml
-traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in
+traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in
 traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS
 traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=Authorization, Content-Type, X-Requested-With
 traefik.http.middlewares.cors-headers.headers.accesscontrolallowcredentials=true
@@ -74,11 +74,11 @@ docker-compose -f docker-compose.traefik.yml up -d
 
 #### Step 3: Test CORS Preflight
 
-**From your browser console (when on radeo.in):**
+**From your browser console (when on weBazaar.in):**
 
 ```javascript
 // Test OPTIONS preflight
-fetch("https://api.radeo.in/api/v1/auth/login", {
+fetch("https://api.weBazaar.in/api/v1/auth/login", {
   method: "OPTIONS",
   credentials: "include",
   headers: {
@@ -89,7 +89,7 @@ fetch("https://api.radeo.in/api/v1/auth/login", {
   .catch((e) => console.error("Error:", e));
 
 // Test actual login
-fetch("https://api.radeo.in/api/v1/auth/login", {
+fetch("https://api.weBazaar.in/api/v1/auth/login", {
   method: "POST",
   credentials: "include",
   headers: {
@@ -117,7 +117,7 @@ fetch("https://api.radeo.in/api/v1/auth/login", {
 1. Verify frontend domain in `accesscontrolalloworiginlist` (must match exactly)
 2. Check that OPTIONS response includes all required headers
 3. Ensure credentials: true is set in CORS config
-4. Verify backend service is healthy: `curl https://api.radeo.in/health`
+4. Verify backend service is healthy: `curl https://api.weBazaar.in/health`
 
 ### 5. Environment Variables
 
@@ -175,13 +175,13 @@ docker-compose -f docker-compose.traefik.yml restart traefik
 
 ```bash
 # Check backend logs
-docker logs radeo-backend
+docker logs weBazaar-backend
 
 # Test health endpoint directly
 curl http://localhost:5000/health
 
 # Verify environment variables are set
-docker inspect radeo-backend
+docker inspect weBazaar-backend
 ```
 
 ### SSL Certificate Issues
@@ -199,7 +199,7 @@ docker-compose -f docker-compose.traefik.yml restart traefik
 
 ## Security Considerations
 
-1. **CORS Origin Restriction**: Only `https://radeo.in` and `https://www.radeo.in` are allowed
+1. **CORS Origin Restriction**: Only `https://weBazaar.in` and `https://www.weBazaar.in` are allowed
 2. **Credentials**: Enabled for authenticated requests
 3. **Methods**: Only necessary HTTP methods are allowed
 4. **Headers**: Only required headers are exposed

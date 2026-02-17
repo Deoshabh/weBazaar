@@ -1,7 +1,7 @@
 export default async function sitemap() {
   const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "https://api.radeo.in/api/v1";
-  const BASE_URL = "https://radeo.in";
+    process.env.NEXT_PUBLIC_API_URL || "https://api.weBazaar.in/api/v1";
+  const BASE_URL = "https://weBazaar.in";
 
   // Static pages that always exist
   const staticPages = [

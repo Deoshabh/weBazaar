@@ -91,7 +91,7 @@ Use this curl command to test product creation directly:
 
 ```bash
 # First, login to get auth token
-curl -X POST https://api.radeo.in/api/v1/auth/login \
+curl -X POST https://api.weBazaar.in/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "your-admin@email.com",
@@ -101,7 +101,7 @@ curl -X POST https://api.radeo.in/api/v1/auth/login \
 # Copy the accessToken from response
 
 # Then create a product
-curl -X POST https://api.radeo.in/api/v1/admin/products \
+curl -X POST https://api.weBazaar.in/api/v1/admin/products \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -d '{
@@ -112,7 +112,7 @@ curl -X POST https://api.radeo.in/api/v1/admin/products \
     "price": 2999,
     "stock": 100,
     "images": [{
-      "url": "https://minio.radeo.in/product-media/test/test.png",
+      "url": "https://minio.weBazaar.in/product-media/test/test.png",
       "key": "test/test.png",
       "isPrimary": true,
       "order": 0
@@ -124,7 +124,7 @@ curl -X POST https://api.radeo.in/api/v1/admin/products \
 
 ### **SOLUTION 4: Check Frontend Console**
 
-1. Open your website: `https://radeo.in`
+1. Open your website: `https://weBazaar.in`
 2. Open Browser DevTools (F12)
 3. Go to **Console** tab
 4. Refresh the products page
@@ -140,7 +140,7 @@ Open in browser or use curl:
 
 ```bash
 # Check if products API is accessible
-curl https://api.radeo.in/api/v1/products
+curl https://api.weBazaar.in/api/v1/products
 
 # Expected response:
 # [] (empty array if no products)
@@ -153,7 +153,7 @@ curl https://api.radeo.in/api/v1/products
 Your server.js has:
 
 ```javascript
-const allowedOrigins = ["https://radeo.in", "https://www.radeo.in"];
+const allowedOrigins = ["https://weBazaar.in", "https://www.weBazaar.in"];
 ```
 
 Make sure:
@@ -231,8 +231,8 @@ This will:
 - [ ] `MONGO_URI` environment variable is set correctly in Dokploy
 - [ ] Backend logs show "✅ MongoDB connected"
 - [ ] Products exist in database (`db.products.countDocuments()` > 0)
-- [ ] API endpoint is accessible: `https://api.radeo.in/api/v1/products`
-- [ ] Frontend `NEXT_PUBLIC_API_URL` is set to: `https://api.radeo.in/api/v1`
+- [ ] API endpoint is accessible: `https://api.weBazaar.in/api/v1/products`
+- [ ] Frontend `NEXT_PUBLIC_API_URL` is set to: `https://api.weBazaar.in/api/v1`
 - [ ] No CORS errors in browser console
 - [ ] Admin user is authenticated when creating products
 

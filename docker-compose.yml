@@ -4,7 +4,7 @@ services:
   # Node.js Backend
   backend:
     build: ./backend
-    container_name: radeo-backend
+    container_name: weBazaar-backend
     restart: always
     ports:
       - "5000:5000"
@@ -17,19 +17,19 @@ services:
       - MINIO_USE_SSL=${MINIO_USE_SSL}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_BUCKET_NAME=radeo-reviews
+      - MINIO_BUCKET_NAME=weBazaar-reviews
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - mongo
       - redis
       - minio
     networks:
-      - radeo-network
+      - weBazaar-network
 
   # Python AI Worker
   ai-worker:
     build: ./ai-worker
-    container_name: radeo-ai-worker
+    container_name: weBazaar-ai-worker
     restart: always
     deploy:
       resources:
@@ -41,19 +41,19 @@ services:
       - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
-      - MINIO_BUCKET_NAME=radeo-reviews
-      - MONGO_URI=mongodb://mongo:27017/radeo
+      - MINIO_BUCKET_NAME=weBazaar-reviews
+      - MONGO_URI=mongodb://mongo:27017/weBazaar
     depends_on:
       - redis
       - minio
       - mongo
     networks:
-      - radeo-network
+      - weBazaar-network
 
   # Frontend (Next.js)
   frontend:
     build: ./frontend
-    container_name: radeo-frontend
+    container_name: weBazaar-frontend
     restart: always
     ports:
       - "3000:3000"
@@ -62,36 +62,36 @@ services:
     depends_on:
       - backend
     networks:
-      - radeo-network
+      - weBazaar-network
 
   # Database
   mongo:
     image: mongo:6.0
-    container_name: radeo-mongo
+    container_name: weBazaar-mongo
     restart: always
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
     networks:
-      - radeo-network
+      - weBazaar-network
 
   # Queue (Valkey/Redis)
   redis:
     image: valkey/valkey:7.2
-    container_name: radeo-redis
+    container_name: weBazaar-redis
     restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - radeo-network
+      - weBazaar-network
 
   # Object Storage
   minio:
     image: minio/minio
-    container_name: radeo-minio
+    container_name: weBazaar-minio
     restart: always
     command: server /data --console-address ":9001"
     ports:
@@ -99,14 +99,15 @@ services:
       - "9001:9001"
     environment:
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-kzw03p43vnzwsq1t}
+      - MINIO_BROWSER_REDIRECT_URL=https://minio.webazaar.in
     volumes:
       - minio_data:/data
     networks:
-      - radeo-network
+      - weBazaar-network
 
 networks:
-  radeo-network:
+  weBazaar-network:
     driver: bridge
 
 volumes:

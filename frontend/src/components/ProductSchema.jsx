@@ -10,7 +10,7 @@ export default function ProductSchema({ product }) {
         sku: product.sku || product._id,
         brand: {
             '@type': 'Brand',
-            name: product.brand || 'Radeo',
+            name: product.brand || 'weBazaar',
         },
         offers: {
             '@type': 'Offer',

@@ -25,7 +25,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = generateSEOMetadata({
-  title: 'Radeo - Premium Handcrafted Shoes',
+  title: 'weBazaar - Premium Handcrafted Shoes',
   description: 'Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship.',
   keywords: ['shoes', 'handcrafted', 'premium', 'leather', 'oxford', 'derby', 'brogue', 'loafer'],
 });
@@ -38,7 +38,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <head>
-        <link rel="preconnect" href="https://api.radeo.in" />
+        <link rel="preconnect" href="https://api.weBazaar.in" />
         <script src={`https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`} async defer></script>
       </head>
       <body className="antialiased">

@@ -6,7 +6,7 @@
 
 In your **Dokploy Dashboard**:
 
-1. Go to **radeo-backend project**
+1. Go to **weBazaar-backend project**
 2. Click **"Add Service"** → **"Compose File"** (or "Docker Compose")
 3. Copy the contents of `docker-compose.dokploy.yml` from this repo
 4. Paste into Dokploy
@@ -18,7 +18,7 @@ Valkey will now be running on the same network as your backend.
 
 ### Step 2: Update Backend Environment Variables
 
-In the **radeo-backend service** (NOT the new Valkey service), update or add these environment variables:
+In the **weBazaar-backend service** (NOT the new Valkey service), update or add these environment variables:
 
 ```env
 REDIS_HOST=valkey
@@ -33,7 +33,7 @@ REDIS_PASSWORD=ro6k0egdepp8tc8dvwmibnjsbuzkbvyz
 ### Step 3: Redeploy Backend
 
 1. Save the environment changes
-2. Click **"Redeploy"** on the radeo-backend service
+2. Click **"Redeploy"** on the weBazaar-backend service
 3. Wait ~1-2 minutes for deployment
 
 ---

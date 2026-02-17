@@ -49,7 +49,7 @@ export default function FAQPage() {
             {faqPage.title || 'Frequently Asked Questions'}
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            {faqPage.subtitle || 'Find answers to common questions about Radeo'}
+            {faqPage.subtitle || 'Find answers to common questions about weBazaar'}
           </p>
 
           <div className="max-w-2xl mx-auto">
@@ -188,7 +188,7 @@ export default function FAQPage() {
               {faqPage.supportPrimaryText || 'Contact Support'}
             </Link>
             <a
-              href={faqPage.supportSecondaryLink || 'mailto:support@radeo.in'}
+              href={faqPage.supportSecondaryLink || 'mailto:support@weBazaar.in'}
               className="inline-flex items-center justify-center px-8 py-4 bg-primary-700 text-white rounded-lg font-semibold hover:bg-primary-800 transition-colors border-2 border-primary-500"
             >
               {faqPage.supportSecondaryText || 'Email Us'}

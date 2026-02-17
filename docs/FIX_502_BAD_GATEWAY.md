@@ -31,7 +31,7 @@ docker-compose -f docker-compose.traefik.yml logs backend | tail -20
 sleep 10
 
 # Test health endpoint
-curl https://api.radeo.in/health
+curl https://api.weBazaar.in/health
 ```
 
 Expected output:
@@ -85,21 +85,21 @@ docker-compose -f docker-compose.traefik.yml up -d --build backend
 ### Test 1: Health Check
 
 ```bash
-curl https://api.radeo.in/health
+curl https://api.weBazaar.in/health
 # Expected: HTTP/2 200 OK
 ```
 
 ### Test 2: OPTIONS Preflight
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/register \
-  -H "Origin: https://radeo.in" \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/register \
+  -H "Origin: https://weBazaar.in" \
   -H "Access-Control-Request-Method: POST" \
   -i
 
 # Expected:
 # HTTP/2 204 No Content (or 200 OK)
-# access-control-allow-origin: https://radeo.in
+# access-control-allow-origin: https://weBazaar.in
 # access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 # access-control-allow-credentials: true
 # (NOT 502 Bad Gateway)
@@ -108,18 +108,18 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/register \
 ### Test 3: Categories API
 
 ```bash
-curl https://api.radeo.in/api/v1/categories \
-  -H "Origin: https://radeo.in"
+curl https://api.weBazaar.in/api/v1/categories \
+  -H "Origin: https://weBazaar.in"
 
 # Expected:
 # HTTP/2 200 OK
-# access-control-allow-origin: https://radeo.in
+# access-control-allow-origin: https://weBazaar.in
 # (JSON array of categories)
 ```
 
 ### Test 4: Frontend Registration
 
-1. Go to https://radeo.in/auth/register
+1. Go to https://weBazaar.in/auth/register
 2. Fill form and submit
 3. Expected: **No CORS errors** in console
 4. Expected: Either successful registration or validation error (not CORS error)
@@ -230,7 +230,7 @@ When OPTIONS preflight is sent:
 
 4. **Test endpoints** (use curl commands above)
 
-5. **Test from browser** (https://radeo.in/auth/register)
+5. **Test from browser** (https://weBazaar.in/auth/register)
 
 6. **Report status**
 
@@ -246,7 +246,7 @@ docker-compose -f docker-compose.traefik.yml logs backend | tail -50
 docker-compose -f docker-compose.traefik.yml ps
 
 # Network test
-curl -v https://api.radeo.in/health 2>&1 | head -30
+curl -v https://api.weBazaar.in/health 2>&1 | head -30
 ```
 
 ---

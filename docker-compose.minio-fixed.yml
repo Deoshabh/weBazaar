@@ -10,9 +10,9 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: ylp0p1kdbsskkyei
       # Point console to the console domain
-      MINIO_BROWSER_REDIRECT_URL: https://minio-console.radeo.in
+      MINIO_BROWSER_REDIRECT_URL: https://minio-console.weBazaar.in
       # Point API to the API domain
-      MINIO_SERVER_URL: https://minio.radeo.in
+      MINIO_SERVER_URL: https://minio.weBazaar.in
 
     command: server /data --console-address ":9001"
 
@@ -25,14 +25,14 @@ services:
       - "traefik.enable=true"
 
       # ====== API Router (Port 9000) ======
-      - "traefik.http.routers.minio-api.rule=Host(`minio.radeo.in`)"
+      - "traefik.http.routers.minio-api.rule=Host(`minio.weBazaar.in`)"
       - "traefik.http.routers.minio-api.entrypoints=websecure"
       - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
       - "traefik.http.routers.minio-api.service=minio-api"
       - "traefik.http.services.minio-api.loadbalancer.server.port=9000"
 
       # ====== Console Router (Port 9001) ======
-      - "traefik.http.routers.minio-console.rule=Host(`minio-console.radeo.in`)"
+      - "traefik.http.routers.minio-console.rule=Host(`minio-console.weBazaar.in`)"
       - "traefik.http.routers.minio-console.entrypoints=websecure"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
       - "traefik.http.routers.minio-console.service=minio-console"

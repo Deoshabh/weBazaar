@@ -207,11 +207,11 @@ The Order model uses specific field names that weren't being used consistently:
 
 ```bash
 # Test order cancellation endpoint
-curl -X PATCH https://api.radeo.in/api/v1/orders/{orderId}/cancel \
+curl -X PATCH https://api.weBazaar.in/api/v1/orders/{orderId}/cancel \
   -H "Cookie: token=YOUR_TOKEN"
 
 # Test admin stats
-curl -X GET https://api.radeo.in/api/v1/admin/stats \
+curl -X GET https://api.weBazaar.in/api/v1/admin/stats \
   -H "Cookie: token=ADMIN_TOKEN"
 ```
 

@@ -130,7 +130,7 @@ reviews/65f1234567890abcdef12345/65f9876543210fedcba09876/1707318245123-a1b2c3d4
 ### URL Format
 
 ```
-https://radeo.in/product-images/reviews/65f1234567890abcdef12345/65f9876543210fedcba09876/1707318245123-a1b2c3d4e5f6g7h8.jpg
+https://weBazaar.in/product-images/reviews/65f1234567890abcdef12345/65f9876543210fedcba09876/1707318245123-a1b2c3d4e5f6g7h8.jpg
 ```
 
 ## Validation Rules
@@ -192,8 +192,8 @@ FormData:
     "title": "Great product!",
     "comment": "I love this product...",
     "photos": [
-      "https://radeo.in/product-images/reviews/65f.../65f.../1707318245123-a1b2c3d4.jpg",
-      "https://radeo.in/product-images/reviews/65f.../65f.../1707318245456-e5f6g7h8.jpg"
+      "https://weBazaar.in/product-images/reviews/65f.../65f.../1707318245123-a1b2c3d4.jpg",
+      "https://weBazaar.in/product-images/reviews/65f.../65f.../1707318245456-e5f6g7h8.jpg"
     ],
     "verifiedPurchase": true,
     "isHidden": false,
@@ -229,7 +229,7 @@ This will install multer and all other required packages.
 Ensure your `.env.production` has MinIO variables:
 
 ```env
-MINIO_ENDPOINT=radeo.in
+MINIO_ENDPOINT=weBazaar.in
 MINIO_PORT=443
 MINIO_USE_SSL=true
 MINIO_ACCESS_KEY=your-access-key

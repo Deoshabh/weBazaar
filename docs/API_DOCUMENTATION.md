@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-Production: https://api.radeo.in
+Production: https://api.weBazaar.in
 Development: http://localhost:5000
 ```
 
@@ -675,7 +675,7 @@ Upload media file (images)
 
 ```json
 {
-  "url": "https://cdn.radeo.in/products/..."
+  "url": "https://cdn.weBazaar.in/products/..."
 }
 ```
 
@@ -737,4 +737,4 @@ All endpoints return errors in this format:
 
 **Last Updated:** February 3, 2026  
 **API Version:** v1  
-**Support:** support@radeo.in
+**Support:** support@weBazaar.in

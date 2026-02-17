@@ -59,7 +59,7 @@ POST / api / v1 / auth / firebase - login;
 ### Option 1: Clear Everything
 
 ```
-1. Close all radeo.in tabs
+1. Close all weBazaar.in tabs
 2. DevTools (F12) → Application tab
 3. Click "Clear site data" (checkbox)
 4. Reload page
@@ -70,7 +70,7 @@ POST / api / v1 / auth / firebase - login;
 
 ```
 1. New Incognito Window (Ctrl+Shift+N)
-2. Visit radeo.in/auth/firebase-login
+2. Visit weBazaar.in/auth/firebase-login
 3. Try login
    (This tests clean session - if works here, issue is cache)
 ```

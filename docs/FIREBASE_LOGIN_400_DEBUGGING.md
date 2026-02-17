@@ -2,7 +2,7 @@
 
 ## Issue Summary
 
-The Firebase login endpoint (`api.radeo.in/api/v1/auth/firebase-login`) is returning a 400 status code with the message: **"Firebase token is required"**
+The Firebase login endpoint (`api.weBazaar.in/api/v1/auth/firebase-login`) is returning a 400 status code with the message: **"Firebase token is required"**
 
 ```
 Failed to load resource: the server responded with a status of 400
@@ -185,7 +185,7 @@ Firebase token verification error: {
 2. Test in different environments:
    - [ ] localhost (development)
    - [ ] Staging environment
-   - [ ] Production (api.radeo.in)
+   - [ ] Production (api.weBazaar.in)
 
 ## Files Modified
 

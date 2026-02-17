@@ -45,7 +45,7 @@ The Product model requires `description` as a **required field**, but it wasn't 
 **`[object Object]` error:**
 
 ```
-GET https://radeo.in/admin/[object%20Object] 404 (Not Found)
+GET https://weBazaar.in/admin/[object%20Object] 404 (Not Found)
 ```
 
 **Cause:** Edit button trying to navigate to non-existent edit route  
@@ -99,7 +99,7 @@ Wait for Dokploy to redeploy (both backend and frontend)
 
 ### **Step 2: Create Product Again (CORRECTLY)**
 
-Go to: `https://radeo.in/admin/products`
+Go to: `https://weBazaar.in/admin/products`
 
 Click "Add Product" and **fill in ALL required fields**:
 
@@ -159,7 +159,7 @@ After clicking "Create Product", check:
 
 ### **Step 4: Check Public Products Page**
 
-Go to: `https://radeo.in/products`
+Go to: `https://weBazaar.in/products`
 
 You should now see your product!
 

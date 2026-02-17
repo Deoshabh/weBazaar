@@ -312,7 +312,7 @@ Already configured:
 
 ```env
 # frontend/.env.local & .env.production
-NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 ```
 
 ### API Endpoints Used
@@ -524,10 +524,10 @@ When address is saved, these fields are added:
 
    ```bash
    # Test PIN check (no auth)
-   curl https://api.radeo.in/api/v1/addresses/check-pincode/201301
+   curl https://api.weBazaar.in/api/v1/addresses/check-pincode/201301
 
    # Test full validation (with auth)
-   curl -X POST https://api.radeo.in/api/v1/addresses/validate \
+   curl -X POST https://api.weBazaar.in/api/v1/addresses/validate \
      -H "Authorization: Bearer YOUR_TOKEN" \
      -H "Content-Type: application/json" \
      -d '{"name":"Test","phone":"9876543210","pincode":"201301",...}'

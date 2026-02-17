@@ -133,7 +133,7 @@ NEXT_PUBLIC_SOKETI_TLS=true
 
 ### 3. Shiprocket Dashboard
 
-**Webhook URL**: `https://api.radeo.in/api/webhooks/shiprocket`
+**Webhook URL**: `https://api.weBazaar.in/api/webhooks/shiprocket`
 **Header**: `x-api-key: YOUR_TOKEN`
 **Events**: Enable all tracking events
 

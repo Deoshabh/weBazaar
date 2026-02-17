@@ -12,7 +12,7 @@
 
 ### 2. **[object Object] Image URLs**
 
-**Error**: `GET https://radeo.in/[object%20Object] 404 (Not Found)`
+**Error**: `GET https://weBazaar.in/[object%20Object] 404 (Not Found)`
 
 **Root Cause**: Product images are stored as objects `{url, key, isPrimary, order}` in MongoDB but code was treating them as strings.
 
@@ -208,7 +208,7 @@ Shows stock availability for each size:
 {
   images: [
     {
-      url: String,      // Public URL (https://minio-api.radeo.in/...)
+      url: String,      // Public URL (https://minio-api.weBazaar.in/...)
       key: String,      // MinIO key (products/slug/filename.jpg)
       isPrimary: Boolean,
       order: Number
@@ -255,9 +255,9 @@ Shows stock availability for each size:
 2. **Wait for Dokploy auto-deployment** (both frontend and backend containers)
 
 3. **Test on production:**
-   - Visit https://radeo.in/products
+   - Visit https://weBazaar.in/products
    - Click on a product → verify images and sizes load
-   - Go to https://radeo.in/admin/products
+   - Go to https://weBazaar.in/admin/products
    - Click "Edit" on a product → verify data loads
    - Update product → verify changes save
 

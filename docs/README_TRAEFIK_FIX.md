@@ -53,7 +53,7 @@ cp .env.traefik.example .env
 deploy.bat          # Windows
 
 # 4. Verify it works
-curl https://api.radeo.in/health
+curl https://api.weBazaar.in/health
 ```
 
 ---
@@ -102,9 +102,9 @@ curl https://api.radeo.in/health
 ## 🔍 How It Works
 
 ```
-Browser (radeo.in)
+Browser (weBazaar.in)
     ↓ sends OPTIONS preflight
-Traefik (api.radeo.in:443)
+Traefik (api.weBazaar.in:443)
     ↓ adds CORS headers
 Backend (localhost:5000)
     ↓ responds with CORS headers
@@ -121,7 +121,7 @@ Browser ✅ allows POST request
 - [ ] Copy .env.traefik.example → .env
 - [ ] Fill environment variables
 - [ ] Run deploy script
-- [ ] Test: `curl https://api.radeo.in/health`
+- [ ] Test: `curl https://api.weBazaar.in/health`
 - [ ] Test CORS: See curl command in quick reference
 - [ ] Verify login works
 - [ ] Check browser console for errors

@@ -95,7 +95,7 @@ async function createTestProduct() {
     console.log("\n✅ Test completed successfully!");
     console.log("\nNext steps:");
     console.log("1. Try accessing: http://localhost:5000/api/v1/products");
-    console.log("2. Or on VPS: https://api.radeo.in/api/v1/products");
+    console.log("2. Or on VPS: https://api.weBazaar.in/api/v1/products");
     console.log("3. You should see the test product in the response");
   } catch (error) {
     console.error("❌ Error:", error.message);

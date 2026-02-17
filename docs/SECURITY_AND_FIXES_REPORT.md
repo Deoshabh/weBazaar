@@ -349,7 +349,7 @@ toast.error(
 
 ```javascript
 // Before
-const API_URL = process.env.API_URL || "https://api.radeo.in/api/v1";
+const API_URL = process.env.API_URL || "https://api.weBazaar.in/api/v1";
 // ❌ Tests hit production if env var not set
 
 // After
@@ -536,7 +536,7 @@ git commit -m "fix: UI/UX issues and React warnings"
 git push
 
 # 3. Verify Production
-curl https://api.radeo.in/health  # Backend health check
+curl https://api.weBazaar.in/health  # Backend health check
 # Test critical flows in production
 ```
 

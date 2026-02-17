@@ -34,8 +34,8 @@ Successfully implemented **6 critical fixes** to improve SEO, fix bugs, and add 
 
 **URLs Generated**:
 
-- `https://radeo.in/sitemap.xml` - Auto-generated sitemap
-- `https://radeo.in/robots.txt` - SEO instructions
+- `https://weBazaar.in/sitemap.xml` - Auto-generated sitemap
+- `https://weBazaar.in/robots.txt` - SEO instructions
 
 **Note**: Product detail pages are client components, so dynamic metadata requires server-side rendering. Consider converting to server components for optimal SEO.
 
@@ -93,7 +93,7 @@ key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
 **Also Changed**:
 
-- Company name: `'Shoes Store'` → `'Radeo'`
+- Company name: `'Shoes Store'` → `'weBazaar'`
 
 **Configuration Required**:
 
@@ -339,7 +339,7 @@ Ensure these are set in production:
 
 ```bash
 NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_YOUR_KEY
-NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 ```
 
 **Backend** (`.env`):
@@ -353,15 +353,15 @@ RAZORPAY_KEY_SECRET=YOUR_SECRET
 
 ```bash
 # Test search endpoint
-curl https://api.radeo.in/api/v1/products/search?q=oxford
+curl https://api.weBazaar.in/api/v1/products/search?q=oxford
 ```
 
 ### 3. Verify Sitemap
 
 ```bash
 # After deployment, check:
-https://radeo.in/sitemap.xml
-https://radeo.in/robots.txt
+https://weBazaar.in/sitemap.xml
+https://weBazaar.in/robots.txt
 ```
 
 ---
@@ -417,8 +417,8 @@ https://radeo.in/robots.txt
 
 ### After Deployment
 
-- [ ] Visit `https://radeo.in/sitemap.xml`
-- [ ] Visit `https://radeo.in/robots.txt`
+- [ ] Visit `https://weBazaar.in/sitemap.xml`
+- [ ] Visit `https://weBazaar.in/robots.txt`
 - [ ] Submit sitemap to Google Search Console
 - [ ] Test payment with real card (test mode)
 - [ ] Verify admin stats show real data

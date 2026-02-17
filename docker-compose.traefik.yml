@@ -17,7 +17,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=admin@radeo.in"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@weBazaar.in"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
 
     # Ports: HTTP (80), HTTPS (443)
@@ -49,7 +49,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: radeo-backend
+    container_name: weBazaar-backend
     restart: unless-stopped
 
     # Environment variables
@@ -68,7 +68,7 @@ services:
       - MINIO_REGION=${MINIO_REGION:-us-east-1}
       - REDIS_HOST=valkey
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-ro6k0egdepp8tc8dvwmibnjsbuzkbvyz}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-erhbztkuyvv5xlnljijzeoopkpp1jvuv}
 
     # Expose port (no need to publish, Traefik will route)
     expose:
@@ -91,8 +91,8 @@ services:
       # Enable Traefik for this service
       - "traefik.enable=true"
 
-      # ====== ROUTER: api.radeo.in ======
-      - "traefik.http.routers.backend.rule=Host(`api.radeo.in`)"
+      # ====== ROUTER: api.weBazaar.in ======
+      - "traefik.http.routers.backend.rule=Host(`api.weBazaar.in`)"
 
       # CRITICAL: Only use websecure (HTTPS) entrypoint
       - "traefik.http.routers.backend.entrypoints=websecure"
@@ -108,8 +108,8 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
       # ====== MIDDLEWARE: CORS Headers ======
-      # Allow requests ONLY from https://radeo.in
-      - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+      # Allow requests ONLY from https://weBazaar.in
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
 
       # Allow these HTTP methods (including OPTIONS for preflight)
       - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -133,12 +133,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: radeo-frontend
+    container_name: weBazaar-frontend
     restart: unless-stopped
 
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+      - NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 
     expose:
       - "3000"
@@ -157,8 +157,8 @@ services:
       # Enable Traefik for this service
       - "traefik.enable=true"
 
-      # ====== ROUTER: radeo.in ======
-      - "traefik.http.routers.frontend.rule=Host(`radeo.in`, `www.radeo.in`)"
+      # ====== ROUTER: weBazaar.in ======
+      - "traefik.http.routers.frontend.rule=Host(`weBazaar.in`, `www.weBazaar.in`)"
 
       # Use both HTTP (for redirect) and HTTPS
       - "traefik.http.routers.frontend.entrypoints=web,websecure"
@@ -186,8 +186,8 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
       - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
-      - MINIO_BROWSER_REDIRECT_URL=https://minio-console.radeo.in
-      - MINIO_SERVER_URL=https://minio.radeo.in
+      - MINIO_BROWSER_REDIRECT_URL=https://minio-console.weBazaar.in
+      - MINIO_SERVER_URL=https://minio.weBazaar.in
 
     # Start MinIO server with console
     command: server /data --console-address ":9001"
@@ -215,7 +215,7 @@ services:
       - "traefik.enable=true"
 
       # ====== MinIO API Router (port 9000) ======
-      - "traefik.http.routers.minio-api.rule=Host(`minio.radeo.in`)"
+      - "traefik.http.routers.minio-api.rule=Host(`minio.weBazaar.in`)"
       - "traefik.http.routers.minio-api.entrypoints=websecure"
       - "traefik.http.routers.minio-api.tls=true"
       - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
@@ -223,7 +223,7 @@ services:
       - "traefik.http.services.minio-api.loadbalancer.server.port=9000"
 
       # ====== MinIO Console Router (port 9001) ======
-      - "traefik.http.routers.minio-console.rule=Host(`minio-console.radeo.in`)"
+      - "traefik.http.routers.minio-console.rule=Host(`minio-console.weBazaar.in`)"
       - "traefik.http.routers.minio-console.entrypoints=websecure"
       - "traefik.http.routers.minio-console.tls=true"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
@@ -231,7 +231,7 @@ services:
       - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
 
       # ====== CORS Middleware for MinIO API ======
-      - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+      - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS,HEAD"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowcredentials=true"
@@ -247,7 +247,7 @@ services:
     restart: unless-stopped
 
     # Command with password
-    command: redis-server --requirepass ${REDIS_PASSWORD:-ro6k0egdepp8tc8dvwmibnjsbuzkbvyz}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-erhbztkuyvv5xlnljijzeoopkpp1jvuv}
 
     # Persistent volume
     volumes:

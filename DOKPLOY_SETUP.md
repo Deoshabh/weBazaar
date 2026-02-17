@@ -1,6 +1,6 @@
 # Dokploy Deployment Guide
 
-This guide explains how to deploy the Radeo Shoes application on a VPS using Dokploy, configured with **Nixpacks** build strategy.
+This guide explains how to deploy the weBazaar Shoes application on a VPS using Dokploy, configured with **Nixpacks** build strategy.
 
 ## 1. Prerequisites
 - **VPS** with Dokploy installed.
@@ -11,7 +11,7 @@ This guide explains how to deploy the Radeo Shoes application on a VPS using Dok
 
 ## 2. Project Setup in Dokploy
 1.  Login to your Dokploy panel.
-2.  Create a new **Project** (e.g., "Radeo").
+2.  Create a new **Project** (e.g., "weBazaar").
 3.  Connect your **GitHub Repository**.
 
 ## 3. Application Creation
@@ -19,7 +19,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
 
 ### A. Backend Application (Node.js)
 1.  **Create Service**: Application
-2.  **Name**: `radeo-backend`
+2.  **Name**: `weBazaar-backend`
 3.  **Source**: GitHub -> Select Repo -> Branch `main`
 4.  **Build Type**: `Nixpacks`
 5.  **Build Path**: `/backend`  <-- **CRITICAL**: Point to backend folder
@@ -28,7 +28,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
     ```env
     PORT=5000
     NODE_ENV=production
-    MONGO_URI=mongodb://user:pass@host:27017/radeo?authSource=admin
+    MONGO_URI=mongodb://user:pass@host:27017/weBazaar?authSource=admin
     REDIS_HOST=your-redis-host  (or internal dokploy container name)
     REDIS_HOST=your-redis-host  (or internal dokploy container name)
     REDIS_PORT=6379
@@ -37,7 +37,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
     MINIO_PORT=9000
     MINIO_ACCESS_KEY=your-access-key
     MINIO_SECRET_KEY=your-secret-key
-    MINIO_BUCKET_NAME=radeo-reviews
+    MINIO_BUCKET_NAME=weBazaar-reviews
     JWT_SECRET=your-secure-secret
     FIREBASE_CREDENTIALS_JSON={...paste your full json here...}
     SHIPROCKET_EMAIL=your-email
@@ -48,7 +48,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
 
 ### B. Frontend Application (Next.js)
 1.  **Create Service**: Application
-2.  **Name**: `radeo-frontend`
+2.  **Name**: `weBazaar-frontend`
 3.  **Source**: GitHub -> Select Repo -> Branch `main`
 4.  **Build Type**: `Nixpacks`
 5.  **Build Path**: `/frontend` <-- **CRITICAL**: Point to frontend folder
@@ -62,7 +62,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
 
 ### C. AI Worker Application (Python)
 1.  **Create Service**: Application
-2.  **Name**: `radeo-ai-worker`
+2.  **Name**: `weBazaar-ai-worker`
 3.  **Source**: GitHub -> Select Repo -> Branch `main`
 4.  **Build Type**: `Nixpacks`
 5.  **Build Path**: `/ai-worker` <-- **CRITICAL**: Point to ai-worker folder
@@ -70,7 +70,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
 6.  **Start Command**: `python main.py`
 7.  **Environment Variables**:
     ```env
-    MONGO_URI=mongodb://user:pass@host:27017/radeo?authSource=admin
+    MONGO_URI=mongodb://user:pass@host:27017/weBazaar?authSource=admin
     REDIS_HOST=your-redis-host
     REDIS_PORT=6379
     REDIS_PASSWORD=your-redis-password
@@ -78,7 +78,7 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
     MINIO_PORT=9000
     MINIO_ACCESS_KEY=your-access-key
     MINIO_SECRET_KEY=your-secret-key
-    MINIO_BUCKET_NAME=radeo-reviews
+    MINIO_BUCKET_NAME=weBazaar-reviews
     MINIO_SECURE=false (or true if using SSL for MinIO internally)
     ```
 8.  **Resources**:
@@ -111,4 +111,4 @@ You will create **3 Separate Applications** in Dokploy (one for each service) to
 
 ### AI Worker Crashing
 - "OOMKilled": Increase Memory Limit to 3GB or 4GB.
-- "Connection Refused": Check `REDIS_HOST`. If using Docker networking, use the container name (e.g., `radeo-redis` or `redis`). If external, use IP.
+- "Connection Refused": Check `REDIS_HOST`. If using Docker networking, use the container name (e.g., `weBazaar-redis` or `redis`). If external, use IP.

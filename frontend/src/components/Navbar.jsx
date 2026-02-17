@@ -234,7 +234,7 @@ export default function Navbar() {
               <div className="relative" style={{ width: `${logoWidth}px`, height: `${logoHeight}px` }}>
                 <Image
                   src={settings.branding.logo.url}
-                  alt={settings.branding.logo.alt || 'Radeo'}
+                  alt={settings.branding.logo.alt || 'weBazaar'}
                   fill
                   className="object-contain object-center"
                   priority
@@ -242,7 +242,7 @@ export default function Navbar() {
               </div>
             ) : (
               <span className="text-2xl font-serif font-bold text-primary-900 hover:text-brand-brown transition-colors">
-                {settings?.branding?.siteName || 'Radeo'}
+                {settings?.branding?.siteName || 'weBazaar'}
               </span>
             )}
           </Link>

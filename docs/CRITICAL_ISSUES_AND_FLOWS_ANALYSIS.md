@@ -2,7 +2,7 @@
 
 **Date**: February 1, 2026  
 **Analysis Type**: Full System Audit  
-**Website**: https://radeo.in/
+**Website**: https://weBazaar.in/
 
 ---
 
@@ -46,7 +46,7 @@ After thorough code review and testing, here's the verdict:
 
 ```javascript
 export const metadata = {
-  title: "Radeo - Premium Handcrafted Shoes",
+  title: "weBazaar - Premium Handcrafted Shoes",
   description:
     "Discover exquisite handcrafted shoes made with premium materials...",
   keywords:
@@ -74,7 +74,7 @@ export async function generateMetadata({ params }) {
     const product = data.product || data;
 
     return {
-      title: `${product.name} - Buy Premium ${product.category} Shoes | Radeo`,
+      title: `${product.name} - Buy Premium ${product.category} Shoes | weBazaar`,
       description: product.description.substring(0, 160),
       keywords: `${product.name}, ${product.category}, ${product.brand}, premium shoes, handcrafted shoes`,
       openGraph: {
@@ -92,7 +92,7 @@ export async function generateMetadata({ params }) {
     };
   } catch (error) {
     return {
-      title: "Product Not Found | Radeo",
+      title: "Product Not Found | weBazaar",
     };
   }
 }
@@ -103,13 +103,13 @@ export async function generateMetadata({ params }) {
 ```javascript
 // frontend/src/app/products/page.jsx
 export const metadata = {
-  title: "Premium Handcrafted Shoes Collection | Radeo",
+  title: "Premium Handcrafted Shoes Collection | weBazaar",
   description:
     "Browse our exclusive collection of handcrafted premium leather shoes. Oxford, Derby, Loafers, and more. Free shipping across India.",
   keywords:
     "premium shoes, handcrafted shoes, leather shoes, oxford shoes, derby shoes, loafers, formal shoes",
   openGraph: {
-    title: "Premium Handcrafted Shoes Collection | Radeo",
+    title: "Premium Handcrafted Shoes Collection | weBazaar",
     description:
       "Browse our exclusive collection of handcrafted premium leather shoes.",
     type: "website",
@@ -129,11 +129,11 @@ const productSchema = {
   description: product.description,
   brand: {
     "@type": "Brand",
-    name: product.brand || "Radeo",
+    name: product.brand || "weBazaar",
   },
   offers: {
     "@type": "Offer",
-    url: `https://radeo.in/products/${product.slug}`,
+    url: `https://weBazaar.in/products/${product.slug}`,
     priceCurrency: "INR",
     price: product.price,
     availability:
@@ -152,7 +152,7 @@ export default async function sitemap() {
   const products = await fetch(`${API_URL}/products`).then((r) => r.json());
 
   const productUrls = products.map((p) => ({
-    url: `https://radeo.in/products/${p.slug}`,
+    url: `https://weBazaar.in/products/${p.slug}`,
     lastModified: p.updatedAt,
     changeFrequency: "weekly",
     priority: 0.8,
@@ -160,13 +160,13 @@ export default async function sitemap() {
 
   return [
     {
-      url: "https://radeo.in",
+      url: "https://weBazaar.in",
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: "https://radeo.in/products",
+      url: "https://weBazaar.in/products",
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
@@ -185,7 +185,7 @@ export default function robots() {
       allow: "/",
       disallow: ["/admin/", "/checkout/", "/cart/", "/profile/", "/orders/"],
     },
-    sitemap: "https://radeo.in/sitemap.xml",
+    sitemap: "https://weBazaar.in/sitemap.xml",
   };
 }
 ```
@@ -280,7 +280,7 @@ key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RsGRtsJgCpkZEk',
 ```bash
 # frontend/.env.production
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your_production_key_here
-NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 ```
 
 **Remove hardcoded fallback**:
@@ -581,7 +581,7 @@ const transporter = nodemailer.createTransporter({
 
 exports.sendOrderConfirmation = async (order, user) => {
   const mailOptions = {
-    from: '"Radeo" <noreply@radeo.in>',
+    from: '"weBazaar" <noreply@weBazaar.in>',
     to: user.email,
     subject: `Order Confirmation - ${order.orderId}`,
     html: `
@@ -780,7 +780,7 @@ exports.deleteProduct = async (req, res) => {
       for (const imageUrl of product.images) {
         try {
           // Extract object name from URL
-          // URL format: https://minio-api.radeo.in/product-media/products/slug/filename
+          // URL format: https://minio-api.weBazaar.in/product-media/products/slug/filename
           const urlParts = imageUrl.split("/product-media/");
           if (urlParts.length > 1) {
             const objectName = urlParts[1];

@@ -15,6 +15,6 @@ export default function robots() {
         ],
       },
     ],
-    sitemap: "https://radeo.in/sitemap.xml",
+    sitemap: "https://weBazaar.in/sitemap.xml",
   };
 }

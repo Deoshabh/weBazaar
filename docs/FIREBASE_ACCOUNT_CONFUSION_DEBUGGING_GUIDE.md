@@ -225,7 +225,7 @@ router.push("/");
 **Steps:**
 
 ```
-1. Visit https://radeo.in/auth/firebase-login
+1. Visit https://weBazaar.in/auth/firebase-login
 2. Click "Continue with Google"
 3. Select: gagandev.001@gmail.com
 4. Verify: Logged in as gagandev.001@gmail.com
@@ -266,7 +266,7 @@ After new auth:
 ```
 1. Open Chrome → More Tools → New Incognito Window
    (This guarantees NO cached sessions)
-2. Visit https://radeo.in/auth/firebase-login
+2. Visit https://weBazaar.in/auth/firebase-login
 3. Click "Continue with Google"
 4. Select: Gagan211105@akgec.ac.in
 5. Should see Google account chooser (no cached account)
@@ -392,7 +392,7 @@ db.users.find({
 
 ```bash
 # Complete reset:
-1. Close all browser tabs with radeo.in
+1. Close all browser tabs with weBazaar.in
 2. Open brand new Incognito window
 3. Visit /auth/firebase-login
 4. Try again

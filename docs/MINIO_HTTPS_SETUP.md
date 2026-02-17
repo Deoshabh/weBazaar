@@ -24,8 +24,8 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_BROWSER_REDIRECT_URL=https://minio-console.radeo.in
-      - MINIO_SERVER_URL=https://minio.radeo.in
+      - MINIO_BROWSER_REDIRECT_URL=https://minio-console.weBazaar.in
+      - MINIO_SERVER_URL=https://minio.weBazaar.in
     command: server /data --console-address ":9001"
 
     # Remove the ports section - let Traefik handle external access
@@ -43,21 +43,21 @@ services:
       - "traefik.enable=true"
 
       # MinIO API (port 9000)
-      - "traefik.http.routers.minio-api.rule=Host(`minio.radeo.in`)"
+      - "traefik.http.routers.minio-api.rule=Host(`minio.weBazaar.in`)"
       - "traefik.http.routers.minio-api.entrypoints=websecure"
       - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
       - "traefik.http.routers.minio-api.service=minio-api"
       - "traefik.http.services.minio-api.loadbalancer.server.port=9000"
 
       # MinIO Console (port 9001)
-      - "traefik.http.routers.minio-console.rule=Host(`minio-console.radeo.in`)"
+      - "traefik.http.routers.minio-console.rule=Host(`minio-console.weBazaar.in`)"
       - "traefik.http.routers.minio-console.entrypoints=websecure"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
       - "traefik.http.routers.minio-console.service=minio-console"
       - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
 
       # CORS Headers for MinIO API
-      - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+      - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS,HEAD"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowcredentials=true"
@@ -75,23 +75,23 @@ In the MinIO service environment variables:
 ```env
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=ylpop1kdbsskkyei
-MINIO_BROWSER_REDIRECT_URL=https://minio-console.radeo.in
-MINIO_SERVER_URL=https://minio.radeo.in
+MINIO_BROWSER_REDIRECT_URL=https://minio-console.weBazaar.in
+MINIO_SERVER_URL=https://minio.weBazaar.in
 ```
 
 ### 3. Add DNS Records
 
 Add these DNS A records pointing to your server IP (157.173.218.96):
 
-- `minio.radeo.in` → 157.173.218.96
-- `minio-console.radeo.in` → 157.173.218.96
+- `minio.weBazaar.in` → 157.173.218.96
+- `minio-console.weBazaar.in` → 157.173.218.96
 
 ### 4. Update Backend Environment Variables
 
 The backend `.env` file has already been updated with:
 
 ```env
-MINIO_ENDPOINT=minio.radeo.in
+MINIO_ENDPOINT=minio.weBazaar.in
 MINIO_PORT=443
 MINIO_USE_SSL=true
 MINIO_ACCESS_KEY=minioadmin
@@ -120,11 +120,11 @@ MINIO_REGION=us-east-1
 1. **Test MinIO API (should redirect to HTTPS):**
 
    ```bash
-   curl -I https://minio.radeo.in/minio/health/live
+   curl -I https://minio.weBazaar.in/minio/health/live
    ```
 
 2. **Test MinIO Console:**
-   - Visit https://minio-console.radeo.in
+   - Visit https://minio-console.weBazaar.in
    - Login with: minioadmin / ylpop1kdbsskkyei
 
 3. **Test Image Upload:**
@@ -133,10 +133,10 @@ MINIO_REGION=us-east-1
 
 ### 7. Expected URLs After Fix
 
-- **MinIO API:** https://minio.radeo.in
-- **MinIO Console:** https://minio-console.radeo.in
-- **Signed Upload URLs:** https://minio.radeo.in/product-media/products/...
-- **Public Image URLs:** https://minio.radeo.in/product-media/products/...
+- **MinIO API:** https://minio.weBazaar.in
+- **MinIO Console:** https://minio-console.weBazaar.in
+- **Signed Upload URLs:** https://minio.weBazaar.in/product-media/products/...
+- **Public Image URLs:** https://minio.weBazaar.in/product-media/products/...
 
 ## Troubleshooting
 
@@ -147,7 +147,7 @@ MINIO_REGION=us-east-1
 
 ### If MinIO is not accessible:
 
-- Verify DNS records are propagated: `nslookup minio.radeo.in`
+- Verify DNS records are propagated: `nslookup minio.weBazaar.in`
 - Check Traefik dashboard for router status
 
 ### If images still don't upload:

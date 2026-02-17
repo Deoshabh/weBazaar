@@ -33,7 +33,7 @@ This guide covers the complete Firebase authentication implementation supporting
 #### Enable Authentication Methods
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: **radeo-2026**
+2. Select your project: **weBazaar-2026**
 3. Navigate to **Authentication** → **Sign-in method**
 4. Enable the following:
    - ✅ **Email/Password**
@@ -53,9 +53,9 @@ Your Firebase config (already added):
 ```javascript
 {
   apiKey: "AIzaSyCA1p_WyJ7m3j97HnjKA05EPRq5001LT2k",
-  authDomain: "radeo-2026.firebaseapp.com",
-  projectId: "radeo-2026",
-  storageBucket: "radeo-2026.firebasestorage.app",
+  authDomain: "weBazaar-2026.firebaseapp.com",
+  projectId: "weBazaar-2026",
+  storageBucket: "weBazaar-2026.firebasestorage.app",
   messagingSenderId: "1016544530927",
   appId: "1:1016544530927:web:ed217482d6dc73192ba61a",
   measurementId: "G-5PR3Z8K7YT"
@@ -361,8 +361,8 @@ Add to `.env.local` (optional, already hardcoded):
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCA1p_WyJ7m3j97HnjKA05EPRq5001LT2k
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=radeo-2026.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=radeo-2026
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=weBazaar-2026.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=weBazaar-2026
 ```
 
 ### Backend Environment Variables
@@ -371,10 +371,10 @@ Add to `.env`:
 
 ```env
 # Firebase Admin SDK
-FIREBASE_PROJECT_ID=radeo-2026
+FIREBASE_PROJECT_ID=weBazaar-2026
 
 # Optional: For production
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@radeo-2026.iam.gserviceaccount.com
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@weBazaar-2026.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 

@@ -1,4 +1,4 @@
-# Radeo - Premium Handcrafted Shoes E-Commerce Frontend
+# weBazaar - Premium Handcrafted Shoes E-Commerce Frontend
 
 A modern, fully-featured e-commerce frontend built with Next.js 14 and Tailwind CSS for a premium handcrafted shoes website.
 
@@ -216,7 +216,7 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-For issues or questions, please contact: info@radeo.com
+For issues or questions, please contact: info@weBazaar.com
 
 ---
 

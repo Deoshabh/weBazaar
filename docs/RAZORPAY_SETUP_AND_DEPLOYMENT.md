@@ -48,7 +48,7 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_SBfFobfvhPtFYL
 3. Add/Update:
    ```
    NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_SBfFobfvhPtFYL
-   NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+   NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
    ```
 4. **Save** the changes
 5. **Redeploy** the frontend service

@@ -129,7 +129,7 @@ export default function ReturnsPage() {
                 {returnsPolicy.support?.primaryText || 'Contact Support'}
               </Link>
               <a
-                href={returnsPolicy.support?.secondaryLink || 'mailto:support@radeo.in'}
+                href={returnsPolicy.support?.secondaryLink || 'mailto:support@weBazaar.in'}
                 className="inline-flex items-center justify-center px-6 py-3 bg-primary-700 text-white rounded-lg font-semibold hover:bg-primary-800 transition-colors"
               >
                 {returnsPolicy.support?.secondaryText || 'Email Us'}

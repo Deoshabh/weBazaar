@@ -2,7 +2,7 @@
 
 ## Review Summary
 
-Completed a comprehensive review of the backend sync logic for the Firebase login endpoint (`api.radeo.in/api/v1/auth/firebase-login`) which was returning a **400 Bad Request** error.
+Completed a comprehensive review of the backend sync logic for the Firebase login endpoint (`api.weBazaar.in/api/v1/auth/firebase-login`) which was returning a **400 Bad Request** error.
 
 ## Issue Identified
 
@@ -243,10 +243,10 @@ Ensure these are properly set:
 **Frontend** (`.env.local`):
 
 ```
-NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 NEXT_PUBLIC_FIREBASE_API_KEY=<your-api-key>
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=radeo-2026.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=radeo-2026
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=weBazaar-2026.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=weBazaar-2026
 ```
 
 **Backend** (`.env`):
@@ -254,7 +254,7 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=radeo-2026
 ```
 FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
 # OR
-FIREBASE_PROJECT_ID=radeo-2026
+FIREBASE_PROJECT_ID=weBazaar-2026
 FIREBASE_PRIVATE_KEY=<your-private-key>
 FIREBASE_CLIENT_EMAIL=<your-email>
 ```
@@ -279,7 +279,7 @@ FIREBASE_CLIENT_EMAIL=<your-email>
 4. **Test All Environments**:
    - [ ] Localhost (development)
    - [ ] Staging (if available)
-   - [ ] Production (api.radeo.in)
+   - [ ] Production (api.weBazaar.in)
 
 ## Related Documentation
 

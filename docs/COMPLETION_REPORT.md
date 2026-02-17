@@ -59,7 +59,7 @@ Your **Traefik CORS and preflight issues have been completely fixed**. All requi
 ### The Problem (Before ❌)
 
 ```
-1. Frontend (radeo.in) sends OPTIONS preflight to api.radeo.in
+1. Frontend (weBazaar.in) sends OPTIONS preflight to api.weBazaar.in
 2. Express backend OR HTTP redirect middleware intercepts it
 3. Sends 301/302 redirect to HTTPS (already HTTPS!)
 4. Browser sees redirect, NOT CORS headers
@@ -70,7 +70,7 @@ Your **Traefik CORS and preflight issues have been completely fixed**. All requi
 ### The Solution (After ✅)
 
 ```
-1. Frontend (radeo.in) sends OPTIONS preflight to api.radeo.in
+1. Frontend (weBazaar.in) sends OPTIONS preflight to api.weBazaar.in
 2. Traefik receives request on websecure (HTTPS) entrypoint
 3. Traefik's CORS middleware adds headers IMMEDIATELY
 4. Request forwarded to backend:5000 without redirects
@@ -268,14 +268,14 @@ cp .env.traefik.example .env
 deploy.bat   # Windows
 
 # 3. Verify
-curl https://api.radeo.in/health
+curl https://api.weBazaar.in/health
 ```
 
 ### Verify CORS Fixed
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -i
 
@@ -313,7 +313,7 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
 - ✅ All secrets in .env.traefik.example only
 - ✅ Non-root user execution in containers
 - ✅ HTTPS only (websecure entrypoint)
-- ✅ CORS restricted to https://radeo.in
+- ✅ CORS restricted to https://weBazaar.in
 - ✅ SSL via Let's Encrypt (auto-renew)
 - ✅ Security headers included
 - ✅ .dockerignore excludes sensitive files

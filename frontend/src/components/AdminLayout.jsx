@@ -151,7 +151,7 @@ function AdminLayoutContent({ children }) {
       {/* Admin Header */}
       <header className="fixed top-0 left-0 right-0 h-[80px] bg-white shadow-sm z-50 px-4 lg:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-xl font-bold font-serif text-primary-900">Radeo Admin</span>
+          <span className="text-xl font-bold font-serif text-primary-900">weBazaar Admin</span>
         </div>
         <button
           onClick={handleBackToStore}

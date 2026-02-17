@@ -1,9 +1,9 @@
-# 🔍 Comprehensive Website Review - Radeo.in
+# 🔍 Comprehensive Website Review - weBazaar.in
 
 **Date**: February 1, 2026  
 **Reviewer**: GitHub Copilot  
-**Website**: https://radeo.in/  
-**Repository**: https://github.com/Deoshabh/Radeo-2026
+**Website**: https://weBazaar.in/  
+**Repository**: https://github.com/Deoshabh/weBazaar-2026
 
 ---
 
@@ -271,7 +271,7 @@ echo '{"presets": ["next/babel"]}' > .babelrc
 **Issue**: Dummy contact information in footer:
 
 - Phone: `+91 123 456 7890`
-- Email: `info@radeo.com`
+- Email: `info@weBazaar.com`
 - Address: `123 Shoe Street, Fashion District, Mumbai 400001`
 
 **Impact**:
@@ -286,7 +286,7 @@ echo '{"presets": ["next/babel"]}' > .babelrc
 // frontend/src/components/Footer.jsx
 const CONTACT_INFO = {
   phone: "+91 YOUR_REAL_PHONE",
-  email: "support@radeo.in", // Use your domain
+  email: "support@weBazaar.in", // Use your domain
   address: "Your Real Address",
 };
 ```
@@ -457,7 +457,7 @@ frontend/src/
 **Image URLs Working**:
 
 ```
-https://minio-api.radeo.in/product-media/products/oxford/...
+https://minio-api.weBazaar.in/product-media/products/oxford/...
 ```
 
 Images load fast and look professional!
@@ -554,7 +554,7 @@ You have extensive documentation:
 export async function generateMetadata({ params }) {
   const product = await fetchProduct(params.slug);
   return {
-    title: `${product.name} - Radeo`,
+    title: `${product.name} - weBazaar`,
     description: product.description,
     openGraph: {
       title: product.name,
@@ -898,7 +898,7 @@ className = "text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl";
    ```javascript
    // frontend/src/app/layout.jsx
    export const metadata = {
-     title: "Radeo - Premium Handcrafted Shoes",
+     title: "weBazaar - Premium Handcrafted Shoes",
      description: "...",
    };
    ```

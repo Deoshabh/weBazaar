@@ -19,11 +19,11 @@ REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
 REDIS_QUEUE_NAME = 'image-moderation'
 
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://mongo:27017/radeo')
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://mongo:27017/weBazaar')
 MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'minio:9000')
 MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
 MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
-MINIO_BUCKET = os.getenv('MINIO_BUCKET_NAME', 'radeo-reviews')
+MINIO_BUCKET = os.getenv('MINIO_BUCKET_NAME', 'weBazaar-reviews')
 MINIO_SECURE = os.getenv('MINIO_SECURE', 'false').lower() == 'true'
 
 # --- Initialization ---

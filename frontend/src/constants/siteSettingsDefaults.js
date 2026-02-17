@@ -41,7 +41,7 @@ export const SITE_SETTINGS_DEFAULTS = {
     testimonials: {
       enabled: true,
       title: 'What Our Customers Say',
-      description: 'Real feedback from customers who wear Radeo every day.',
+      description: 'Real feedback from customers who wear weBazaar every day.',
       items: [
         {
           id: 'testimonial-1',
@@ -68,7 +68,7 @@ export const SITE_SETTINGS_DEFAULTS = {
       title: 'Trusted Brand Partners',
       description: 'We collaborate with quality-focused partners and manufacturers.',
       items: [
-        { id: 'brand-1', name: 'Radeo Atelier', logoText: 'RA' },
+        { id: 'brand-1', name: 'weBazaar Atelier', logoText: 'RA' },
         { id: 'brand-2', name: 'Heritage Line', logoText: 'HL' },
         { id: 'brand-3', name: 'Prime Leather Co.', logoText: 'PL' },
         { id: 'brand-4', name: 'Urban Classics', logoText: 'UC' },
@@ -140,7 +140,7 @@ export const SITE_SETTINGS_DEFAULTS = {
   contactInfo: {
     address: '123 Shoe Street, Fashion District, Mumbai 400001',
     phone: '+91 123 456 7890',
-    email: 'support@radeo.in',
+    email: 'support@weBazaar.in',
     showAddress: true,
     showPhone: true,
     showEmail: true,
@@ -169,7 +169,7 @@ export const SITE_SETTINGS_DEFAULTS = {
   },
   faqPage: {
     title: 'Frequently Asked Questions',
-    subtitle: 'Find answers to common questions about Radeo',
+    subtitle: 'Find answers to common questions about weBazaar',
     categories: [
       {
         id: 'faq-orders',
@@ -216,11 +216,11 @@ export const SITE_SETTINGS_DEFAULTS = {
     supportPrimaryText: 'Contact Support',
     supportPrimaryLink: '/contact',
     supportSecondaryText: 'Email Us',
-    supportSecondaryLink: 'mailto:support@radeo.in',
+    supportSecondaryLink: 'mailto:support@weBazaar.in',
   },
   footerContent: {
     brand: {
-      name: 'Radeo',
+      name: 'weBazaar',
       description:
         'Premium handcrafted shoes made with timeless craftsmanship and finest materials.',
       logo: '',
@@ -265,11 +265,11 @@ export const SITE_SETTINGS_DEFAULTS = {
     },
   },
   aboutPage: {
-    title: 'About Radeo',
+    title: 'About weBazaar',
     subtitle: 'Your trusted destination for premium footwear since 2026',
     storyTitle: 'Our Story',
     storyParagraphs: [
-      'Radeo was born from a simple belief: everyone deserves access to quality footwear that combines style, comfort, and durability.',
+      'weBazaar was born from a simple belief: everyone deserves access to quality footwear that combines style, comfort, and durability.',
       'We curate products that match modern lifestyles while maintaining quality and comfort standards.',
       'We partner with trusted manufacturers and brands to bring authentic products at fair prices.',
     ],
@@ -438,7 +438,7 @@ export const SITE_SETTINGS_DEFAULTS = {
       primaryText: 'Contact Support',
       primaryLink: '/contact',
       secondaryText: 'Email Us',
-      secondaryLink: 'mailto:support@radeo.in',
+      secondaryLink: 'mailto:support@weBazaar.in',
     },
   },
   maintenanceMode: {

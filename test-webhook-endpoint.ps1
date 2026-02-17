@@ -1,7 +1,7 @@
 # Test webhook endpoint accessibility
 Write-Host "Testing webhook endpoint..." -ForegroundColor Yellow
 
-$url = "https://radeo.in/api/v1/admin/shipping/webhook"
+$url = "https://weBazaar.in/api/v1/admin/shipping/webhook"
 $token = "48f6cc854c7a94beb4ea1144ca8242ba7e78a0f5a07127364250cade5083f7a2"
 
 $headers = @{

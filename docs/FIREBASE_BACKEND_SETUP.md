@@ -24,8 +24,8 @@ FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
 ### Method 2: Environment Variables (For Production/Docker)
 
 ```env
-FIREBASE_PROJECT_ID=radeo-2026
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@radeo-2026.iam.gserviceaccount.com
+FIREBASE_PROJECT_ID=weBazaar-2026
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@weBazaar-2026.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
@@ -90,8 +90,8 @@ For production environments (VPS, Docker, etc.):
 Extract the credentials from the JSON file and set:
 
 ```bash
-export FIREBASE_PROJECT_ID="radeo-2026"
-export FIREBASE_CLIENT_EMAIL="firebase-adminsdk-fbsvc@radeo-2026.iam.gserviceaccount.com"
+export FIREBASE_PROJECT_ID="weBazaar-2026"
+export FIREBASE_CLIENT_EMAIL="firebase-adminsdk-fbsvc@weBazaar-2026.iam.gserviceaccount.com"
 export FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCzNu6Qw4sfxWWg
 ...
@@ -110,8 +110,8 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KE
 services:
   backend:
     environment:
-      - FIREBASE_PROJECT_ID=radeo-2026
-      - FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@radeo-2026.iam.gserviceaccount.com
+      - FIREBASE_PROJECT_ID=weBazaar-2026
+      - FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@weBazaar-2026.iam.gserviceaccount.com
       - FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n
 ```
 
@@ -201,5 +201,5 @@ Ensure these are enabled in Firebase Console:
 ---
 
 **Configuration completed at:** ${new Date().toISOString()}
-**Project:** radeo-2026
-**Service Account:** firebase-adminsdk-fbsvc@radeo-2026.iam.gserviceaccount.com
+**Project:** weBazaar-2026
+**Service Account:** firebase-adminsdk-fbsvc@weBazaar-2026.iam.gserviceaccount.com

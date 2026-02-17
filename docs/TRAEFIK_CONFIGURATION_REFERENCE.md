@@ -30,7 +30,7 @@ This automatically configures:
 ```yaml
 # Route configuration
 traefik.enable=true
-traefik.http.routers.backend.rule=Host(`api.radeo.in`)
+traefik.http.routers.backend.rule=Host(`api.weBazaar.in`)
 traefik.http.routers.backend.entrypoints=websecure
 traefik.http.routers.backend.tls=true
 traefik.http.routers.backend.tls.certresolver=letsencrypt
@@ -38,7 +38,7 @@ traefik.http.routers.backend.middlewares=cors-headers
 traefik.http.services.backend.loadbalancer.server.port=5000
 
 # CORS Middleware
-traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in
+traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in
 traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS
 traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=Authorization, Content-Type, X-Requested-With
 traefik.http.middlewares.cors-headers.headers.accesscontrolallowcredentials=true
@@ -54,7 +54,7 @@ Key sections:
 ```nginx
 # OPTIONS preflight handling
 if ($request_method = 'OPTIONS') {
-    add_header 'Access-Control-Allow-Origin' 'https://radeo.in' always;
+    add_header 'Access-Control-Allow-Origin' 'https://weBazaar.in' always;
     add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
     add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type' always;
     add_header 'Access-Control-Allow-Credentials' 'true' always;
@@ -62,7 +62,7 @@ if ($request_method = 'OPTIONS') {
 }
 
 # Regular request handling
-add_header 'Access-Control-Allow-Origin' 'https://radeo.in' always;
+add_header 'Access-Control-Allow-Origin' 'https://weBazaar.in' always;
 add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
 add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type' always;
 add_header 'Access-Control-Allow-Credentials' 'true' always;
@@ -92,7 +92,7 @@ traefik.http.routers.backend.entrypoints=web,websecure
 
 ```yaml
 # Allow specific origins (not *)
-accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in
+accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in
 
 # Include OPTIONS in allowed methods
 accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS
@@ -135,7 +135,7 @@ traefik.http.routers.backend.middlewares=
 http://localhost:8080
 
 # Should show:
-# - Route: backend (api.radeo.in)
+# - Route: backend (api.weBazaar.in)
 # - Middleware: cors-headers
 # - Status: green (working)
 ```
@@ -143,13 +143,13 @@ http://localhost:8080
 ### 2. CORS Headers Present in Response
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -v
 
 # Response headers should include:
-# access-control-allow-origin: https://radeo.in
+# access-control-allow-origin: https://weBazaar.in
 # access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 # access-control-allow-credentials: true
 # HTTP/2 204 (or 200)
@@ -161,16 +161,16 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
 docker-compose -f docker-compose.traefik.yml ps
 
 # Should show:
-# radeo-backend  | healthy
-# radeo-frontend | healthy
+# weBazaar-backend  | healthy
+# weBazaar-frontend | healthy
 # traefik        | healthy
 ```
 
 ### 4. No Redirects on OPTIONS
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -L -v 2>&1 | grep "< HTTP"
 
 # Should show:
@@ -230,7 +230,7 @@ labels:
   - "traefik.enable=true"
 
   # Router configuration
-  - "traefik.http.routers.backend.rule=Host(`api.radeo.in`)"
+  - "traefik.http.routers.backend.rule=Host(`api.weBazaar.in`)"
   - "traefik.http.routers.backend.entrypoints=websecure"
   - "traefik.http.routers.backend.middlewares=cors-headers"
   - "traefik.http.routers.backend.tls=true"
@@ -240,7 +240,7 @@ labels:
   - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
   # Middleware: CORS Headers
-  - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+  - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
   - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
   - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=Authorization, Content-Type, X-Requested-With"
   - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowcredentials=true"
@@ -263,11 +263,11 @@ JWT_REFRESH_SECRET=your-refresh-secret-here
 JWT_ACCESS_SECRET=your-access-secret-here
 
 # MinIO (if using S3 storage)
-MINIO_ENDPOINT=minio.radeo.in
+MINIO_ENDPOINT=minio.weBazaar.in
 MINIO_PORT=9000
 MINIO_ACCESS_KEY=minioadmin
 MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET=radeo-images
+MINIO_BUCKET=weBazaar-images
 ```
 
 ---

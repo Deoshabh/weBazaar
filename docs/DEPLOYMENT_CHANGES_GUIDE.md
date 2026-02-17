@@ -12,9 +12,9 @@ Add these to your **frontend** `.env.production` or Dokploy frontend service env
 ```env
 # Firebase Configuration (moved from hardcoded values)
 NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCA1p_WyJ7m3j97HnjKA05EPRq5001LT2k
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=radeo-2026.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=radeo-2026
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=radeo-2026.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=weBazaar-2026.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=weBazaar-2026
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=weBazaar-2026.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1016544530927
 NEXT_PUBLIC_FIREBASE_APP_ID=1:1016544530927:web:ed217482d6dc73192ba61a
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-5PR3Z8K7YT
@@ -117,7 +117,7 @@ The CORS configuration in `nginx.conf` has been fixed. If you use Nginx directly
 
 1. Copy the updated `nginx.conf` to your server:
    ```bash
-   scp nginx.conf user@your-vps:/etc/nginx/sites-available/radeo.in
+   scp nginx.conf user@your-vps:/etc/nginx/sites-available/weBazaar.in
    ```
 2. Test configuration:
    ```bash
@@ -167,16 +167,16 @@ After deploying all changes, verify everything works:
 
 ```bash
 # 1. Health check
-curl https://api.radeo.in/api/health
+curl https://api.weBazaar.in/api/health
 
 # 2. Check security headers (should show helmet headers)
-curl -I https://api.radeo.in/api/health
+curl -I https://api.weBazaar.in/api/health
 
 # 3. Test CORS
 curl -I -X OPTIONS \
-  -H "Origin: https://radeo.in" \
+  -H "Origin: https://weBazaar.in" \
   -H "Access-Control-Request-Method: GET" \
-  https://api.radeo.in/api/v1/products
+  https://api.weBazaar.in/api/v1/products
 
 # 4. Verify Node version
 docker exec <backend-container> node --version
@@ -184,13 +184,13 @@ docker exec <backend-container> node --version
 # 5. Test rate limiting on auth (should get 429 after 10 request)
 for i in $(seq 1 15); do
   curl -s -o /dev/null -w "%{http_code}\n" \
-    -X POST https://api.radeo.in/api/v1/auth/login \
+    -X POST https://api.weBazaar.in/api/v1/auth/login \
     -H "Content-Type: application/json" \
     -d '{"email":"test@test.com","password":"wrong"}'
 done
 
 # 6. Test frontend Firebase auth still works
-# Open https://radeo.in and try login with Google
+# Open https://weBazaar.in and try login with Google
 ```
 
 ---
@@ -207,6 +207,6 @@ If anything breaks after deployment:
    ```
 3. **Nginx:** Restore backup:
    ```bash
-   sudo cp /etc/nginx/sites-available/radeo.in.backup /etc/nginx/sites-available/radeo.in
+   sudo cp /etc/nginx/sites-available/weBazaar.in.backup /etc/nginx/sites-available/weBazaar.in
    sudo systemctl reload nginx
    ```

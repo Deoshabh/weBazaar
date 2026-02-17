@@ -81,9 +81,9 @@ setProducts(productsData);
 2. **Dokploy will auto-deploy the frontend**
 
 3. **Test immediately:**
-   - Go to: `https://radeo.in/admin/products`
+   - Go to: `https://weBazaar.in/admin/products`
    - You should now see your product(s)!
-   - Go to: `https://radeo.in/products`
+   - Go to: `https://weBazaar.in/products`
    - Products should appear there too!
 
 ## 🔍 How to Verify It's Working

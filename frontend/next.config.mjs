@@ -13,12 +13,12 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "minio.radeo.in",
+        hostname: "minio.weBazaar.in",
         pathname: "/product-media/**",
       },
       {
         protocol: "https",
-        hostname: "cdn.radeo.in",
+        hostname: "cdn.weBazaar.in",
         pathname: "/product-media/**",
       },
       {
@@ -59,6 +59,6 @@ export default setupHoneybadger(nextConfig, {
   reportData: true,
   silent: false,
   apiKey: process.env.HONEYBADGER_API_KEY,
-  assetsUrl: process.env.NEXT_PUBLIC_ASSETS_URL || 'https://radeo.in',
+  assetsUrl: process.env.NEXT_PUBLIC_ASSETS_URL || 'https://weBazaar.in',
   revision: process.env.GIT_COMMIT_SHA,
 });

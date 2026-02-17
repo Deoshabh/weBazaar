@@ -180,24 +180,24 @@ This document identifies all hardcoded frontend content that should be moved to 
 {
   footer: {
     brand: {
-      name: "Radeo",
+      name: "weBazaar",
       description: "Premium handcrafted shoes made with timeless craftsmanship...",
       logo: "/logo.png" // Optional
     },
     socialLinks: [
       {
         platform: "facebook",
-        url: "https://facebook.com/radeo",
+        url: "https://facebook.com/weBazaar",
         enabled: true
       },
       {
         platform: "twitter",
-        url: "https://twitter.com/radeo",
+        url: "https://twitter.com/weBazaar",
         enabled: true
       },
       {
         platform: "instagram",
-        url: "https://instagram.com/radeo",
+        url: "https://instagram.com/weBazaar",
         enabled: true
       }
     ]
@@ -258,7 +258,7 @@ This document identifies all hardcoded frontend content that should be moved to 
   contactInfo: {
     address: "123 Shoe Street, Fashion District, Mumbai 400001",
     phone: "+91 123 456 7890",
-    email: "info@radeo.com",
+    email: "info@weBazaar.com",
     showAddress: true,
     showPhone: true,
     showEmail: true
@@ -276,7 +276,7 @@ This document identifies all hardcoded frontend content that should be moved to 
 ```javascript
 {
   legal: {
-    copyrightText: "© 2026 Radeo. All rights reserved.",
+    copyrightText: "© 2026 weBazaar. All rights reserved.",
     links: [
       { text: "Privacy Policy", url: "/privacy", enabled: true },
       { text: "Terms & Conditions", url: "/terms", enabled: true }
@@ -298,16 +298,16 @@ This document identifies all hardcoded frontend content that should be moved to 
 {
   aboutPage: {
     meta: {
-      title: "About Us - Radeo",
-      description: "Learn about Radeo..."
+      title: "About Us - weBazaar",
+      description: "Learn about weBazaar..."
     },
     header: {
-      title: "About Radeo",
+      title: "About weBazaar",
       subtitle: "Your trusted destination for premium footwear since 2026"
     },
     story: {
       title: "Our Story",
-      content: `Radeo was born from a simple belief: everyone deserves access to quality footwear...` // Rich text
+      content: `weBazaar was born from a simple belief: everyone deserves access to quality footwear...` // Rich text
     },
     values: [
       {
@@ -407,7 +407,7 @@ This document identifies all hardcoded frontend content that should be moved to 
       },
       email: {
         label: "Email Us",
-        value: "support@radeo.com",
+        value: "support@weBazaar.com",
         responseTime: "We'll respond within 24 hours",
         icon: "FiMail",
         enabled: true
@@ -444,7 +444,7 @@ This document identifies all hardcoded frontend content that should be moved to 
 {
   faqPage: {
     meta: {
-      title: "Frequently Asked Questions - Radeo",
+      title: "Frequently Asked Questions - weBazaar",
       description: "Find answers to common questions..."
     },
     categories: [
@@ -526,7 +526,7 @@ This document identifies all hardcoded frontend content that should be moved to 
 {
   shippingPage: {
     meta: {
-      title: "Shipping Information - Radeo",
+      title: "Shipping Information - weBazaar",
       description: "Learn about our shipping methods..."
     },
     highlights: [
@@ -618,7 +618,7 @@ This document identifies all hardcoded frontend content that should be moved to 
 {
   returnsPage: {
     meta: {
-      title: "Return & Refund Policy - Radeo",
+      title: "Return & Refund Policy - weBazaar",
       description: "Learn about our hassle-free return..."
     },
     quickSummary: [

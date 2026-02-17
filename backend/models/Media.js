@@ -182,12 +182,12 @@ mediaSchema.pre("save", function (next) {
   // Generate CDN URL if not set
   if (!this.cdnUrl && this.storageUrl) {
     // Convert MinIO URL to CDN URL
-    // Example: http://minio:9000/cms-media/filename.jpg → https://cdn.radeo.in/cms-media/filename.jpg
+    // Example: http://minio:9000/cms-media/filename.jpg → https://cdn.weBazaar.in/cms-media/filename.jpg
     const url = new URL(this.storageUrl);
     if (url.hostname === "minio" || url.hostname.includes("minio")) {
       this.cdnUrl = this.storageUrl.replace(
         url.origin,
-        "https://cdn.radeo.in"
+        "https://cdn.weBazaar.in"
       );
     } else {
       this.cdnUrl = this.storageUrl;

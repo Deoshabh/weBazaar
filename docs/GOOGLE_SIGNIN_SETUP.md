@@ -13,7 +13,7 @@ This guide will help you enable Google Sign-In using the OAuth Client ID from yo
 ### Step 1: Enable Google Sign-In in Firebase Console
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: **radeo-2026**
+2. Select your project: **weBazaar-2026**
 3. Navigate to **Authentication** → **Sign-in method**
 4. Click on **Google** in the providers list
 5. Click **Enable** toggle to ON
@@ -26,7 +26,7 @@ Web SDK configuration
 ├─ Web client ID: Automatically filled by Firebase
 └─ Web client secret: Automatically filled by Firebase
 
-Public-facing name for project: Radeo
+Public-facing name for project: weBazaar
 Support email: your-email@example.com
 ```
 
@@ -53,9 +53,9 @@ Firebase will automatically add these domains, but verify:
 
 **For Production:**
 
-- ✅ `radeo-2026.firebaseapp.com`
-- ✅ `radeo-2026.web.app`
-- ➕ Add your production domain (e.g., `radeo.com`)
+- ✅ `weBazaar-2026.firebaseapp.com`
+- ✅ `weBazaar-2026.web.app`
+- ➕ Add your production domain (e.g., `weBazaar.com`)
 
 ### Step 4: Add Authorized Redirect URIs in Google Cloud
 
@@ -65,8 +65,8 @@ Firebase will automatically add these domains, but verify:
 4. Under **Authorized redirect URIs**, add:
 
 ```
-https://radeo-2026.firebaseapp.com/__/auth/handler
-https://radeo-2026.web.app/__/auth/handler
+https://weBazaar-2026.firebaseapp.com/__/auth/handler
+https://weBazaar-2026.web.app/__/auth/handler
 http://localhost:3000/__/auth/handler (for testing)
 ```
 
@@ -83,8 +83,8 @@ Create/update `.env.local` in your `frontend/` directory:
 ```env
 # Firebase Config (already in code, but you can use env vars)
 NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCA1p_WyJ7m3j97HnjKA05EPRq5001LT2k
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=radeo-2026.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=radeo-2026
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=weBazaar-2026.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=weBazaar-2026
 
 # Google OAuth Client ID (from your screenshot)
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=1016544530927-4lr457bua5ittrmfcu44lrjqqp9jjmq.apps.googleusercontent.com
@@ -113,11 +113,11 @@ const firebaseConfig = {
     "AIzaSyCA1p_WyJ7m3j97HnjKA05EPRq5001LT2k",
   authDomain:
     process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    "radeo-2026.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "radeo-2026",
+    "weBazaar-2026.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "weBazaar-2026",
   storageBucket:
     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-    "radeo-2026.firebasestorage.app",
+    "weBazaar-2026.firebasestorage.app",
   messagingSenderId:
     process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1016544530927",
   appId:
@@ -358,7 +358,7 @@ This data is sent to your backend and saved in MongoDB.
 
 Your OAuth consent screen shows:
 
-- ✅ App name: "radeo-2026"
+- ✅ App name: "weBazaar-2026"
 - ✅ User support email
 - ⚠️ **Status:** Currently in "Testing" mode
 

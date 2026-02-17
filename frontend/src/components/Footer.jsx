@@ -96,7 +96,7 @@ export default function Footer() {
       <div className="container-custom py-12">
         <div className={contentContainerClass}>
           <div>
-            <h3 className="text-2xl font-serif font-bold mb-4">{footerContent.brand?.name || 'Radeo'}</h3>
+            <h3 className="text-2xl font-serif font-bold mb-4">{footerContent.brand?.name || 'weBazaar'}</h3>
             <p className="opacity-80 mb-4">
               {footerContent.brand?.description ||
                 'Premium handcrafted shoes made with timeless craftsmanship and finest materials.'}
@@ -214,7 +214,7 @@ export default function Footer() {
 
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderColor: `${textColor}33` }}>
           <p className="opacity-70 text-sm">
-            &copy; {currentYear} {footerContent.brand?.name || 'Radeo'}. {footerContent.legal?.copyrightText || 'All rights reserved.'}
+            &copy; {currentYear} {footerContent.brand?.name || 'weBazaar'}. {footerContent.legal?.copyrightText || 'All rights reserved.'}
           </p>
           <div className="flex gap-6 text-sm">
             {legalLinks.map((link) => (

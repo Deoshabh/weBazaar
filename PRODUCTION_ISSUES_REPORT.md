@@ -1,4 +1,4 @@
-# Production Issues Report - Radeo.in
+# Production Issues Report - weBazaar.in
 
 **Date:** February 3, 2026  
 **Status:** ✅ **ALL ISSUES RESOLVED**
@@ -83,7 +83,7 @@ useEffect(() => {
 **Error:**
 
 ```
-api.radeo.in/api/v1/admin/users/.../toggle-block: 500
+api.weBazaar.in/api/v1/admin/users/.../toggle-block: 500
 ```
 
 **Root Cause:**

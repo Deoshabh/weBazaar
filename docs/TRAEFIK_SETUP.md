@@ -32,8 +32,8 @@ deploy.bat
 docker-compose -f docker-compose.traefik.yml ps
 
 # Test CORS preflight
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -i
 ```
@@ -42,7 +42,7 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
 
 ```
 HTTP/2 204
-access-control-allow-origin: https://radeo.in
+access-control-allow-origin: https://weBazaar.in
 access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 access-control-allow-credentials: true
 ```
@@ -72,7 +72,7 @@ access-control-allow-credentials: true
 ```
 ┌─────────────────────────────────────────────┐
 │         Internet (HTTPS)                    │
-│  radeo.in / api.radeo.in                    │
+│  weBazaar.in / api.weBazaar.in                    │
 └────────────────────┬────────────────────────┘
                      │
         ┌────────────▼────────────┐
@@ -106,7 +106,7 @@ access-control-allow-credentials: true
 
 ✅ **Security**
 
-- HTTPS only on api.radeo.in
+- HTTPS only on api.weBazaar.in
 - CORS restricted to specific origins
 - No hardcoded secrets (uses .env)
 - Non-root container execution
@@ -129,11 +129,11 @@ access-control-allow-credentials: true
 ```bash
 # 1. Verify frontend domain matches CORS config
 # Edit docker-compose.traefik.yml, check:
-- "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+- "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
 
 # 2. Test CORS headers are present
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -v
 
 # 3. Check if backend service is healthy
@@ -151,10 +151,10 @@ docker logs traefik
 
 ```bash
 # 1. Check logs
-docker logs radeo-backend
+docker logs weBazaar-backend
 
 # 2. Verify environment variables are set
-docker inspect radeo-backend | grep -A 20 "Env"
+docker inspect weBazaar-backend | grep -A 20 "Env"
 
 # 3. Ensure .env file exists and has required values
 cat .env | grep -E "MONGO|JWT|MINIO"
@@ -198,7 +198,7 @@ docker-compose -f docker-compose.traefik.yml restart traefik
 # Search for middleware that handles OPTIONS
 
 # 3. Test OPTIONS directly on backend
-docker exec radeo-backend curl -X OPTIONS http://localhost:5000/api/v1/auth/login -v
+docker exec weBazaar-backend curl -X OPTIONS http://localhost:5000/api/v1/auth/login -v
 
 # 4. Check Traefik middleware attachment
 docker exec traefik traefik --version  # Check version
@@ -253,8 +253,8 @@ docker-compose -f docker-compose.traefik.yml down -v
 
 Before going to production, verify:
 
-- [ ] Frontend loads at https://radeo.in
-- [ ] Backend health check passes: `curl https://api.radeo.in/health`
+- [ ] Frontend loads at https://weBazaar.in
+- [ ] Backend health check passes: `curl https://api.weBazaar.in/health`
 - [ ] OPTIONS preflight returns 204/200: See "Test CORS" above
 - [ ] Login works: POST to `/api/v1/auth/login`
 - [ ] Register works: POST to `/api/v1/auth/register`
@@ -275,11 +275,11 @@ JWT_REFRESH_SECRET=another-long-random-string-at-least-32-chars
 JWT_ACCESS_SECRET=another-long-random-string-at-least-32-chars
 
 # MinIO (if using S3 storage)
-MINIO_ENDPOINT=minio.radeo.in
+MINIO_ENDPOINT=minio.weBazaar.in
 MINIO_PORT=9000
 MINIO_ACCESS_KEY=minioadmin
 MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET=radeo-images
+MINIO_BUCKET=weBazaar-images
 MINIO_USE_SSL=true
 
 # Traefik will auto-configure:

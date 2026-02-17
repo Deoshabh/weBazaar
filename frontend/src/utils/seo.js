@@ -3,12 +3,12 @@
  * Helper functions to generate consistent SEO metadata
  */
 
-const SITE_NAME = "Radeo";
-const SITE_URL = "https://radeo.in";
+const SITE_NAME = "weBazaar";
+const SITE_URL = "https://weBazaar.in";
 const SITE_DESCRIPTION =
-  "Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship. Shop the finest collection of luxury footwear at Radeo.";
+  "Discover exquisite handcrafted shoes made with premium materials and timeless craftsmanship. Shop the finest collection of luxury footwear at weBazaar.";
 const SITE_IMAGE = `${SITE_URL}/og-image.jpg`;
-const TWITTER_HANDLE = "@radeo_in";
+const TWITTER_HANDLE = "@weBazaar_in";
 
 /**
  * Generate base metadata for all pages
@@ -139,7 +139,7 @@ export const generateCategoryMetadata = (category) => {
     title: category.name,
     description:
       category.description ||
-      `Shop ${category.name} at Radeo. Discover our premium collection of ${category.name.toLowerCase()}.`,
+      `Shop ${category.name} at weBazaar. Discover our premium collection of ${category.name.toLowerCase()}.`,
     image: category.image || SITE_IMAGE,
     url: `${SITE_URL}/products?category=${category.slug}`,
     keywords: [category.name, "shoes", "footwear", "buy online"],
@@ -207,9 +207,9 @@ export const generateOrganizationJsonLd = () => {
       availableLanguage: ["en", "hi"],
     },
     sameAs: [
-      "https://www.facebook.com/radeo",
-      "https://www.instagram.com/radeo",
-      "https://twitter.com/radeo_in",
+      "https://www.facebook.com/weBazaar",
+      "https://www.instagram.com/weBazaar",
+      "https://twitter.com/weBazaar_in",
     ],
   };
 };

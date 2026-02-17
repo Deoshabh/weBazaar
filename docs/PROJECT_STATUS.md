@@ -147,7 +147,7 @@ backend/
 ### 1. Quick PIN Check (Public)
 
 ```bash
-curl https://api.radeo.in/api/v1/addresses/check-pincode/201301
+curl https://api.weBazaar.in/api/v1/addresses/check-pincode/201301
 ```
 
 **Response:**
@@ -164,7 +164,7 @@ curl https://api.radeo.in/api/v1/addresses/check-pincode/201301
 ### 2. Full Validation (Protected)
 
 ```bash
-curl -X POST https://api.radeo.in/api/v1/addresses/validate \
+curl -X POST https://api.weBazaar.in/api/v1/addresses/validate \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -218,7 +218,7 @@ TEST_TOKEN="your_token_here" node test-address-validation.js
 ### Manual Testing
 
 1. **PIN Code Check:**
-   - Open browser: `https://api.radeo.in/api/v1/addresses/check-pincode/201301`
+   - Open browser: `https://api.weBazaar.in/api/v1/addresses/check-pincode/201301`
    - Should show: `{"success":true,"serviceable":true,...}`
 
 2. **Validation API:**
@@ -520,10 +520,10 @@ node test-address-validation.js
 TEST_TOKEN="your_token" node test-address-validation.js
 
 # Check backend is running
-curl https://api.radeo.in/api/v1/health
+curl https://api.weBazaar.in/api/v1/health
 
 # Test PIN check (public)
-curl https://api.radeo.in/api/v1/addresses/check-pincode/201301
+curl https://api.weBazaar.in/api/v1/addresses/check-pincode/201301
 
 # Rebuild frontend
 cd frontend
@@ -559,13 +559,13 @@ The system is fully functional and ready to use.
 1. **Check backend is running:**
 
    ```bash
-   curl https://api.radeo.in/api/v1/health
+   curl https://api.weBazaar.in/api/v1/health
    ```
 
 2. **Check API endpoints:**
 
    ```bash
-   curl https://api.radeo.in/api/v1/addresses/check-pincode/201301
+   curl https://api.weBazaar.in/api/v1/addresses/check-pincode/201301
    ```
 
 3. **Check browser console:**

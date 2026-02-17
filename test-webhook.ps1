@@ -7,7 +7,7 @@ Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Configuration
-$baseUrl = "https://api.radeo.in"
+$baseUrl = "https://api.weBazaar.in"
 $webhookToken = "48f6cc854c7a94beb4ea1144ca8242ba7e78a0f5a07127364250cade5083f7a2"
 
 # Test 1: AWB Generated

@@ -1,9 +1,9 @@
 # Test CORS preflight request
-Write-Host "Testing OPTIONS preflight to https://api.radeo.in/api/v1/auth/register" -ForegroundColor Cyan
+Write-Host "Testing OPTIONS preflight to https://api.weBazaar.in/api/v1/auth/register" -ForegroundColor Cyan
 Write-Host ""
 
 $headers = @{
-    "Origin"                         = "https://radeo.in"
+    "Origin"                         = "https://weBazaar.in"
     "Access-Control-Request-Method"  = "POST"
     "Access-Control-Request-Headers" = "Content-Type,Authorization"
 }
@@ -12,7 +12,7 @@ try {
     # Ignore SSL certificate validation for testing
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
     
-    $response = Invoke-WebRequest -Uri "https://api.radeo.in/api/v1/auth/register" `
+    $response = Invoke-WebRequest -Uri "https://api.weBazaar.in/api/v1/auth/register" `
         -Method OPTIONS `
         -Headers $headers
     
@@ -39,11 +39,11 @@ catch {
 }
 
 Write-Host ""
-Write-Host "Testing actual POST to https://api.radeo.in/api/v1/auth/register" -ForegroundColor Cyan
+Write-Host "Testing actual POST to https://api.weBazaar.in/api/v1/auth/register" -ForegroundColor Cyan
 Write-Host ""
 
 $body = @{
-    email    = "test@radeo.in"
+    email    = "test@weBazaar.in"
     password = "TestPassword123"
 } | ConvertTo-Json
 
@@ -51,7 +51,7 @@ try {
     # Ignore SSL certificate validation for testing
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
     
-    $response = Invoke-WebRequest -Uri "https://api.radeo.in/api/v1/auth/register" `
+    $response = Invoke-WebRequest -Uri "https://api.weBazaar.in/api/v1/auth/register" `
         -Method POST `
         -Headers @{ "Content-Type" = "application/json" } `
         -Body $body

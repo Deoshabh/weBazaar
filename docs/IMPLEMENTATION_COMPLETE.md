@@ -116,7 +116,7 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
 
 **Contact Details:**
 
-- Email: support@radeo.in
+- Email: support@weBazaar.in
 - Phone: +91 123 456 7890
 - Hours: Mon-Sat 9 AM - 6 PM IST
 - Address: Mumbai office address

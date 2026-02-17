@@ -393,7 +393,7 @@ SHIPROCKET_EMAIL=your-email
 SHIPROCKET_PASSWORD=your-password
 
 # frontend/.env.local & .env.production
-NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 ```
 
 ## 🔄 Migration Strategy
@@ -409,13 +409,13 @@ NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
 
 ```bash
 # Test validation API
-curl -X POST https://api.radeo.in/api/v1/addresses/validate \
+curl -X POST https://api.weBazaar.in/api/v1/addresses/validate \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d @test-address.json
 
 # Test PIN check
-curl https://api.radeo.in/api/v1/addresses/check-pincode/201301
+curl https://api.weBazaar.in/api/v1/addresses/check-pincode/201301
 ```
 
 ### Phase 3: Checkout Integration

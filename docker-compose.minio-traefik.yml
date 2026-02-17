@@ -7,21 +7,21 @@ labels:
   - "traefik.enable=true"
 
   # MinIO API Router
-  - "traefik.http.routers.minio-api.rule=Host(`minio.radeo.in`)"
+  - "traefik.http.routers.minio-api.rule=Host(`minio.weBazaar.in`)"
   - "traefik.http.routers.minio-api.entrypoints=websecure"
   - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
   - "traefik.http.routers.minio-api.service=minio-api"
   - "traefik.http.services.minio-api.loadbalancer.server.port=9000"
 
   # MinIO Console Router (port 9001)
-  - "traefik.http.routers.minio-console.rule=Host(`minio-console.radeo.in`)"
+  - "traefik.http.routers.minio-console.rule=Host(`minio-console.weBazaar.in`)"
   - "traefik.http.routers.minio-console.entrypoints=websecure"
   - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
   - "traefik.http.routers.minio-console.service=minio-console"
   - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
 
   # CORS Middleware for MinIO API
-  - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://radeo.in,https://www.radeo.in"
+  - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
   - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS,HEAD"
   - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowheaders=*"
   - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowcredentials=true"
@@ -41,5 +41,5 @@ expose:
 environment:
   - MINIO_ROOT_USER=${MINIO_ROOT_USER}
   - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-  - MINIO_BROWSER_REDIRECT_URL=https://minio-console.radeo.in
-  - MINIO_SERVER_URL=https://minio.radeo.in
+  - MINIO_BROWSER_REDIRECT_URL=https://minio-console.weBazaar.in
+  - MINIO_SERVER_URL=https://minio.weBazaar.in

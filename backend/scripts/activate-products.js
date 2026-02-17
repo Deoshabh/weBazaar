@@ -76,7 +76,7 @@ async function activateProducts() {
 
     console.log("=".repeat(60));
     console.log("✅ All products are now ACTIVE and IN STOCK!\n");
-    console.log("🎉 Go to https://radeo.in to see your products!\n");
+    console.log("🎉 Go to https://weBazaar.in to see your products!\n");
   } catch (error) {
     console.error("\n❌ Error:", error.message);
     console.error("\nFull error:", error);

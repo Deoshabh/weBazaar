@@ -48,8 +48,8 @@ docker-compose -f docker-compose.traefik.yml up -d
 docker-compose -f docker-compose.traefik.yml ps
 
 # Test CORS
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -i
 
@@ -59,8 +59,8 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
 ## 4. Access
 
 ```
-Frontend:     https://radeo.in
-Backend:      https://api.radeo.in
+Frontend:     https://weBazaar.in
+Backend:      https://api.weBazaar.in
 Traefik:      http://localhost:8080
 ```
 
@@ -74,7 +74,7 @@ Traefik:      http://localhost:8080
 | Restart backend | `docker-compose -f docker-compose.traefik.yml restart backend`  |
 | Stop all        | `docker-compose -f docker-compose.traefik.yml down`             |
 | Rebuild         | `docker-compose -f docker-compose.traefik.yml build --no-cache` |
-| Health check    | `curl https://api.radeo.in/health`                              |
+| Health check    | `curl https://api.weBazaar.in/health`                              |
 
 ---
 
@@ -95,7 +95,7 @@ Traefik:      http://localhost:8080
 Make sure `frontend/.env.production` contains:
 
 ```bash
-NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
+NEXT_PUBLIC_API_URL=https://api.weBazaar.in/api/v1
 ```
 
 ---
@@ -107,7 +107,7 @@ NEXT_PUBLIC_API_URL=https://api.radeo.in/api/v1
 docker logs traefik  # Check middleware
 
 # Backend not responding?
-docker logs radeo-backend  # Check app logs
+docker logs weBazaar-backend  # Check app logs
 
 # Certificates not working?
 docker logs traefik | grep letsencrypt  # Check cert status
@@ -123,7 +123,7 @@ docker-compose -f docker-compose.traefik.yml config  # Validate config
 - [ ] Test login/register from frontend
 - [ ] Verify no CORS errors in browser console
 - [ ] Check SSL certificate is valid
-- [ ] Run `curl https://api.radeo.in/health` works
+- [ ] Run `curl https://api.weBazaar.in/health` works
 - [ ] All services show "healthy" in `ps` output
 - [ ] Traefik dashboard shows all routes green
 
@@ -147,9 +147,9 @@ docker-compose -f docker-compose.traefik.yml config  # Validate config
 **Why port 5000?**
 
 - Backend runs internally on 5000
-- Traefik routes based on domain (`api.radeo.in`)
+- Traefik routes based on domain (`api.weBazaar.in`)
 - Users never know internal port exists
-- Domain: `api.radeo.in` → Internal: `backend:5000`
+- Domain: `api.weBazaar.in` → Internal: `backend:5000`
 
 ---
 

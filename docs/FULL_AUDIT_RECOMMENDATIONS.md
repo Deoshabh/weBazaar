@@ -1,8 +1,8 @@
-# Radeo E-Commerce - Full Audit & Recommendations
+# weBazaar E-Commerce - Full Audit & Recommendations
 
 > **Audit Date:** February 10, 2026
 > **Auditor:** Senior Developer (10+ years experience)
-> **Project:** Radeo - Premium Leather Shoes E-Commerce
+> **Project:** weBazaar - Premium Leather Shoes E-Commerce
 > **Stack:** Next.js 14 + Express 5 + MongoDB + Firebase Auth + MinIO + Valkey/Redis
 > **Deployment:** VPS with Dokploy (Traefik, Valkey, MongoDB)
 
@@ -89,7 +89,7 @@
 ### 13. ✅ Nginx Double ACAO Header Bug
 
 - **File:** `nginx.conf`
-- **Issue:** Two `Access-Control-Allow-Origin` headers added (both radeo.in and www.radeo.in). Browsers reject this.
+- **Issue:** Two `Access-Control-Allow-Origin` headers added (both weBazaar.in and www.weBazaar.in). Browsers reject this.
 - **Fix:** Use `map` block for dynamic origin selection.
 
 ### 14. ✅ Node.js 18 EOL in Dockerfiles

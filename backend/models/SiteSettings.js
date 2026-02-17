@@ -10,7 +10,7 @@ const siteSettingsSchema = new mongoose.Schema(
       favicon: {
         url: { type: String, default: '' },
       },
-      siteName: { type: String, default: 'Radeo' },
+      siteName: { type: String, default: 'weBazaar' },
     },
     banners: [
       {

@@ -1,6 +1,6 @@
 /**
  * Migration Script: Update image URLs to use CDN
- * Target: api.minio.radeo.in / minio.radeo.in → cdn.radeo.in
+ * Target: api.minio.weBazaar.in / minio.weBazaar.in → cdn.weBazaar.in
  *
  * Run on VPS: node migrate-image-urls.js
  * Requires MONGO_URI env var (reads from .env automatically)
@@ -10,8 +10,8 @@ dotenv.config();
 
 const mongoose = require("mongoose");
 
-const OLD_DOMAINS = ["api.minio.radeo.in", "minio.radeo.in"];
-const NEW_DOMAIN = "cdn.radeo.in";
+const OLD_DOMAINS = ["api.minio.weBazaar.in", "minio.weBazaar.in"];
+const NEW_DOMAIN = "cdn.weBazaar.in";
 
 async function migrate() {
   console.log("🔄 Connecting to MongoDB...");

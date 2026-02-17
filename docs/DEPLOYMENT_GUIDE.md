@@ -1,4 +1,4 @@
-# Dokploy Deployment Guide for radeo.in
+# Dokploy Deployment Guide for weBazaar.in
 
 # Complete setup instructions for your VPS
 
@@ -6,14 +6,14 @@
 
 ### DNS Configuration:
 
-Add these records in your domain registrar (radeo.in):
+Add these records in your domain registrar (weBazaar.in):
 
 ```
 Type    Name    Value               TTL
 A       @       YOUR_VPS_IP         300
 A       www     YOUR_VPS_IP         300
 A       api     YOUR_VPS_IP         300
-CNAME   minio   api.radeo.in        300
+CNAME   minio   api.weBazaar.in        300
 ```
 
 ## 2. DOKPLOY PROJECT STRUCTURE
@@ -22,17 +22,17 @@ CNAME   minio   api.radeo.in        300
 
 #### Service 1: Backend API
 
-- **Name**: radeo-backend
+- **Name**: weBazaar-backend
 - **Type**: Docker
-- **Domain**: api.radeo.in
+- **Domain**: api.weBazaar.in
 - **Port**: 5000
 - **Environment Variables**: Copy from backend/.env.production
 
 #### Service 2: Frontend
 
-- **Name**: radeo-frontend
+- **Name**: weBazaar-frontend
 - **Type**: Docker/Next.js
-- **Domain**: radeo.in (and www.radeo.in)
+- **Domain**: weBazaar.in (and www.weBazaar.in)
 - **Port**: 3000
 - **Environment Variables**: Copy from frontend/.env.production
 - **Build Command**: npm run build
@@ -40,10 +40,10 @@ CNAME   minio   api.radeo.in        300
 
 #### Service 3: MinIO (Optional - if not using shared MinIO)
 
-- **Name**: radeo-minio
+- **Name**: weBazaar-minio
 - **Type**: Docker Compose
 - **File**: docker-compose.minio.yml
-- **Access**: Internal only (localhost) or minio.radeo.in for admin
+- **Access**: Internal only (localhost) or minio.weBazaar.in for admin
 
 ## 3. MONGODB SETUP
 
@@ -58,9 +58,9 @@ sudo systemctl enable mongod
 
 # Create database
 mongosh
-use radeo_production
+use weBazaar_production
 db.createUser({
-  user: "radeo_admin",
+  user: "weBazaar_admin",
   pwd: "SECURE_PASSWORD",
   roles: ["readWrite"]
 })
@@ -69,7 +69,7 @@ db.createUser({
 Update backend .env:
 
 ```
-MONGO_URI=mongodb://radeo_admin:SECURE_PASSWORD@localhost:27017/radeo_production
+MONGO_URI=mongodb://weBazaar_admin:SECURE_PASSWORD@localhost:27017/weBazaar_production
 ```
 
 ### Option B: MongoDB Atlas (Recommended)
@@ -95,12 +95,12 @@ Password: minioadmin
 ## 5. NGINX REVERSE PROXY (If not using Dokploy's built-in proxy)
 
 ```nginx
-# /etc/nginx/sites-available/radeo.in
+# /etc/nginx/sites-available/weBazaar.in
 
 # Frontend
 server {
     listen 80;
-    server_name radeo.in www.radeo.in;
+    server_name weBazaar.in www.weBazaar.in;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -115,7 +115,7 @@ server {
 # Backend API
 server {
     listen 80;
-    server_name api.radeo.in;
+    server_name api.weBazaar.in;
 
     location / {
         proxy_pass http://localhost:5000;
@@ -141,8 +141,8 @@ Just enable it in the dashboard for each service.
 sudo apt install certbot python3-certbot-nginx -y
 
 # Get certificates
-sudo certbot --nginx -d radeo.in -d www.radeo.in
-sudo certbot --nginx -d api.radeo.in
+sudo certbot --nginx -d weBazaar.in -d www.weBazaar.in
+sudo certbot --nginx -d api.weBazaar.in
 
 # Auto-renewal is configured automatically
 ```
@@ -164,25 +164,25 @@ sudo certbot --nginx -d api.radeo.in
 
 1. **Connect GitHub Repository**
    - Link your GitHub account
-   - Select Deoshabh/Radeo-2026 repository
+   - Select Deoshabh/weBazaar-2026 repository
    - Set branch to `main`
 
 2. **Create Backend Service**
    - Click "New Service" → "Docker"
-   - Name: radeo-backend
+   - Name: weBazaar-backend
    - Root Directory: /backend
    - Dockerfile: (auto-detect or specify)
-   - Domain: api.radeo.in
+   - Domain: api.weBazaar.in
    - Port: 5000
    - Add all environment variables from .env.production
    - Enable "Auto Deploy" on git push
 
 3. **Create Frontend Service**
    - Click "New Service" → "Next.js" or "Docker"
-   - Name: radeo-frontend
+   - Name: weBazaar-frontend
    - Root Directory: /frontend
-   - Domain: radeo.in
-   - Add www.radeo.in as alias
+   - Domain: weBazaar.in
+   - Add www.weBazaar.in as alias
    - Port: 3000
    - Build command: `npm run build`
    - Start command: `npm start`
@@ -200,15 +200,15 @@ sudo certbot --nginx -d api.radeo.in
 
 ```bash
 # Check if services are running
-curl https://api.radeo.in/health
-curl https://radeo.in
+curl https://api.weBazaar.in/health
+curl https://weBazaar.in
 
 # Test backend API
-curl https://api.radeo.in/api/v1/products
+curl https://api.weBazaar.in/api/v1/products
 
 # Monitor logs
-dokploy logs radeo-backend
-dokploy logs radeo-frontend
+dokploy logs weBazaar-backend
+dokploy logs weBazaar-frontend
 ```
 
 ### Create admin user:
@@ -218,7 +218,7 @@ dokploy logs radeo-frontend
 ssh user@YOUR_VPS_IP
 
 # Access backend container
-docker exec -it radeo-backend sh
+docker exec -it weBazaar-backend sh
 
 # Run admin creation script
 node utils/makeAdmin.js your-email@example.com
@@ -237,11 +237,11 @@ node utils/makeAdmin.js your-email@example.com
 
 ```bash
 # Update containers
-dokploy update radeo-backend
-dokploy update radeo-frontend
+dokploy update weBazaar-backend
+dokploy update weBazaar-frontend
 
 # Backup MongoDB
-mongodump --uri="mongodb://localhost:27017/radeo_production" --out=/backups/$(date +%Y%m%d)
+mongodump --uri="mongodb://localhost:27017/weBazaar_production" --out=/backups/$(date +%Y%m%d)
 
 # Clean Docker
 docker system prune -a
@@ -249,9 +249,9 @@ docker system prune -a
 
 ## QUICK REFERENCE
 
-**Frontend**: https://radeo.in
-**Backend API**: https://api.radeo.in
-**Admin Panel**: https://radeo.in/admin
+**Frontend**: https://weBazaar.in
+**Backend API**: https://api.weBazaar.in
+**Admin Panel**: https://weBazaar.in/admin
 **MinIO Console**: http://YOUR_VPS_IP:9001 (internal only)
 
 **Support**:

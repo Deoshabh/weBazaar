@@ -580,7 +580,7 @@ exports.resetStorefrontDefaults = async (req, res, next) => {
     settings.branding = {
       logo: { url: '', alt: 'Logo' },
       favicon: { url: '' },
-      siteName: 'Radeo',
+      siteName: 'weBazaar',
     };
     settings.banners = [];
     settings.announcementBar = SITE_SETTINGS_DEFAULTS.announcementBar;

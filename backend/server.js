@@ -119,8 +119,8 @@ if (process.env.NODE_ENV !== "test") {
 // CORS (Production safe)
 // ===============================
 const allowedOrigins = [
-  "https://radeo.in",
-  "https://www.radeo.in",
+  "https://weBazaar.in",
+  "https://www.weBazaar.in",
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
   ...(process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [])
 ];
@@ -138,8 +138,8 @@ app.use(
         return callback(null, true);
       }
 
-      // Optional wildcard allow for radeo.in subdomains (disabled by default)
-      if (allowWildcardSubdomains && /^https:\/\/[a-z0-9-]+\.radeo\.in$/i.test(origin)) {
+      // Optional wildcard allow for weBazaar.in subdomains (disabled by default)
+      if (allowWildcardSubdomains && /^https:\/\/[a-z0-9-]+\.weBazaar\.in$/i.test(origin)) {
         return callback(null, true);
       }
       
@@ -160,7 +160,7 @@ app.use(
 // ===============================
 app.use(
   helmet({
-    // Allow cross-origin requests from frontend (radeo.in → api.radeo.in)
+    // Allow cross-origin requests from frontend (weBazaar.in → api.weBazaar.in)
     crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
@@ -245,7 +245,7 @@ app.use("/api/v1/user", require("./routes/userRoutes"));
 app.get("/", (_req, res) => {
   res.status(200).json({
     status: "OK",
-    message: "Radeo API is running",
+    message: "weBazaar API is running",
   });
 });
 

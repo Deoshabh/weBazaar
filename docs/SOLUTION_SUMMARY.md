@@ -58,7 +58,7 @@ Your Traefik CORS and preflight issues have been **completely fixed**! Here's wh
 
 ```
 Request Flow:
-1. Browser sends OPTIONS preflight to api.radeo.in
+1. Browser sends OPTIONS preflight to api.weBazaar.in
 2. Traefik receives request (websecure/HTTPS entrypoint only)
 3. Traefik's CORS middleware adds headers
 4. Traefik forwards to backend:5000 without redirecting
@@ -73,7 +73,7 @@ Request Flow:
 ```yaml
 traefik.http.routers.backend.entrypoints=websecure  # ← No HTTP redirect!
 traefik.http.routers.backend.middlewares=cors-headers  # ← CORS at proxy level
-traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://radeo.in
+traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in
 ```
 
 ---
@@ -107,8 +107,8 @@ docker-compose -f docker-compose.traefik.yml up -d
 docker-compose -f docker-compose.traefik.yml ps
 
 # Test CORS
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -i
 ```
@@ -117,7 +117,7 @@ Expected Response:
 
 ```
 HTTP/2 204
-Access-Control-Allow-Origin: https://radeo.in
+Access-Control-Allow-Origin: https://weBazaar.in
 Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 Access-Control-Allow-Credentials: true
 ```
@@ -131,7 +131,7 @@ Access-Control-Allow-Credentials: true
 | server.js        | None ✅      | Already perfect CORS config    |
 | Routes           | None ✅      | No redirect middleware present |
 | Backend Port     | 5000 ✅      | Correctly configured           |
-| CORS Origin      | radeo.in ✅  | Properly restricted            |
+| CORS Origin      | weBazaar.in ✅  | Properly restricted            |
 | HTTPS            | Automatic ✅ | Let's Encrypt via Traefik      |
 | OPTIONS handling | Traefik ✅   | Handled at proxy level         |
 
@@ -141,7 +141,7 @@ Access-Control-Allow-Credentials: true
 
 ```
 Internet (HTTPS)
-    ↓ api.radeo.in
+    ↓ api.weBazaar.in
 ┌─────────────────┐
 │    Traefik      │  ← CORS headers added here
 │  (Port 443)     │  ← No redirects
@@ -178,16 +178,16 @@ Internet (HTTPS)
 Before going live, verify:
 
 ```
-☐ Frontend loads at https://radeo.in
-☐ Backend health check: curl https://api.radeo.in/health
-☐ OPTIONS preflight returns 204: curl -X OPTIONS https://api.radeo.in/api/v1/auth/login ...
+☐ Frontend loads at https://weBazaar.in
+☐ Backend health check: curl https://api.weBazaar.in/health
+☐ OPTIONS preflight returns 204: curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login ...
 ☐ Login works: Frontend can POST to /api/v1/auth/login
 ☐ Register works: Frontend can POST to /api/v1/auth/register
 ☐ Cookies sent: Credentials included in requests
 ☐ No CORS errors: Browser console is clean
 ☐ Traefik dashboard: http://localhost:8080 shows all routes
 ☐ SSL certificate: Valid in browser (no warnings)
-☐ Logs clean: docker logs radeo-backend shows no errors
+☐ Logs clean: docker logs weBazaar-backend shows no errors
 ```
 
 ---
@@ -199,7 +199,7 @@ Before going live, verify:
 | **View all logs**   | `docker-compose -f docker-compose.traefik.yml logs -f`         |
 | **Restart backend** | `docker-compose -f docker-compose.traefik.yml restart backend` |
 | **Stop everything** | `docker-compose -f docker-compose.traefik.yml down`            |
-| **Check health**    | `curl https://api.radeo.in/health`                             |
+| **Check health**    | `curl https://api.weBazaar.in/health`                             |
 | **View Traefik**    | http://localhost:8080                                          |
 | **Debug CORS**      | Check Traefik logs for middleware                              |
 

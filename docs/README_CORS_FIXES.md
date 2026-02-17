@@ -130,21 +130,21 @@ verify-cors-fixes.bat   # Windows
 **Test 1: Health Check**
 
 ```bash
-curl -i https://api.radeo.in/health
+curl -i https://api.weBazaar.in/health
 # Expected: HTTP/2 200 OK
 ```
 
 **Test 2: OPTIONS Preflight**
 
 ```bash
-curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
-  -H 'Origin: https://radeo.in' \
+curl -X OPTIONS https://api.weBazaar.in/api/v1/auth/login \
+  -H 'Origin: https://weBazaar.in' \
   -H 'Access-Control-Request-Method: POST' \
   -i
 
 # Expected:
 # HTTP/2 204 No Content (or 200)
-# access-control-allow-origin: https://radeo.in
+# access-control-allow-origin: https://weBazaar.in
 # access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 # access-control-allow-credentials: true
 # (NOT 401 or CORS error)
@@ -153,8 +153,8 @@ curl -X OPTIONS https://api.radeo.in/api/v1/auth/login \
 **Test 3: Browser Console**
 
 ```javascript
-// Run on https://radeo.in
-fetch("https://api.radeo.in/api/v1/categories")
+// Run on https://weBazaar.in
+fetch("https://api.weBazaar.in/api/v1/categories")
   .then((r) => r.json())
   .then((d) => console.log("✅ Success:", d))
   .catch((e) => console.error("❌ Error:", e.message));
@@ -166,8 +166,8 @@ fetch("https://api.radeo.in/api/v1/categories")
 **Test 4: Login**
 
 ```javascript
-// Run on https://radeo.in
-fetch("https://api.radeo.in/api/v1/auth/login", {
+// Run on https://weBazaar.in
+fetch("https://api.weBazaar.in/api/v1/auth/login", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   credentials: "include",
@@ -236,7 +236,7 @@ docker-compose -f docker-compose.traefik.yml logs -f
 **Express** (`backend/server.js`)
 
 - ✅ CORS middleware: applied globally
-- ✅ Allowed origins: radeo.in, www.radeo.in
+- ✅ Allowed origins: weBazaar.in, www.weBazaar.in
 - ✅ Credentials: enabled
 - ✅ Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 - ✅ No app.options("\*"): correctly avoided
@@ -257,7 +257,7 @@ docker-compose -f docker-compose.traefik.yml logs -f
 ## 🔐 Security
 
 - ✅ **Real requests still authenticated** - OPTIONS bypassed, but POST/PUT/DELETE need tokens
-- ✅ **CORS origin restricted** - Only radeo.in allowed
+- ✅ **CORS origin restricted** - Only weBazaar.in allowed
 - ✅ **Credentials required** - Cookies/auth headers still needed for real requests
 - ✅ **Methods restricted** - Only allowed methods permitted
 - ✅ **Headers validated** - Only allowed headers accepted
@@ -330,7 +330,7 @@ docker-compose -f docker-compose.traefik.yml logs -f
 ## 🧪 Testing Checklist
 
 - [ ] `./verify-cors-fixes.sh` passes all 10 checks
-- [ ] `curl https://api.radeo.in/health` returns 200
+- [ ] `curl https://api.weBazaar.in/health` returns 200
 - [ ] OPTIONS preflight curl returns 204 with CORS headers
 - [ ] Browser fetch() to API endpoint works
 - [ ] Login form submits successfully

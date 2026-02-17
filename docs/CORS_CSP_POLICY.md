@@ -9,15 +9,15 @@ Defines the production policy for cross-origin access and baseline header harden
 Implementation is in `backend/server.js`.
 
 - Always allowed:
-  - `https://radeo.in`
-  - `https://www.radeo.in`
+  - `https://weBazaar.in`
+  - `https://www.weBazaar.in`
   - `FRONTEND_URL` (if set)
   - values from `CORS_ALLOWED_ORIGINS` (comma-separated)
 - Development mode: all origins are allowed for local testing.
 - Optional wildcard subdomains: disabled by default.
   - Enable only when required by setting:
     - `CORS_ALLOW_WILDCARD_SUBDOMAINS=true`
-  - When enabled, only `https://<subdomain>.radeo.in` is accepted.
+  - When enabled, only `https://<subdomain>.weBazaar.in` is accepted.
 
 ## CSP and Security Headers
 
