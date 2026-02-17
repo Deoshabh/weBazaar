@@ -25,34 +25,39 @@ export const AuthProvider = ({ children }) => {
         if (firebaseUser) {
           // User is signed in to Firebase
           const token = await firebaseUser.getIdToken();
+          const accessToken = Cookies.get('accessToken');
 
-          // Check if we already have the user data in state
-          if (!user) {
-            // Fetch backend user data
-            // We can rely on the cookie being set by the login flow, or we can fetch 'me'
-            // If we are just refreshing the page, the cookie should be there.
-            // But if it's a fresh firebase login (e.g. from persistent storage), we need to ensure backend session exists.
-
-            // For now, let's try to fetch user. If it fails (401), we might need to sync.
+          if (accessToken) {
             try {
               const response = await authAPI.getCurrentUser();
               setUser(response.data);
-            } catch (err) {
-              console.log("Backend session expired/missing. Attempting auto-sync with Firebase...");
+            } catch {
               try {
                 const response = await authAPI.firebaseLogin({
                   firebaseToken: token,
                   email: firebaseUser.email,
-                  uid: firebaseUser.uid
+                  uid: firebaseUser.uid,
                 });
-                const { accessToken, user: backendUser } = response.data;
-                Cookies.set('accessToken', accessToken, { expires: 1 });
+                const { accessToken: nextAccessToken, user: backendUser } = response.data;
+                Cookies.set('accessToken', nextAccessToken, { expires: 1 });
                 setUser(backendUser);
-                console.log("Auto-sync successful");
               } catch (syncErr) {
-                console.error("Failed to auto-sync backend session:", syncErr);
-                // If sync fails, we accept the user is effectively logged out from backend perspective
+                console.error('Failed to auto-sync backend session:', syncErr);
               }
+            }
+          } else {
+            try {
+              const response = await authAPI.firebaseLogin({
+                firebaseToken: token,
+                email: firebaseUser.email,
+                uid: firebaseUser.uid,
+              });
+              const { accessToken: nextAccessToken, user: backendUser } = response.data;
+              Cookies.set('accessToken', nextAccessToken, { expires: 1 });
+              setUser(backendUser);
+            } catch (syncErr) {
+              console.error('Failed to establish backend session from Firebase user:', syncErr);
+              setUser(null);
             }
           }
         } else {
@@ -68,7 +73,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, []);
 
   const login = async (credentials) => {
     try {

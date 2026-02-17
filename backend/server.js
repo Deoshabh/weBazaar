@@ -240,6 +240,30 @@ app.use("/api/v1/wishlist", require("./routes/wishlistRoutes"));
 app.use("/api/v1/user", require("./routes/userRoutes"));
 
 // ===============================
+// Basic root/static probes
+// ===============================
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Radeo API is running",
+  });
+});
+
+app.get("/favicon.ico", (_req, res) => {
+  res.status(204).end();
+});
+
+// ===============================
+// Health Check (deprecated - use /api/health)
+// ===============================
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Use /api/health for detailed health check",
+  });
+});
+
+// ===============================
 // 404 Handler (must be after all routes)
 // ===============================
 app.use(notFoundHandler);
@@ -248,16 +272,6 @@ app.use(notFoundHandler);
 // Global Error Handler (must be last)
 // ===============================
 app.use(errorHandler);
-
-// ===============================
-// Health Check (deprecated - use /api/health)
-// ===============================
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "Use /api/health for detailed health check",
-  });
-});
 
 // ===============================
 // START SERVER (BLOCKING)
