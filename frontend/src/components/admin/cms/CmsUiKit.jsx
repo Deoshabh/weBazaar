@@ -15,9 +15,9 @@ export function Card({ children, className = '' }) {
 /* ─── SectionToggle ─── */
 export function SectionToggle({ label, enabled, onChange, hint }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
       <div>
-        <span className="text-sm font-medium text-primary-900">{label}</span>
+        <span className="text-sm font-semibold text-gray-900">{label}</span>
         {hint && <p className="text-xs text-gray-500 mt-0.5">{hint}</p>}
       </div>
       <label className="relative inline-flex items-center cursor-pointer">
@@ -37,9 +37,9 @@ export function SectionToggle({ label, enabled, onChange, hint }) {
 export function Field({ label, hint, children, className = '' }) {
   return (
     <div className={className}>
-      {label && <label className="block text-sm font-medium text-primary-900 mb-1.5">{label}</label>}
+      {label && <label className="block text-sm font-semibold text-gray-800 mb-1.5">{label}</label>}
       {children}
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -49,7 +49,7 @@ export function TextInput({ value, onChange, placeholder, type = 'text', classNa
   return (
     <input
       type={type}
-      className={`input w-full ${className}`}
+      className={`w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all ${className}`}
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
@@ -61,7 +61,7 @@ export function TextInput({ value, onChange, placeholder, type = 'text', classNa
 export function TextArea({ value, onChange, placeholder, rows = 3, className = '' }) {
   return (
     <textarea
-      className={`input w-full ${className}`}
+      className={`w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all ${className}`}
       rows={rows}
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value)}
@@ -78,11 +78,11 @@ export function ColorPicker({ value, onChange, label }) {
         type="color"
         value={value || '#000000'}
         onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-14 border border-primary-200 rounded cursor-pointer"
+        className="h-10 w-14 border border-gray-300 rounded cursor-pointer"
       />
       <div className="flex-1">
-        {label && <span className="text-sm text-primary-900">{label}</span>}
-        <span className="block text-xs text-gray-400 font-mono">{value || '#000000'}</span>
+        {label && <span className="text-sm font-medium text-gray-800">{label}</span>}
+        <span className="block text-xs text-gray-500 font-mono">{value || '#000000'}</span>
       </div>
     </div>
   );
@@ -96,13 +96,13 @@ export function CollapsibleSection({ title, icon, badge, defaultOpen = false, ch
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-primary-50/60 hover:bg-primary-50 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 hover:bg-gray-200 transition-colors text-left"
       >
-        {open ? <FiChevronDown className="w-4 h-4 text-gray-500" /> : <FiChevronRight className="w-4 h-4 text-gray-500" />}
-        {icon && <span className="text-primary-700">{icon}</span>}
-        <span className="font-medium text-sm text-primary-900 flex-1">{title}</span>
+        {open ? <FiChevronDown className="w-4 h-4 text-gray-600" /> : <FiChevronRight className="w-4 h-4 text-gray-600" />}
+        {icon && <span className="text-gray-700">{icon}</span>}
+        <span className="font-semibold text-sm text-gray-900 flex-1">{title}</span>
         {badge && (
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-200 text-primary-800">
+          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${badge === 'ON' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
             {badge}
           </span>
         )}
@@ -133,10 +133,10 @@ export function TabButton({ active, onClick, icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 sm:px-6 py-3.5 font-medium text-sm transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
+      className={`px-4 sm:px-6 py-3.5 font-semibold text-sm transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
         active
-          ? 'border-primary-900 text-primary-900 bg-primary-50'
-          : 'border-transparent text-gray-500 hover:text-gray-700'
+          ? 'border-gray-900 text-gray-900 bg-gray-50'
+          : 'border-transparent text-gray-500 hover:text-gray-800'
       }`}
     >
       {icon}
