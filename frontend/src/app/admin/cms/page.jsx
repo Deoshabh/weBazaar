@@ -30,7 +30,7 @@ export default function AdminCMSPage() {
   const [saving, setSaving] = useState(false);
 
   /* ── State ── */
-  const [branding, setBranding] = useState({ logo: { url: '', alt: 'Logo' }, favicon: { url: '' }, siteName: 'RADEO' });
+  const [branding, setBranding] = useState({ logo: { url: '', alt: 'Logo' }, favicon: { url: '' }, siteName: 'weBazaar' });
   const [banners, setBanners] = useState([]);
   const [announcementBar, setAnnouncementBar] = useState({
     enabled: true, text: '', link: '', backgroundColor: '#10b981', textColor: '#ffffff', dismissible: true,
