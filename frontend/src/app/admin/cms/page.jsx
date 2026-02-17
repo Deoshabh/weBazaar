@@ -9,7 +9,7 @@ import AdminLayout from '@/components/AdminLayout';
 import toast from 'react-hot-toast';
 import {
   FiHome, FiImage, FiLayout, FiTrash2, FiPlus, FiArrowUp, FiArrowDown,
-  FiFileText, FiPhone, FiSettings, FiSave, FiInfo, FiStar,
+  FiFileText, FiPhone, FiSettings, FiSave, FiInfo, FiStar, FiUploadCloud, FiX,
 } from 'react-icons/fi';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import {
@@ -31,6 +31,10 @@ export default function AdminCMSPage() {
 
   /* ── State ── */
   const [branding, setBranding] = useState({ logo: { url: '', alt: 'Logo' }, favicon: { url: '' }, siteName: 'weBazaar' });
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [faviconFile, setFaviconFile] = useState(null);
+  const [faviconPreview, setFaviconPreview] = useState(null);
   const [banners, setBanners] = useState([]);
   const [announcementBar, setAnnouncementBar] = useState({
     enabled: true, text: '', link: '', backgroundColor: '#10b981', textColor: '#ffffff', dismissible: true,
@@ -416,22 +420,116 @@ export default function AdminCMSPage() {
           ============================================================ */}
           {activeTab === 'branding' && (
             <Card>
-              <h3 className="text-lg font-semibold text-primary-900">Branding Essentials</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Branding Essentials</h3>
               <Field label="Site Name"><TextInput value={branding.siteName} onChange={v => setBranding(p => ({ ...p, siteName: v }))} /></Field>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Logo URL" hint="Paste a URL or upload via your media manager">
-                  <TextInput value={branding.logo?.url} onChange={v => setBranding(p => ({ ...p, logo: { ...p.logo, url: v } }))} placeholder="https://..." />
-                  {branding.logo?.url && (
-                    <div className="mt-2 h-16 flex items-center justify-center bg-gray-50 rounded">
-                      <Image src={branding.logo.url} alt="Logo" width={120} height={40} className="object-contain" />
-                    </div>
-                  )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                {/* ── Logo Upload ── */}
+                <Field label="Logo" hint="Upload an image or paste a URL. Recommended: PNG with transparent background.">
+                  <div
+                    className="relative mt-1 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors cursor-pointer bg-white"
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('border-gray-500', 'bg-gray-50'); }}
+                    onDragLeave={e => { e.currentTarget.classList.remove('border-gray-500', 'bg-gray-50'); }}
+                    onDrop={e => {
+                      e.preventDefault(); e.currentTarget.classList.remove('border-gray-500', 'bg-gray-50');
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && file.type.startsWith('image/')) { setLogoFile(file); setLogoPreview(URL.createObjectURL(file)); }
+                    }}
+                    onClick={() => document.getElementById('logo-upload-input')?.click()}
+                  >
+                    <input id="logo-upload-input" type="file" accept="image/*" className="hidden" onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) { setLogoFile(file); setLogoPreview(URL.createObjectURL(file)); }
+                    }} />
+                    {(logoPreview || branding.logo?.url) ? (
+                      <div className="relative">
+                        <div className="h-20 flex items-center justify-center">
+                          <Image src={logoPreview || branding.logo.url} alt="Logo" width={160} height={60} className="object-contain max-h-20" />
+                        </div>
+                        <button type="button" className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-sm" onClick={e => {
+                          e.stopPropagation(); setLogoFile(null); setLogoPreview(null); setBranding(p => ({ ...p, logo: { ...p.logo, url: '' } }));
+                        }}><FiX className="w-3 h-3" /></button>
+                        <p className="text-xs text-gray-500 mt-2">Click or drag to replace</p>
+                      </div>
+                    ) : (
+                      <div className="py-4">
+                        <FiUploadCloud className="mx-auto w-8 h-8 text-gray-400" />
+                        <p className="text-sm text-gray-600 mt-2 font-medium">Click to upload or drag & drop</p>
+                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, SVG up to 2MB</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2">
+                    <TextInput value={branding.logo?.url} onChange={v => { setBranding(p => ({ ...p, logo: { ...p.logo, url: v } })); setLogoFile(null); setLogoPreview(null); }} placeholder="Or paste image URL..." />
+                  </div>
+                  <Field label="Logo Alt Text" className="mt-2">
+                    <TextInput value={branding.logo?.alt} onChange={v => setBranding(p => ({ ...p, logo: { ...p.logo, alt: v } }))} placeholder="e.g. weBazaar Logo" />
+                  </Field>
                 </Field>
-                <Field label="Favicon URL">
-                  <TextInput value={branding.favicon?.url} onChange={v => setBranding(p => ({ ...p, favicon: { ...p.favicon, url: v } }))} placeholder="https://..." />
+
+                {/* ── Favicon Upload ── */}
+                <Field label="Favicon" hint="Upload a square icon. Recommended: 32×32 or 64×64 PNG/ICO.">
+                  <div
+                    className="relative mt-1 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors cursor-pointer bg-white"
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('border-gray-500', 'bg-gray-50'); }}
+                    onDragLeave={e => { e.currentTarget.classList.remove('border-gray-500', 'bg-gray-50'); }}
+                    onDrop={e => {
+                      e.preventDefault(); e.currentTarget.classList.remove('border-gray-500', 'bg-gray-50');
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && (file.type.startsWith('image/') || file.name.endsWith('.ico'))) { setFaviconFile(file); setFaviconPreview(URL.createObjectURL(file)); }
+                    }}
+                    onClick={() => document.getElementById('favicon-upload-input')?.click()}
+                  >
+                    <input id="favicon-upload-input" type="file" accept="image/*,.ico" className="hidden" onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) { setFaviconFile(file); setFaviconPreview(URL.createObjectURL(file)); }
+                    }} />
+                    {(faviconPreview || branding.favicon?.url) ? (
+                      <div className="relative">
+                        <div className="h-20 flex items-center justify-center">
+                          <Image src={faviconPreview || branding.favicon.url} alt="Favicon" width={48} height={48} className="object-contain max-h-16 rounded" />
+                        </div>
+                        <button type="button" className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-sm" onClick={e => {
+                          e.stopPropagation(); setFaviconFile(null); setFaviconPreview(null); setBranding(p => ({ ...p, favicon: { ...p.favicon, url: '' } }));
+                        }}><FiX className="w-3 h-3" /></button>
+                        <p className="text-xs text-gray-500 mt-2">Click or drag to replace</p>
+                      </div>
+                    ) : (
+                      <div className="py-4">
+                        <FiUploadCloud className="mx-auto w-8 h-8 text-gray-400" />
+                        <p className="text-sm text-gray-600 mt-2 font-medium">Click to upload or drag & drop</p>
+                        <p className="text-xs text-gray-400 mt-1">ICO, PNG, SVG — 32×32 or 64×64px</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2">
+                    <TextInput value={branding.favicon?.url} onChange={v => { setBranding(p => ({ ...p, favicon: { ...p.favicon, url: v } })); setFaviconFile(null); setFaviconPreview(null); }} placeholder="Or paste favicon URL..." />
+                  </div>
                 </Field>
               </div>
-              <SaveButton onClick={() => saveMain({ branding }, 'Branding saved!')} saving={saving} label="Save Branding" />
+
+              <SaveButton onClick={async () => {
+                try {
+                  setSaving(true);
+                  const updated = { ...branding };
+                  if (logoFile) {
+                    updated.logo = { ...updated.logo, url: await uploadImage(logoFile) };
+                    setLogoFile(null); setLogoPreview(null);
+                  }
+                  if (faviconFile) {
+                    updated.favicon = { ...updated.favicon, url: await uploadImage(faviconFile) };
+                    setFaviconFile(null); setFaviconPreview(null);
+                  }
+                  setBranding(updated);
+                  await adminAPI.updateSettings({ branding: updated });
+                  toast.success('Branding saved!');
+                  refreshSettings();
+                } catch (err) {
+                  console.error('Save failed:', err);
+                  if (err.response?.status === 401) { toast.error('Session expired'); router.push('/auth/login'); }
+                  else toast.error('Failed to save branding');
+                } finally { setSaving(false); }
+              }} saving={saving} label="Save Branding" />
             </Card>
           )}
 
