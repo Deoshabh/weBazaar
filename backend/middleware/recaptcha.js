@@ -122,7 +122,7 @@ async function verifyRecaptchaToken(
       token: token,
       siteKey:
         process.env.RECAPTCHA_SITE_KEY ||
-        "6LcbjmUsAAAAAHVeGta063p2ii-OlYGQqOBPfmQl",
+        "6LcZ2G8sAAAAALESBjPi3MQrsECYxP9pTnHZ8Dm_",
     };
 
     // Add user information if provided (for better bot detection)
@@ -221,7 +221,7 @@ async function verifyRecaptchaToken(
 async function createAssessment({
   projectID = process.env.GOOGLE_CLOUD_PROJECT_ID || "webazaar-62921",
   recaptchaKey = process.env.RECAPTCHA_SITE_KEY ||
-    "6LcbjmUsAAAAAHVeGta063p2ii-OlYGQqOBPfmQl",
+    "6LcZ2G8sAAAAALESBjPi3MQrsECYxP9pTnHZ8Dm_",
   token = "",
   recaptchaAction = "",
   userInfo = null,

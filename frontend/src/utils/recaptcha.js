@@ -5,7 +5,7 @@
 
 const RECAPTCHA_SITE_KEY =
   process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
-  "6LcbjmUsAAAAAHVeGta063p2ii-OlYGQqOBPfmQl";
+  "6LcZ2G8sAAAAALESBjPi3MQrsECYxP9pTnHZ8Dm_";
 
 /**
  * Execute reCAPTCHA Enterprise for a specific action
