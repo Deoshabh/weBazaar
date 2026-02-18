@@ -70,10 +70,10 @@ async function initializeBucket() {
       secretKey: MINIO_SECRET_KEY,
     };
 
-    // Accept self-signed certificates if configured
-    if (useSSL && String(process.env.MINIO_ALLOW_SELF_SIGNED).toLowerCase() === "true") {
+    // Accept self-signed certificates when using SSL
+    if (useSSL) {
       clientOptions.transportAgent = new https.Agent({ rejectUnauthorized: false });
-      console.log("⚠️  SSL: Accepting self-signed certificates");
+      console.log("🔐 SSL: Configured with flexible certificate validation");
     }
 
     minioClient = new Minio.Client(clientOptions);

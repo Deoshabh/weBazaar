@@ -16,8 +16,8 @@ const reviewMinioOptions = {
   secretKey: process.env.MINIO_SECRET_KEY
 };
 
-// Accept self-signed certificates if configured
-if (useSSL && String(process.env.MINIO_ALLOW_SELF_SIGNED).toLowerCase() === 'true') {
+// Accept self-signed certificates when using SSL
+if (useSSL) {
   reviewMinioOptions.transportAgent = new https.Agent({ rejectUnauthorized: false });
 }
 
