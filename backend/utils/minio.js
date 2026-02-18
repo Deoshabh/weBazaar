@@ -115,6 +115,32 @@ async function initializeBucket() {
     console.error("  Error Message:", error.message);
     console.error("  Status Code:", error.statusCode);
     console.error("  Full Error:", JSON.stringify(error, null, 2));
+    // Log raw response body if available (helps diagnose HTML/non-XML responses)
+    if (error.body) console.error("  Response Body:", error.body);
+    if (error.headers) console.error("  Response Headers:", JSON.stringify(error.headers));
+    // Try a raw HTTPS request to see what the endpoint returns
+    try {
+      const http = require(useSSL ? "https" : "http");
+      const testReq = http.request({
+        hostname: MINIO_ENDPOINT,
+        port: Number(MINIO_PORT),
+        path: "/minio/health/live",
+        method: "GET",
+        rejectUnauthorized: false,
+        timeout: 5000,
+      }, (testRes) => {
+        let data = "";
+        testRes.on("data", (chunk) => { data += chunk; });
+        testRes.on("end", () => {
+          console.log(`  🔍 Health check response (${testRes.statusCode}):`, data.substring(0, 500));
+          console.log(`  🔍 Content-Type:`, testRes.headers["content-type"]);
+        });
+      });
+      testReq.on("error", (e) => console.error("  🔍 Health check failed:", e.message));
+      testReq.end();
+    } catch (diagErr) {
+      console.error("  🔍 Diagnostic request failed:", diagErr.message);
+    }
     throw error;
   }
 }
