@@ -1,6 +1,8 @@
 const {
   RecaptchaEnterpriseServiceClient,
 } = require("@google-cloud/recaptcha-enterprise");
+const fs = require("fs");
+const path = require("path");
 
 /**
  * Google reCAPTCHA Enterprise Middleware
@@ -32,12 +34,20 @@ function initializeRecaptchaClient() {
       return null;
     }
 
+    // Check if credentials file exists before attempting to initialize
+    const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || "./google-credentials.json";
+    const resolvedPath = path.resolve(credentialsPath);
+    if (!fs.existsSync(resolvedPath)) {
+      console.warn(
+        `⚠️  reCAPTCHA credentials file not found at: ${resolvedPath}. Verification will be skipped.`,
+      );
+      return null;
+    }
+
     // Create the reCAPTCHA client
     // Client generation is cached (recommended) to avoid repeated initialization
     recaptchaClient = new RecaptchaEnterpriseServiceClient({
-      keyFilename:
-        process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-        "./google-credentials.json",
+      keyFilename: resolvedPath,
     });
 
     console.log("✅ reCAPTCHA Enterprise client initialized");
@@ -141,7 +151,12 @@ async function verifyRecaptchaToken(
       parent: projectPath,
     };
 
-    const [response] = await client.createAssessment(request);
+    const [response] = await Promise.race([
+      client.createAssessment(request),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("reCAPTCHA assessment timeout (5s)")), 5000)
+      ),
+    ]);
 
     // Check if the token is valid
     if (!response.tokenProperties.valid) {
@@ -254,7 +269,12 @@ async function createAssessment({
     parent: projectPath,
   };
 
-  const [response] = await client.createAssessment(request);
+  const [response] = await Promise.race([
+    client.createAssessment(request),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("reCAPTCHA assessment timeout (5s)")), 5000)
+    ),
+  ]);
 
   // Check if the token is valid
   if (!response.tokenProperties.valid) {
