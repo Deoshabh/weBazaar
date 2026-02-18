@@ -503,6 +503,11 @@ exports.getPublicSettings = async (req, res, next) => {
       publicSettings.theme = { ...(publicSettings.theme || {}), ...publishedSnapshot.theme };
     }
 
+    // Include branding from singleton so public consumers (Navbar, OG images) can access it
+    if (publishedSnapshot?.branding || singletonSettings?.branding) {
+      publicSettings.branding = publishedSnapshot?.branding || singletonSettings?.branding;
+    }
+
     publicSettings.publishWorkflow = {
       status: singletonSettings.publishWorkflow?.status || 'live',
       scheduledAt: singletonSettings.publishWorkflow?.scheduledAt || null,

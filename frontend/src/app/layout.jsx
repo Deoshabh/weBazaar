@@ -19,14 +19,36 @@ const roboto = Roboto({
   display: 'swap',
 });
 
+const DEFAULT_OG_IMAGE = 'https://webazaar.in/og/webazaar-og-banner.jpg';
 
+async function fetchBrandingImage() {
+  try {
+    // BACKEND_INTERNAL_URL is the Docker container URL without path prefix (e.g. http://backend:5000)
+    // NEXT_PUBLIC_API_URL already includes /api/v1
+    const baseUrl = process.env.BACKEND_INTERNAL_URL
+      ? `${process.env.BACKEND_INTERNAL_URL}/api/v1`
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1');
+    const res = await fetch(
+      `${baseUrl}/settings/public`,
+      { next: { revalidate: 300 } } // cache 5 minutes
+    );
+    if (!res.ok) return DEFAULT_OG_IMAGE;
+    const data = await res.json();
+    return data?.settings?.branding?.logo?.url || DEFAULT_OG_IMAGE;
+  } catch {
+    return DEFAULT_OG_IMAGE;
+  }
+}
 
-export const metadata = generateSEOMetadata({
-  title: 'weBazaar — Premium Leather & Vegan Shoes',
-  description: 'Conscious style, delivered. Shop premium leather & vegan shoes at weBazaar — cruelty-free, sustainable, and designed for modern living.',
-  image: 'https://webazaar.in/og/webazaar-og-banner.jpg',
-  keywords: ['vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear', 'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes'],
-});
+export async function generateMetadata() {
+  const ogImage = await fetchBrandingImage();
+  return generateSEOMetadata({
+    title: 'weBazaar — Premium Leather & Vegan Shoes',
+    description: 'Conscious style, delivered. Shop premium leather & vegan shoes at weBazaar — cruelty-free, sustainable, and designed for modern living.',
+    image: ogImage,
+    keywords: ['vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear', 'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes'],
+  });
+}
 
 import QueryProvider from '@/providers/QueryProvider';
 
@@ -36,7 +58,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={roboto.variable}>
       <head>
-        <link rel="preconnect" href="https://api.weBazaar.in" />
+        <link rel="preconnect" href="https://api.webazaar.in" />
         <script src={`https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`} async defer></script>
       </head>
       <body className="antialiased">
