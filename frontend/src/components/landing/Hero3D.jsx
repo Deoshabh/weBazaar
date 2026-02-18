@@ -147,7 +147,7 @@ export default function Hero3D() {
             className="text-5xl md:text-7xl lg:text-8xl font-light leading-none mb-6 hero-headline"
             style={{
               color: '#E6E2DD',
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              fontFamily: "'Roboto', sans-serif",
               letterSpacing: '0.04em',
             }}
           >

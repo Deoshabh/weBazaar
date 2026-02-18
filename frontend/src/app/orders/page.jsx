@@ -91,7 +91,7 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-primary-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-6xl">
+      <div className="container-custom section-padding max-w-6xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-primary-900 mb-2">My Orders</h1>

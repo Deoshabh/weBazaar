@@ -1,4 +1,4 @@
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/context/AuthContext';
@@ -12,17 +12,14 @@ import AnnouncementBar from '@/components/AnnouncementBar';
 import MaintenanceModeGate from '@/components/MaintenanceModeGate';
 import { generateMetadata as generateSEOMetadata } from '@/utils/seo';
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['300', '400', '500', '700', '900'],
+  variable: '--font-roboto',
   display: 'swap',
 });
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-});
+
 
 export const metadata = generateSEOMetadata({
   title: 'weBazaar — Premium Leather & Vegan Shoes',
@@ -37,7 +34,7 @@ import QueryProvider from '@/providers/QueryProvider';
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={roboto.variable}>
       <head>
         <link rel="preconnect" href="https://api.weBazaar.in" />
         <script src={`https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`} async defer></script>

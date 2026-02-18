@@ -24,14 +24,14 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary-50 pt-24">
+    <div className="min-h-screen bg-primary-50">
       <div className="container-custom section-padding">
-        <Link href="/products" className="inline-flex items-center gap-2 text-primary-600 hover:text-brand-brown mb-8">
+        <Link href="/products" className="inline-flex items-center gap-2 text-primary-600 hover:text-brand-brown mb-4">
           <FiArrowLeft />
           Continue Shopping
         </Link>
 
-        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-primary-900 mb-8">
+        <h1 className="font-serif text-3xl lg:text-4xl font-bold text-primary-900 mb-6">
           My Wishlist
         </h1>
 

@@ -224,7 +224,7 @@ export default function Navbar() {
       style={{ color: 'var(--color-text-primary)' }}
     >
       <div className="container-custom">
-        <div className={`${isCenteredHeader ? 'grid grid-cols-[1fr_auto_1fr] items-center' : 'relative flex items-center justify-between'} py-4 ${isCenteredHeader ? 'lg:min-h-[72px]' : ''}`}>
+        <div className={`${isCenteredHeader ? 'grid grid-cols-[1fr_auto_1fr] items-center' : 'relative flex items-center justify-between'} py-3 ${isCenteredHeader ? 'lg:min-h-[56px]' : ''}`}>
           {/* Logo */}
           <Link
             href="/"
@@ -328,7 +328,7 @@ export default function Navbar() {
                           </div>
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
-                            <span className="font-bold text-lg text-primary-700" style={{ fontFamily: "'Playfair Display', serif" }}>{category.name.charAt(0)}</span>
+                            <span className="font-bold text-lg text-primary-700" style={{ fontFamily: "'Roboto', sans-serif" }}>{category.name.charAt(0)}</span>
                           </div>
                         )}
                         <div className="flex-1 min-w-0">

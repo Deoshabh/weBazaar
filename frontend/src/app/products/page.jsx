@@ -256,14 +256,14 @@ function ProductsContent() {
   ].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-primary-50 pt-28 pb-20" ref={containerRef}>
+    <div className="min-h-screen bg-primary-50" ref={containerRef}>
       <div className="container-custom section-padding">
         {/* Header */}
-        <div className="mb-10" ref={headerRef}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div className="mb-6" ref={headerRef}>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-4">
             <div>
-              <p className="text-sm text-primary-500 mb-2 uppercase tracking-wide font-medium">Home / Products</p>
-              <h1 className="font-serif text-4xl lg:text-5xl font-bold text-primary-900">
+              <p className="text-sm text-primary-500 mb-1 uppercase tracking-wide font-medium">Home / Products</p>
+              <h1 className="font-serif text-3xl lg:text-4xl font-bold text-primary-900">
                 {searchQuery ? `Search: "${searchQuery}"` : 'All Products'}
               </h1>
             </div>
@@ -550,7 +550,7 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-primary-50 pt-28">
+      <div className="min-h-screen bg-primary-50">
         <div className="container-custom section-padding">
           <div className="w-48 h-8 bg-gray-200 rounded animate-pulse mb-8"></div>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

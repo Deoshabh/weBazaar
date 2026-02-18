@@ -290,7 +290,7 @@ export function SiteSettingsProvider({ children }) {
 
     const primaryScale = buildPrimaryScale(activePrimaryColor);
 
-    root.style.setProperty('--theme-font-family', theme.fontFamily || 'var(--font-inter)');
+    root.style.setProperty('--theme-font-family', theme.fontFamily || 'var(--font-roboto)');
     root.style.setProperty('--theme-font-scale', String(theme.fontScale || 1));
     root.style.setProperty('--theme-border-radius', theme.borderRadius || '0.5rem');
     root.style.setProperty('--theme-container-width', theme.containerWidth || '1280px');

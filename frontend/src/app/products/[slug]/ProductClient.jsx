@@ -126,9 +126,9 @@ export default function ProductClient({ product }) {
     return (
         <>
             <ProductMetadata product={product} />
-            <div className="min-h-screen bg-primary-50 pt-24">
+            <div className="min-h-screen bg-primary-50">
                 <div className="container-custom section-padding">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
                         {/* Image Gallery */}
                         <div className="space-y-4">
                             {/* Main Image */}
@@ -205,20 +205,20 @@ export default function ProductClient({ product }) {
                         </div>
 
                         {/* Product Info */}
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {/* Category & Name */}
                             <div>
-                                <p className="text-sm uppercase tracking-wider text-primary-600 mb-2">
+                                <p className="text-sm uppercase tracking-wider text-primary-600 mb-1">
                                     {product.category?.name}
                                 </p>
-                                <h1 className="font-serif text-4xl lg:text-5xl font-bold text-primary-900 mb-4">
+                                <h1 className="font-serif text-3xl lg:text-4xl font-bold text-primary-900 mb-3">
                                     {product.name}
                                 </h1>
 
                                 {/* Price with Discount Display */}
                                 {product.comparePrice && product.comparePrice > product.price ? (
                                     <div className="flex items-center gap-3 flex-wrap">
-                                        <p className="text-3xl font-bold text-green-600">
+                                        <p className="text-2xl font-bold text-green-600">
                                             ₹{product.price?.toLocaleString('en-IN')}
                                         </p>
                                         <p className="text-xl text-gray-500 line-through">
@@ -229,7 +229,7 @@ export default function ProductClient({ product }) {
                                         </span>
                                     </div>
                                 ) : (
-                                    <p className="text-3xl font-bold text-brand-brown">
+                                    <p className="text-2xl font-bold text-brand-brown">
                                         ₹{product.price?.toLocaleString('en-IN')}
                                     </p>
                                 )}

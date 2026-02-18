@@ -44,13 +44,13 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-primary-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        <Link href="/products" className="inline-flex items-center gap-2 text-sm sm:text-base text-primary-600 hover:text-brand-brown mb-6 sm:mb-8 transition-colors">
+      <div className="container-custom section-padding">
+        <Link href="/products" className="inline-flex items-center gap-2 text-sm sm:text-base text-primary-600 hover:text-brand-brown mb-4 sm:mb-5 transition-colors">
           <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           Continue Shopping
         </Link>
 
-        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-900 mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-primary-900 mb-4 sm:mb-6">
           Shopping Cart
         </h1>
 

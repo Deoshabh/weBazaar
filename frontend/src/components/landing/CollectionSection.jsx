@@ -122,7 +122,7 @@ function ProductCard({ item, index }) {
           className="text-lg font-light tracking-wide"
           style={{
             color: '#2C2B29',
-            fontFamily: "'Cormorant Garamond', serif",
+            fontFamily: "'Roboto', sans-serif",
           }}
         >
           {item.name}
@@ -188,7 +188,7 @@ export default function CollectionSection() {
             className="text-4xl md:text-5xl lg:text-6xl font-light"
             style={{
               color: '#2C2B29',
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              fontFamily: "'Roboto', sans-serif",
             }}
           >
             Three Paths,{' '}

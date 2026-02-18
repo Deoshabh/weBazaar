@@ -160,7 +160,7 @@ export default function LiquidBuyButton({
         color: style.text,
         borderRadius: '999px',
         border: variant === 'secondary' ? '1px solid rgba(44, 43, 41, 0.2)' : 'none',
-        fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+        fontFamily: "'Roboto', sans-serif",
         willChange: 'border-radius, transform',
       }}
     >

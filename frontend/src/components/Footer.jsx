@@ -90,10 +90,10 @@ export default function Footer() {
 
   return (
     <footer
-      className="mt-20 transition-colors duration-300"
+      className="mt-10 transition-colors duration-300"
       style={{ backgroundColor: bgColor, color: textColor }}
     >
-      <div className="container-custom py-12">
+      <div className="container-custom py-8">
         <div className={contentContainerClass}>
           <div>
             <h3 className="text-2xl font-serif font-bold mb-4">{footerContent.brand?.name || 'weBazaar'}</h3>

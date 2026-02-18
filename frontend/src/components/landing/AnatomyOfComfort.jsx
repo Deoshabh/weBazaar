@@ -141,7 +141,7 @@ function AnatomyScene({ scrollProgress }) {
                     className="text-xs font-medium tracking-widest uppercase mb-1"
                     style={{
                       color: '#2C2B29',
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "'Roboto', sans-serif",
                       fontSize: '11px',
                     }}
                   >
@@ -269,7 +269,7 @@ export default function AnatomyOfComfort() {
             className="text-4xl md:text-5xl lg:text-6xl font-light opacity-0"
             style={{
               color: '#2C2B29',
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              fontFamily: "'Roboto', sans-serif",
               letterSpacing: '0.02em',
             }}
           >
@@ -287,7 +287,7 @@ export default function AnatomyOfComfort() {
                   className="text-[9px] tracking-[0.2em] uppercase text-right w-20 transition-opacity duration-500"
                   style={{
                     color: scrollProgress >= label.triggerAt ? '#2C2B29' : 'rgba(44,43,41,0.2)',
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "'Roboto', sans-serif",
                   }}
                 >
                   {label.title.split(' ').slice(-2).join(' ')}

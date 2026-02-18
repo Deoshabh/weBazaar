@@ -95,7 +95,7 @@ export default function LandingNavbar() {
               className="text-xl font-light tracking-[0.15em] transition-colors duration-300"
               style={{
                 color: isScrolled ? '#2C2B29' : '#E6E2DD',
-                fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+                fontFamily: "'Roboto', sans-serif",
               }}
             >
               WEBAZAAR
@@ -118,7 +118,7 @@ export default function LandingNavbar() {
                 className="nav-item relative group"
                 style={{
                   color: isScrolled ? '#2C2B29' : 'rgba(230, 226, 221, 0.85)',
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "'Roboto', sans-serif",
                   fontSize: '13px',
                   letterSpacing: '0.15em',
                   textTransform: 'uppercase',
@@ -201,7 +201,7 @@ export default function LandingNavbar() {
                 className="mobile-nav-item"
                 style={{
                   color: '#2C2B29',
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "'Roboto', sans-serif",
                   fontSize: '18px',
                   letterSpacing: '0.1em',
                   textDecoration: 'none',

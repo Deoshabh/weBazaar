@@ -2,18 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Inter + Playfair Display loaded via next/font/google in layout.jsx */
+/* Roboto loaded via next/font/google in layout.jsx */
 
 :root {
-  --font-inter: 'Inter', sans-serif;
-  --font-playfair: 'Playfair Display', serif;
-  --theme-font-family: var(--font-inter);
+  --font-roboto: 'Roboto', sans-serif;
+  --theme-font-family: var(--font-roboto);
   --theme-font-scale: 1;
   --theme-border-radius: 0.5rem;
   --theme-container-width: 1280px;
   --theme-bg-color: #fafaf9;
   --theme-text-color: #1c1917;
-  --navbar-offset: 80px;
+  --navbar-offset: 64px;
   
   /* Spacing scale */
   --spacing-xs: 0.5rem;
@@ -74,7 +73,7 @@ html[data-theme-custom-cursor='true'] select {
 }
 
 body {
-  font-family: var(--theme-font-family, var(--font-inter));
+  font-family: var(--theme-font-family, var(--font-roboto));
   font-size: calc(1rem * var(--theme-font-scale, 1));
   background-color: var(--theme-bg-color, var(--color-background));
   color: var(--theme-text-color, var(--color-text-primary));
@@ -163,16 +162,16 @@ body {
   }
   
   .section-padding {
-    @apply py-16 lg:py-20;
+    @apply py-8 lg:py-10;
   }
   
   .page-padding {
-    @apply py-10 lg:py-14;
+    @apply py-6 lg:py-8;
   }
   
   /* Prevent content from going under fixed navbar */
   .page-content {
-    @apply pt-20 min-h-screen;
+    @apply pt-16 min-h-screen;
   }
 }
 
@@ -261,8 +260,7 @@ img {
    Landing Page — Organic Levitation Styles
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Cormorant Garamond — Elegant Serif for Landing Page */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap');
+
 
 /* Landing page smooth scroll */
 .landing-smooth-scroll {

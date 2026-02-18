@@ -156,7 +156,7 @@ export default function MeditativeBreathLoader({ onComplete }) {
           className="text-2xl tracking-[0.2em] font-light"
           style={{
             color: '#D4C4B0',
-            fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+            fontFamily: "'Roboto', sans-serif",
           }}
         >
           WEBAZAAR

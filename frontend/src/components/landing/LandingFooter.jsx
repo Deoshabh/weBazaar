@@ -60,7 +60,7 @@ export default function LandingFooter() {
             className="text-3xl md:text-4xl font-light mb-4 tracking-[0.1em]"
             style={{
               color: '#E6E2DD',
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              fontFamily: "'Roboto', sans-serif",
             }}
           >
             WEBAZAAR
@@ -108,7 +108,7 @@ export default function LandingFooter() {
                       className="text-sm transition-colors duration-300 hover:opacity-100"
                       style={{
                         color: 'rgba(230, 226, 221, 0.6)',
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: "'Roboto', sans-serif",
                         letterSpacing: '0.05em',
                         textDecoration: 'none',
                       }}

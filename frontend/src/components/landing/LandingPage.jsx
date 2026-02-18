@@ -57,7 +57,7 @@ export default function LandingPage() {
 
   // Smooth scroll behavior for the landing page
   useEffect(() => {
-    // Cormorant Garamond font loaded globally via globals.css
+    // Roboto font loaded via next/font/google in layout.jsx
   }, []);
 
   return (

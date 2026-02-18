@@ -151,7 +151,7 @@ function FeatureCard({ feature, index }) {
           style={{
             color: '#2C2B29',
             opacity: 0.1,
-            fontFamily: "'Cormorant Garamond', serif",
+            fontFamily: "'Roboto', sans-serif",
             lineHeight: 0.9,
           }}
         >
@@ -164,7 +164,7 @@ function FeatureCard({ feature, index }) {
           className="text-3xl md:text-4xl lg:text-5xl font-light mb-6 whitespace-pre-line"
           style={{
             color: '#2C2B29',
-            fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+            fontFamily: "'Roboto', sans-serif",
             letterSpacing: '0.02em',
             lineHeight: 1.15,
           }}
@@ -256,7 +256,7 @@ export default function FeaturesSection() {
             className="text-4xl md:text-5xl lg:text-6xl font-light"
             style={{
               color: '#2C2B29',
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              fontFamily: "'Roboto', sans-serif",
               letterSpacing: '0.02em',
             }}
           >
@@ -276,7 +276,7 @@ export default function FeaturesSection() {
             className="text-sm mb-8 tracking-wider"
             style={{
               color: 'rgba(44, 43, 41, 0.6)',
-              fontFamily: "'Cormorant Garamond', serif",
+              fontFamily: "'Roboto', sans-serif",
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
             }}

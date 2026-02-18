@@ -478,7 +478,7 @@ export const SITE_SETTINGS_DEFAULTS = {
         textColor: '#F9FAFB',
       },
     },
-    fontFamily: 'var(--font-inter)',
+    fontFamily: 'var(--font-roboto)',
     borderRadius: '0.5rem',
   },
 };
