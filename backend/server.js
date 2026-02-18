@@ -162,8 +162,10 @@ app.use(
 // ===============================
 app.use(
   helmet({
-    // Allow cross-origin requests from frontend (weBazaar.in → api.weBazaar.in)
+    // Allow cross-origin requests from frontend (webazaar.in → api.webazaar.in)
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    // Relax COOP to allow Firebase popup auth (Google Sign-In)
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   }),
 );
 app.use(compression()); // Compress all responses

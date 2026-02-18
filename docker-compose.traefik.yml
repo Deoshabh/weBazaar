@@ -108,8 +108,8 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
       # ====== MIDDLEWARE: CORS Headers ======
-      # Allow requests ONLY from https://weBazaar.in
-      - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
+      # Allow requests ONLY from https://webazaar.in
+      - "traefik.http.middlewares.cors-headers.headers.accesscontrolalloworiginlist=https://webazaar.in,https://www.webazaar.in"
 
       # Allow these HTTP methods (including OPTIONS for preflight)
       - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -231,7 +231,7 @@ services:
       - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
 
       # ====== CORS Middleware for MinIO API ======
-      - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://weBazaar.in,https://www.weBazaar.in"
+      - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://webazaar.in,https://www.webazaar.in"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS,HEAD"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowcredentials=true"
