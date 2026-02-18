@@ -84,11 +84,12 @@ export default function FirebaseLoginPage() {
         toast.error('Failed to sync with server. Please try again.');
       }
     } catch (error) {
-      console.error('Backend sync error:', {
+      console.error('Backend sync error:', JSON.stringify({
         status: error.response?.status,
         message: error.message,
         responseData: error.response?.data,
-      });
+        url: error.config?.url,
+      }, null, 2));
 
       if (error.response?.data?.error === 'FIREBASE_UID_MISMATCH') {
         toast.error(

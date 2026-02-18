@@ -12,6 +12,9 @@ const { recordSecurityEvent } = require("../utils/securityEvents");
 ===================== */
 const generateAccessToken = (user) => {
   const accessSecret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+  if (!accessSecret) {
+    throw new Error("JWT_ACCESS_SECRET or JWT_SECRET environment variable is not set");
+  }
   return jwt.sign({ id: user._id, role: user.role }, accessSecret, {
     expiresIn: process.env.JWT_ACCESS_EXPIRATION || "15m",
   });
@@ -22,7 +25,7 @@ const setRefreshCookie = (res, token) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    domain: process.env.NODE_ENV === "production" ? ".weBazaar.in" : undefined,
+    domain: process.env.NODE_ENV === "production" ? ".webazaar.in" : undefined,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -32,11 +35,14 @@ const clearRefreshCookie = (res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    domain: process.env.NODE_ENV === "production" ? ".weBazaar.in" : undefined,
+    domain: process.env.NODE_ENV === "production" ? ".webazaar.in" : undefined,
   });
 };
 
 const generateRefreshToken = async (user, ip) => {
+  if (!process.env.JWT_REFRESH_SECRET) {
+    throw new Error("JWT_REFRESH_SECRET environment variable is not set");
+  }
   const tokenId = crypto.randomUUID();
   const token = jwt.sign({ id: user._id, jti: tokenId }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRATION || "7d",
@@ -636,7 +642,14 @@ exports.firebaseLogin = async (req, res, next) => {
       code: err.code,
       message: err.message,
       name: err.name,
+      stack: err.stack,
     });
-    next(err);
+    // Return a meaningful error instead of generic 500
+    const status = err.status || 500;
+    return res.status(status).json({
+      message: err.message || "Firebase login failed",
+      error: "FIREBASE_LOGIN_ERROR",
+      details: process.env.NODE_ENV !== "production" ? err.stack : undefined,
+    });
   }
 };
