@@ -15,7 +15,7 @@ const minioClient = new Minio.Client({
   secretKey: process.env.MINIO_SECRET_KEY
 });
 
-const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'weBazaar-reviews';
+const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'webazaar-reviews';
 
 // Ensure bucket exists
 (async () => {

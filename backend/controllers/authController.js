@@ -512,11 +512,25 @@ exports.resetPassword = async (req, res, next) => {
 ===================== */
 exports.firebaseLogin = async (req, res, next) => {
   try {
+    // ── Early environment check ──
+    const jwtSecret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+    if (!jwtSecret || !process.env.JWT_REFRESH_SECRET) {
+      console.error("❌ FATAL: Missing JWT env vars", {
+        hasJwtSecret: Boolean(jwtSecret),
+        hasRefreshSecret: Boolean(process.env.JWT_REFRESH_SECRET),
+      });
+      return res.status(500).json({
+        message: "Server configuration error: JWT secrets not set",
+        error: "SERVER_CONFIG_ERROR",
+      });
+    }
+
     const { firebaseToken, email, phoneNumber, displayName, photoURL } = req.body;
 
-    log.debug("Firebase login request received", {
+    console.log("🔑 Firebase login request received", {
       hasToken: Boolean(firebaseToken),
       hasEmail: Boolean(email),
+      email: email || "(none)",
     });
 
     if (!firebaseToken) {
@@ -619,8 +633,10 @@ exports.firebaseLogin = async (req, res, next) => {
       return res.status(403).json({ message: "Your account has been blocked" });
     }
 
+    console.log("🔐 Generating tokens for user:", user._id, user.email);
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user, req.ip);
+    console.log("✅ Tokens generated successfully");
 
     setRefreshCookie(res, refreshToken).json({
       message: "Firebase authentication successful",
