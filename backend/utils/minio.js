@@ -119,9 +119,10 @@ async function initializeBucket() {
     if (error.body) console.error("  Response Body:", error.body);
     if (error.headers) console.error("  Response Headers:", JSON.stringify(error.headers));
     // Try a raw HTTPS request to see what the endpoint returns
+    const sslEnabled = String(MINIO_USE_SSL).toLowerCase() === "true";
     try {
-      const http = require(useSSL ? "https" : "http");
-      const testReq = http.request({
+      const httpMod = require(sslEnabled ? "https" : "http");
+      const testReq = httpMod.request({
         hostname: MINIO_ENDPOINT,
         port: Number(MINIO_PORT),
         path: "/minio/health/live",
