@@ -1,4 +1,5 @@
 const Minio = require("minio");
+const https = require("https");
 
 /**
  * ===============================
@@ -61,13 +62,21 @@ async function initializeBucket() {
 
     const useSSL = String(MINIO_USE_SSL).toLowerCase() === "true";
 
-    minioClient = new Minio.Client({
+    const clientOptions = {
       endPoint: MINIO_ENDPOINT,
       port: Number(MINIO_PORT),
       useSSL: useSSL,
       accessKey: MINIO_ACCESS_KEY,
       secretKey: MINIO_SECRET_KEY,
-    });
+    };
+
+    // Accept self-signed certificates if configured
+    if (useSSL && String(process.env.MINIO_ALLOW_SELF_SIGNED).toLowerCase() === "true") {
+      clientOptions.transportAgent = new https.Agent({ rejectUnauthorized: false });
+      console.log("⚠️  SSL: Accepting self-signed certificates");
+    }
+
+    minioClient = new Minio.Client(clientOptions);
 
     console.log(
       `🔍 Testing connection to ${useSSL ? "https" : "http"}://${MINIO_ENDPOINT}:${MINIO_PORT}`,

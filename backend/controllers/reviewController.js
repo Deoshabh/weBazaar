@@ -2,18 +2,26 @@ const Review = require('../models/Review');
 const Product = require('../models/Product');
 // const { Queue } = require('bullmq'); // Removed in favor of simple redis list
 const Minio = require('minio');
+const https = require('https');
 const crypto = require('crypto');
 const path = require('path');
 
 // Initialize MinIO Client
 const useSSL = String(process.env.MINIO_USE_SSL).toLowerCase() === 'true';
-const minioClient = new Minio.Client({
+const reviewMinioOptions = {
   endPoint: process.env.MINIO_ENDPOINT || 'minio',
   port: parseInt(process.env.MINIO_PORT || '9000'),
   useSSL: useSSL,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY
-});
+};
+
+// Accept self-signed certificates if configured
+if (useSSL && String(process.env.MINIO_ALLOW_SELF_SIGNED).toLowerCase() === 'true') {
+  reviewMinioOptions.transportAgent = new https.Agent({ rejectUnauthorized: false });
+}
+
+const minioClient = new Minio.Client(reviewMinioOptions);
 
 const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'webazaar-reviews';
 
