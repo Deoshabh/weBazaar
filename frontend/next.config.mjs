@@ -13,12 +13,17 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "minio.weBazaar.in",
+        hostname: "minio.webazaar.in",
         pathname: "/product-media/**",
       },
       {
         protocol: "https",
-        hostname: "cdn.weBazaar.in",
+        hostname: "cdn.webazaar.in",
+        pathname: "/product-media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "s3.webazaar.in",
         pathname: "/product-media/**",
       },
       {

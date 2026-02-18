@@ -161,7 +161,7 @@ exports.createShipment = async (req, res) => {
       billing_pincode: order.shippingAddress.postalCode,
       billing_state: order.shippingAddress.state,
       billing_country: order.shippingAddress.country || "India",
-      billing_email: order.user?.email || "noreply@weBazaar.in",
+      billing_email: order.user?.email || "noreply@webazaar.in",
       billing_phone: order.shippingAddress.phone,
       order_items: orderItems,
       payment_method: order.payment.method === "cod" ? "COD" : "Prepaid",

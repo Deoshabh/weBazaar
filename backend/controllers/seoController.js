@@ -348,7 +348,11 @@ exports.upsertSeoSetting = async (req, res) => {
     res.json({ success: true, data: setting });
   } catch (error) {
     console.error("Error upserting SEO setting:", error);
-    res.status(500).json({ success: false, message: "Failed to save SEO setting" });
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({ success: false, message: messages.join(", "), errors: error.errors });
+    }
+    res.status(500).json({ success: false, message: "Failed to save SEO setting", error: error.message });
   }
 };
 

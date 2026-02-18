@@ -37,12 +37,12 @@ const seoSettingSchema = new mongoose.Schema(
     meta_title: {
       type: String,
       default: "",
-      maxlength: 70,
+      maxlength: 200,
     },
     meta_description: {
       type: String,
       default: "",
-      maxlength: 160,
+      maxlength: 500,
     },
     meta_keywords: {
       type: [String],
@@ -101,11 +101,10 @@ const seoSettingSchema = new mongoose.Schema(
 );
 
 // Keep only last 10 history entries
-seoSettingSchema.pre("save", function (next) {
+seoSettingSchema.pre("save", function () {
   if (this.history && this.history.length > 10) {
     this.history = this.history.slice(-10);
   }
-  next();
 });
 
 module.exports = mongoose.model("SeoSetting", seoSettingSchema);
