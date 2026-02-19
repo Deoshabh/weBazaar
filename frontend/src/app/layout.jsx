@@ -31,13 +31,9 @@ const DEFAULT_OG_IMAGE = 'https://webazaar.in/og/webazaar-og-banner.jpg';
 
 async function fetchBrandingImage() {
   try {
-    // BACKEND_INTERNAL_URL is the Docker container URL without path prefix (e.g. http://backend:5000)
-    // NEXT_PUBLIC_API_URL already includes /api/v1
-    const baseUrl = process.env.BACKEND_INTERNAL_URL
-      ? `${process.env.BACKEND_INTERNAL_URL}/api/v1`
-      : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1');
+    const { getServerApiUrl } = require('@/utils/serverApi');
     const res = await fetch(
-      `${baseUrl}/settings/public`,
+      `${getServerApiUrl()}/settings/public`,
       { next: { revalidate: 300 } } // cache 5 minutes
     );
     if (!res.ok) return DEFAULT_OG_IMAGE;

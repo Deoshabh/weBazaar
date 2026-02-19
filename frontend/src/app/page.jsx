@@ -5,6 +5,7 @@ import { JsonLd, generateWebsiteJsonLd, generateOrganizationJsonLd, generateMeta
 import { SITE_SETTINGS_DEFAULTS } from '@/constants/siteSettingsDefaults';
 import HomeSections from '@/components/storefront/HomeSections';
 import { normalizeSettingsLayout, resolveFeaturedProductsConfig } from '@/utils/layoutSchema';
+import { getServerApiUrl } from '@/utils/serverApi';
 
 // Force dynamic rendering since we rely on external API data that changes
 export const dynamic = 'force-dynamic';
@@ -20,7 +21,7 @@ export const metadata = generateSEOMetadata({
 
 async function getSiteSettings() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/public`, {
+    const res = await fetch(`${getServerApiUrl()}/settings/public`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -42,12 +43,13 @@ async function getSiteSettings() {
 
 async function getFeaturedProducts(limit = 8, selection = 'latest', manualIds = []) {
   try {
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/products?limit=${limit}`;
+    const apiBase = getServerApiUrl();
+    let url = `${apiBase}/products?limit=${limit}`;
 
     if (selection === 'top-rated') {
-      url = `${process.env.NEXT_PUBLIC_API_URL}/products/top-rated?limit=${limit}`;
+      url = `${apiBase}/products/top-rated?limit=${limit}`;
     } else if (selection === 'manual' && manualIds.length > 0) {
-      url = `${process.env.NEXT_PUBLIC_API_URL}/products?ids=${manualIds.join(',')}`;
+      url = `${apiBase}/products?ids=${manualIds.join(',')}`;
     }
 
     const res = await fetch(url, { cache: 'no-store' }); // Ensure fresh products

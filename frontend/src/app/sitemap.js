@@ -1,6 +1,7 @@
+import { getServerApiUrl } from '@/utils/serverApi';
+
 export default async function sitemap() {
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "https://api.weBazaar.in/api/v1";
+  const API_URL = getServerApiUrl();
   const BASE_URL = "https://weBazaar.in";
 
   // Static pages that always exist

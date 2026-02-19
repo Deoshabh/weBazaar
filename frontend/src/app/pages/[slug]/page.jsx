@@ -1,12 +1,13 @@
 import { notFound } from 'next/navigation';
 import CmsPageRenderer from '@/components/storefront/CmsPageRenderer';
+import { getServerApiUrl } from '@/utils/serverApi';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 async function getCmsPage(slug) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cms/pages/${slug}`, {
+    const response = await fetch(`${getServerApiUrl()}/cms/pages/${slug}`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
