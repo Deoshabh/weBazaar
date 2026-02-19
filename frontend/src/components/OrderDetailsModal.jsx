@@ -7,13 +7,6 @@ import { FiX, FiPackage, FiUser, FiMapPin, FiCreditCard, FiTruck, FiPhone, FiMai
 export default function OrderDetailsModal({ order, isOpen, onClose }) {
   if (!isOpen || !order) return null;
 
-  // Debug logging
-  console.log('Order data in modal:', {
-    orderId: order.orderId,
-    shippingAddress: order.shippingAddress,
-    user: order.user
-  });
-
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);

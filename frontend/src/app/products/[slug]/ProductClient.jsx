@@ -126,19 +126,19 @@ export default function ProductClient({ product }) {
     return (
         <>
             <ProductMetadata product={product} />
-            <div className="min-h-screen bg-primary-50">
-                <div className="container-custom section-padding">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+            <div className="min-h-screen bg-cream">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
                         {/* Image Gallery */}
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {/* Main Image */}
-                            <div className="relative aspect-square bg-white rounded-lg overflow-hidden group">
+                            <div className="relative aspect-[4/5] sm:aspect-square bg-white rounded-xl overflow-hidden group shadow-card">
                                 <Image
                                     src={filteredImages[selectedImage]?.url || filteredImages[selectedImage] || '/placeholder.svg'}
                                     alt={product.name}
                                     fill
                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                    className="object-contain transition-transform duration-500 hover:scale-110 cursor-zoom-in"
+                                    className="object-contain transition-transform duration-slow hover:scale-110 cursor-zoom-in"
                                     priority
                                 />
 
@@ -147,14 +147,14 @@ export default function ProductClient({ product }) {
                                     <>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-primary-900 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ink w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-card flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-fast z-10"
                                             aria-label="Previous image"
                                         >
                                             <FiChevronLeft className="w-5 h-5" />
                                         </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-primary-900 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ink w-10 h-10 sm:w-9 sm:h-9 rounded-full shadow-card flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-fast z-10"
                                             aria-label="Next image"
                                         >
                                             <FiChevronRight className="w-5 h-5" />
@@ -162,16 +162,22 @@ export default function ProductClient({ product }) {
                                     </>
                                 )}
 
+                                {/* Image counter on mobile */}
+                                {filteredImages.length > 1 && (
+                                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-ink/60 text-white px-2.5 py-1 rounded-full text-caption tabular-nums sm:hidden">
+                                        {selectedImage + 1} / {filteredImages.length}
+                                    </div>
+                                )}
                             </div>
 
                             {/* 360 View Toggle */}
                             {product.images360 && product.images360.length > 0 && (
-                                <div className="mt-4">
+                                <div className="bg-white rounded-xl p-4 shadow-card">
                                     <div className="flex items-center justify-between mb-2">
-                                        <h3 className="font-semibold text-primary-900 flex items-center gap-2">
-                                            <FiRotateCw /> 360° View
+                                        <h3 className="font-display text-base font-semibold text-ink flex items-center gap-2">
+                                            <FiRotateCw className="w-4 h-4 text-caramel" /> 360° View
                                         </h3>
-                                        <span className="text-xs text-primary-500">Drag to rotate</span>
+                                        <span className="text-caption text-caramel">Drag to rotate</span>
                                     </div>
                                     <Product360Viewer
                                         images={product.images360.map(img => img.url)}
@@ -183,13 +189,15 @@ export default function ProductClient({ product }) {
 
                             {/* Thumbnail Images */}
                             {filteredImages.length > 1 && (
-                                <div className="grid grid-cols-4 gap-4">
+                                <div className="hidden sm:grid grid-cols-4 gap-2.5">
                                     {filteredImages.map((image, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedImage(idx)}
-                                            className={`relative aspect-square bg-white rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-brand-brown' : 'border-transparent hover:border-primary-300'
-                                                }`}
+                                            className={[
+                                                'relative aspect-square bg-white rounded-lg overflow-hidden border-2 transition-all duration-fast',
+                                                selectedImage === idx ? 'border-espresso ring-2 ring-espresso/20' : 'border-sand/30 hover:border-caramel',
+                                            ].join(' ')}
                                         >
                                             <Image
                                                 src={image?.url || image || '/placeholder.svg'}
@@ -208,62 +216,63 @@ export default function ProductClient({ product }) {
                         <div className="space-y-4">
                             {/* Category & Name */}
                             <div>
-                                <p className="text-sm uppercase tracking-wider text-primary-600 mb-1">
+                                <p className="text-caption uppercase tracking-wider text-caramel mb-1">
                                     {product.category?.name}
                                 </p>
-                                <h1 className="font-serif text-3xl lg:text-4xl font-bold text-primary-900 mb-3">
+                                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink mb-3">
                                     {product.name}
                                 </h1>
 
-                                {/* Price with Discount Display */}
+                                {/* Price */}
                                 {product.comparePrice && product.comparePrice > product.price ? (
                                     <div className="flex items-center gap-3 flex-wrap">
-                                        <p className="text-2xl font-bold text-green-600">
+                                        <p className="font-display text-2xl font-semibold text-success">
                                             ₹{product.price?.toLocaleString('en-IN')}
                                         </p>
-                                        <p className="text-xl text-gray-500 line-through">
+                                        <p className="text-lg text-caramel line-through tabular-nums">
                                             ₹{product.comparePrice?.toLocaleString('en-IN')}
                                         </p>
-                                        <span className="bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-full">
+                                        <span className="bg-error text-white text-caption font-bold px-2.5 py-1 rounded-full">
                                             {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}% OFF
                                         </span>
                                     </div>
                                 ) : (
-                                    <p className="text-2xl font-bold text-brand-brown">
+                                    <p className="font-display text-2xl font-semibold text-espresso tabular-nums">
                                         ₹{product.price?.toLocaleString('en-IN')}
                                     </p>
                                 )}
                             </div>
 
                             {/* Description */}
-                            <p className="text-primary-700 leading-relaxed">
+                            <p className="text-body-sm text-walnut leading-relaxed">
                                 {product.description}
                             </p>
 
                             {/* Color Selection */}
                             {product.colors && product.colors.length > 0 && (
                                 <div>
-                                    <label className="block text-sm font-medium text-primary-900 mb-3">
-                                        Select Color: <span className="capitalize text-brand-brown">{getColorName(selectedColor)}</span>
+                                    <label className="block text-body-sm font-medium text-ink mb-3">
+                                        Select Color: <span className="text-espresso capitalize">{getColorName(selectedColor)}</span>
                                     </label>
                                     <div className="flex flex-wrap gap-3">
                                         {product.colors.map((color, idx) => {
-                                            // Parse color - handle hex codes or color names
                                             const colorValue = color.startsWith('#') ? color : color.toLowerCase();
                                             const colorName = getColorName(color);
                                             return (
                                                 <button
                                                     key={idx}
                                                     onClick={() => setSelectedColor(color)}
-                                                    className={`relative w-12 h-12 rounded-full border-3 transition-all ${selectedColor === color
-                                                        ? 'border-brand-brown ring-2 ring-brand-brown ring-offset-2 scale-110'
-                                                        : 'border-primary-300 hover:border-brand-brown hover:scale-105'
-                                                        }`}
+                                                    className={[
+                                                        'relative w-11 h-11 rounded-full border-[3px] transition-all duration-fast',
+                                                        selectedColor === color
+                                                            ? 'border-espresso ring-2 ring-espresso/30 ring-offset-2 scale-110'
+                                                            : 'border-sand hover:border-caramel hover:scale-105',
+                                                    ].join(' ')}
                                                     style={{ backgroundColor: colorValue }}
                                                     title={colorName}
                                                 >
                                                     {selectedColor === color && (
-                                                        <FiCheck className="w-5 h-5 text-white absolute inset-0 m-auto drop-shadow-lg" />
+                                                        <FiCheck className="w-4 h-4 text-white absolute inset-0 m-auto drop-shadow-lg" />
                                                     )}
                                                 </button>
                                             );
@@ -275,10 +284,10 @@ export default function ProductClient({ product }) {
                             {/* Size Selection */}
                             {product.sizes && product.sizes.length > 0 && (
                                 <div>
-                                    <label className="block text-sm font-medium text-primary-900 mb-3">
+                                    <label className="block text-body-sm font-medium text-ink mb-3">
                                         Select Size (UK)
                                     </label>
-                                    <div className="flex flex-wrap gap-3">
+                                    <div className="flex flex-wrap gap-2.5">
                                         {product.sizes.map((sizeItem, idx) => {
                                             const sizeValue = typeof sizeItem === 'object' ? sizeItem.size : sizeItem;
                                             const stock = typeof sizeItem === 'object' ? sizeItem.stock : null;
@@ -287,15 +296,17 @@ export default function ProductClient({ product }) {
                                                     key={idx}
                                                     onClick={() => setSelectedSize(sizeValue)}
                                                     disabled={stock !== null && stock === 0}
-                                                    className={`px-6 py-3 border-2 rounded-lg font-medium transition-all ${selectedSize === sizeValue
-                                                        ? 'border-brand-brown bg-brand-brown text-white'
-                                                        : stock === 0
-                                                            ? 'border-primary-200 bg-primary-100 text-primary-400 cursor-not-allowed'
-                                                            : 'border-primary-200 hover:border-brand-brown'
-                                                        }`}
+                                                    className={[
+                                                        'min-w-[3rem] px-5 py-3 border-2 rounded-lg text-body-sm font-medium transition-all duration-fast',
+                                                        selectedSize === sizeValue
+                                                            ? 'border-espresso bg-espresso text-white'
+                                                            : stock === 0
+                                                                ? 'border-sand/30 bg-linen text-caramel cursor-not-allowed'
+                                                                : 'border-sand/40 hover:border-espresso bg-white',
+                                                    ].join(' ')}
                                                 >
                                                     {sizeValue}
-                                                    {stock !== null && stock === 0 && ' (Out of Stock)'}
+                                                    {stock !== null && stock === 0 && ' (Out)'}
                                                 </button>
                                             );
                                         })}
@@ -304,83 +315,80 @@ export default function ProductClient({ product }) {
                             )}
 
                             {/* Stock Status */}
-                            <div className={`flex items-center gap-2 text-sm ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className={`flex items-center gap-2 text-body-sm ${product.inStock ? 'text-success' : 'text-error'}`}>
                                 {product.inStock ? (
                                     <>
-                                        <FiCheck className="w-5 h-5" />
-                                        <span className="font-medium">In Stock - Made to Order</span>
+                                        <FiCheck className="w-4 h-4" />
+                                        <span className="font-medium">In Stock — Made to Order</span>
                                     </>
                                 ) : (
                                     <span className="font-medium">Currently Unavailable</span>
                                 )}
                             </div>
 
-                            {/* Action Buttons - Always Show */}
-                            <div className="flex gap-4">
+                            {/* Action Buttons — desktop */}
+                            <div className="hidden sm:flex gap-3">
                                 <button
                                     onClick={handleBuyNow}
                                     disabled={!product.inStock}
-                                    className={`flex-1 text-lg py-4 ${product.inStock
-                                        ? 'btn btn-primary'
-                                        : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
-                                        }`}
+                                    className={[
+                                        'flex-1 py-3.5 text-body font-medium rounded-lg transition-colors duration-fast',
+                                        product.inStock
+                                            ? 'bg-espresso text-white hover:bg-ink'
+                                            : 'bg-sand/40 text-caramel cursor-not-allowed',
+                                    ].join(' ')}
                                 >
                                     {product.inStock ? 'Buy Now' : 'Out of Stock'}
                                 </button>
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={!product.inStock}
-                                    className={`flex-1 text-lg py-4 flex items-center justify-center gap-2 ${product.inStock
-                                        ? 'btn btn-secondary'
-                                        : 'bg-primary-200 text-primary-500 cursor-not-allowed hover:bg-primary-200'
-                                        }`}
+                                    className={[
+                                        'flex-1 py-3.5 text-body font-medium rounded-lg flex items-center justify-center gap-2 transition-colors duration-fast',
+                                        product.inStock
+                                            ? 'bg-white border-2 border-espresso text-espresso hover:bg-espresso/[0.04]'
+                                            : 'bg-sand/40 text-caramel cursor-not-allowed border-2 border-sand/30',
+                                    ].join(' ')}
                                 >
-                                    <FiShoppingCart />
+                                    <FiShoppingCart className="w-4 h-4" />
                                     {product.inStock ? 'Add to Cart' : 'Unavailable'}
                                 </button>
                                 <button
                                     onClick={handleToggleWishlist}
-                                    className={`btn ${inWishlist ? 'bg-red-500 text-white hover:bg-red-600' : 'btn-ghost'} px-6 py-4`}
+                                    className={[
+                                        'w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-fast',
+                                        inWishlist
+                                            ? 'bg-error text-white hover:bg-error/90'
+                                            : 'bg-white border-2 border-sand/40 text-walnut hover:border-espresso hover:text-espresso',
+                                    ].join(' ')}
                                 >
-                                    <FiHeart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
+                                    <FiHeart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
                                 </button>
                             </div>
 
                             {/* Trust Badges */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-primary-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                        <FiAward className="w-5 h-5 text-brand-brown" />
+                            <div className="grid grid-cols-3 gap-3 pt-5 border-t border-sand/20">
+                                {[
+                                    { icon: FiAward, title: 'Handcrafted', subtitle: 'Premium Quality' },
+                                    { icon: FiTruck, title: 'Free Delivery', subtitle: '7-10 Business Days' },
+                                    { icon: FiShield, title: 'Premium Leather', subtitle: 'Finest Materials' },
+                                ].map(({ icon: Icon, title, subtitle }) => (
+                                    <div key={title} className="flex items-center gap-2.5">
+                                        <div className="w-9 h-9 bg-linen rounded-full flex items-center justify-center flex-shrink-0">
+                                            <Icon className="w-4 h-4 text-caramel" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-body-sm font-medium text-ink truncate">{title}</p>
+                                            <p className="text-caption text-caramel truncate normal-case tracking-normal">{subtitle}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-medium text-sm">Handcrafted</p>
-                                        <p className="text-xs text-primary-600">Premium Quality</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                        <FiTruck className="w-5 h-5 text-brand-brown" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-sm">Free Delivery</p>
-                                        <p className="text-xs text-primary-600">7-10 Business Days</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                        <FiShield className="w-5 h-5 text-brand-brown" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-sm">Premium Leather</p>
-                                        <p className="text-xs text-primary-600">Finest Materials</p>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
 
                             {/* Made to Order Notice */}
-                            <div className="bg-brand-cream/30 rounded-lg p-4 border border-brand-tan/20">
-                                <p className="text-sm text-primary-800">
-                                    <strong>Made to Order:</strong> This product is custom-crafted upon order.
+                            <div className="bg-gold/5 rounded-lg p-4 border border-gold/20">
+                                <p className="text-body-sm text-walnut">
+                                    <strong className="text-ink">Made to Order:</strong> This product is custom-crafted upon order.
                                     Please allow 7-10 business days for production and delivery.
                                 </p>
                             </div>
@@ -388,53 +396,31 @@ export default function ProductClient({ product }) {
                     </div>
 
                     {/* Product Details Tabs */}
-                    <div className="mt-16">
-                        <div className="border-b border-primary-200 mb-8">
-                            <div className="flex gap-8">
-                                <button
-                                    onClick={() => setActiveTab('description')}
-                                    className={`pb-4 font-medium transition-colors ${activeTab === 'description'
-                                        ? 'border-b-2 border-brand-brown text-brand-brown'
-                                        : 'text-primary-600 hover:text-primary-900'
-                                        }`}
-                                >
-                                    Description
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('specifications')}
-                                    className={`pb-4 font-medium transition-colors ${activeTab === 'specifications'
-                                        ? 'border-b-2 border-brand-brown text-brand-brown'
-                                        : 'text-primary-600 hover:text-primary-900'
-                                        }`}
-                                >
-                                    Specifications
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('care')}
-                                    className={`pb-4 font-medium transition-colors ${activeTab === 'care'
-                                        ? 'border-b-2 border-brand-brown text-brand-brown'
-                                        : 'text-primary-600 hover:text-primary-900'
-                                        }`}
-                                >
-                                    Care Instructions
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('reviews')}
-                                    className={`pb-4 font-medium transition-colors ${activeTab === 'reviews'
-                                        ? 'border-b-2 border-brand-brown text-brand-brown'
-                                        : 'text-primary-600 hover:text-primary-900'
-                                        }`}
-                                >
-                                    Reviews
-                                </button>
+                    <div className="mt-10 sm:mt-16">
+                        <div className="border-b border-sand/30 mb-6 sm:mb-8">
+                            <div className="flex gap-1 sm:gap-6 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                                {['description', 'specifications', 'care', 'reviews'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={[
+                                            'pb-3 px-1 sm:px-0 text-body-sm whitespace-nowrap font-medium transition-colors duration-fast capitalize',
+                                            activeTab === tab
+                                                ? 'border-b-2 border-espresso text-espresso'
+                                                : 'text-caramel hover:text-ink',
+                                        ].join(' ')}
+                                    >
+                                        {tab === 'care' ? 'Care Instructions' : tab}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="prose max-w-none">
+                        <div className="max-w-3xl">
                             {activeTab === 'description' && (
                                 <div>
-                                    <h3 className="font-serif text-2xl font-bold mb-4">Product Description</h3>
-                                    <p className="text-primary-700 leading-relaxed">
+                                    <h3 className="font-display text-xl sm:text-2xl font-semibold text-ink mb-4">Product Description</h3>
+                                    <p className="text-body-sm text-walnut leading-relaxed">
                                         {product.description || 'Crafted with precision and attention to detail, this shoe embodies timeless elegance and superior craftsmanship.'}
                                     </p>
                                 </div>
@@ -442,31 +428,31 @@ export default function ProductClient({ product }) {
 
                             {activeTab === 'specifications' && (
                                 <div>
-                                    <h3 className="font-serif text-2xl font-bold mb-4">Specifications</h3>
-                                    <ul className="space-y-2 text-primary-700">
+                                    <h3 className="font-display text-xl sm:text-2xl font-semibold text-ink mb-4">Specifications</h3>
+                                    <ul className="space-y-2.5 text-body-sm text-walnut">
                                         {product.specifications?.material && (
-                                            <li><strong>Material:</strong> {product.specifications.material}</li>
+                                            <li><strong className="text-ink">Material:</strong> {product.specifications.material}</li>
                                         )}
                                         {product.specifications?.sole && (
-                                            <li><strong>Sole:</strong> {product.specifications.sole}</li>
+                                            <li><strong className="text-ink">Sole:</strong> {product.specifications.sole}</li>
                                         )}
                                         {product.specifications?.construction && (
-                                            <li><strong>Construction:</strong> {product.specifications.construction}</li>
+                                            <li><strong className="text-ink">Construction:</strong> {product.specifications.construction}</li>
                                         )}
                                         {product.specifications?.madeIn && (
-                                            <li><strong>Made in:</strong> {product.specifications.madeIn}</li>
+                                            <li><strong className="text-ink">Made in:</strong> {product.specifications.madeIn}</li>
                                         )}
                                         {product.category?.name && (
-                                            <li><strong>Category:</strong> {product.category.name}</li>
+                                            <li><strong className="text-ink">Category:</strong> {product.category.name}</li>
                                         )}
                                         {product.sizes && product.sizes.length > 0 && (
                                             <li>
-                                                <strong>Available Sizes:</strong> UK{' '}
+                                                <strong className="text-ink">Available Sizes:</strong> UK{' '}
                                                 {product.sizes.map(s => typeof s === 'object' ? s.size : s).join(', ')}
                                             </li>
                                         )}
                                         {product.brand && (
-                                            <li><strong>Brand:</strong> {product.brand}</li>
+                                            <li><strong className="text-ink">Brand:</strong> {product.brand}</li>
                                         )}
                                     </ul>
                                 </div>
@@ -474,18 +460,18 @@ export default function ProductClient({ product }) {
 
                             {activeTab === 'care' && (
                                 <div>
-                                    <h3 className="font-serif text-2xl font-bold mb-4">Care Instructions</h3>
+                                    <h3 className="font-display text-xl sm:text-2xl font-semibold text-ink mb-4">Care Instructions</h3>
                                     {product.careInstructions && product.careInstructions.length > 0 ? (
-                                        <ul className="space-y-2 text-primary-700">
+                                        <ul className="space-y-2 text-body-sm text-walnut">
                                             {product.careInstructions.map((instruction, index) => (
                                                 <li key={index} className="flex gap-3">
-                                                    <span className="text-brand-brown font-semibold">•</span>
+                                                    <span className="text-espresso font-semibold">•</span>
                                                     <span>{instruction}</span>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-primary-600">No care instructions available for this product.</p>
+                                        <p className="text-body-sm text-caramel">No care instructions available for this product.</p>
                                     )}
                                 </div>
                             )}
@@ -498,7 +484,37 @@ export default function ProductClient({ product }) {
                         </div>
                     </div>
                 </div>
-            </div >
+
+                {/* ── Sticky Mobile CTA Bar ── */}
+                <div className="fixed bottom-[calc(var(--bottom-nav-height,64px)+env(safe-area-inset-bottom,0px))] left-0 right-0 bg-white border-t border-sand/30 px-4 py-3 flex items-center gap-3 shadow-lg z-30 sm:hidden">
+                    <button
+                        onClick={handleToggleWishlist}
+                        className={[
+                            'w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors duration-fast',
+                            inWishlist
+                                ? 'bg-error text-white'
+                                : 'bg-linen text-walnut',
+                        ].join(' ')}
+                    >
+                        <FiHeart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
+                    </button>
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={!product.inStock}
+                        className="flex-1 py-3 bg-white border-2 border-espresso text-espresso text-body-sm font-medium rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-fast"
+                    >
+                        <FiShoppingCart className="w-4 h-4" />
+                        Cart
+                    </button>
+                    <button
+                        onClick={handleBuyNow}
+                        disabled={!product.inStock}
+                        className="flex-1 py-3 bg-espresso text-white text-body-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-fast"
+                    >
+                        Buy Now
+                    </button>
+                </div>
+            </div>
         </>
     );
 }

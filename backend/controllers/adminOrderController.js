@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Product = require("../models/Product");
 const { analyzeOrderRisks } = require("../utils/riskDetection");
 const { invalidateCache } = require("../utils/cache");
+const { log } = require("../utils/logger");
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -87,7 +88,7 @@ exports.getAllOrders = async (req, res) => {
       orders: enhancedOrders,
     });
   } catch (error) {
-    console.error("Get all orders error:", error);
+    log.error("Get all orders error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -107,7 +108,7 @@ exports.getOrderById = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("Get order by ID error:", error);
+    log.error("Get order by ID error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -155,35 +156,46 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Restore stock if cancelling
+    // Restore stock if cancelling — use a transaction for atomicity
     if (status === "cancelled" && order.status !== "cancelled") {
-      for (const item of order.items) {
-        if (item.product && item.quantity && item.size) {
-          await Product.updateOne(
-            { _id: item.product, "sizes.size": item.size },
-            {
-              $inc: {
-                "sizes.$.stock": item.quantity,
-                stock: item.quantity,
-              },
+      const mongoose = require("mongoose");
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          for (const item of order.items) {
+            if (item.product && item.quantity && item.size) {
+              await Product.updateOne(
+                { _id: item.product, "sizes.size": item.size },
+                {
+                  $inc: {
+                    "sizes.$.stock": item.quantity,
+                    stock: item.quantity,
+                  },
+                },
+                { session }
+              );
             }
-          );
-        }
+          }
+          order.status = status;
+          await order.save({ session });
+        });
+      } finally {
+        session.endSession();
       }
       // Invalidate cache
       await invalidateCache("products:*");
+    } else {
+      // Update status (non-cancel)
+      order.status = status;
+      await order.save();
     }
-
-    // Update status
-    order.status = status;
-    await order.save();
 
     res.json({
       success: true,
       order,
     });
   } catch (error) {
-    console.error("Update order status error:", error);
+    log.error("Update order status error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -215,7 +227,7 @@ exports.getUserOrders = async (req, res) => {
       orders,
     });
   } catch (error) {
-    console.error("Get user orders error:", error);
+    log.error("Get user orders error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -250,7 +262,7 @@ exports.updateShippingInfo = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("Update shipping info error:", error);
+    log.error("Update shipping info error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -268,7 +280,7 @@ exports.updateShippingAddress = async (req, res) => {
         "Address editing has been disabled for admins. Address is view-only.",
     });
   } catch (error) {
-    console.error("Update shipping address error:", error);
+    log.error("Update shipping address error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -337,23 +349,34 @@ exports.bulkUpdateStatus = async (req, res) => {
         }
 
         if (status === "cancelled" && order.status !== "cancelled") {
-          for (const item of order.items) {
-            if (item.product && item.quantity && item.size) {
-              await Product.updateOne(
-                { _id: item.product, "sizes.size": item.size },
-                {
-                  $inc: {
-                    "sizes.$.stock": item.quantity,
-                    stock: item.quantity,
-                  },
+          const mongoose = require("mongoose");
+          const cancelSession = await mongoose.startSession();
+          try {
+            await cancelSession.withTransaction(async () => {
+              for (const item of order.items) {
+                if (item.product && item.quantity && item.size) {
+                  await Product.updateOne(
+                    { _id: item.product, "sizes.size": item.size },
+                    {
+                      $inc: {
+                        "sizes.$.stock": item.quantity,
+                        stock: item.quantity,
+                      },
+                    },
+                    { session: cancelSession }
+                  );
                 }
-              );
-            }
+              }
+              order.status = status;
+              await order.save({ session: cancelSession });
+            });
+          } finally {
+            cancelSession.endSession();
           }
+        } else {
+          order.status = status;
+          await order.save();
         }
-
-        order.status = status;
-        await order.save();
 
         results.success.push(orderId);
       } catch (error) {
@@ -374,7 +397,7 @@ exports.bulkUpdateStatus = async (req, res) => {
       results,
     });
   } catch (error) {
-    console.error("Bulk update status error:", error);
+    log.error("Bulk update status error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -457,7 +480,7 @@ exports.bulkCreateShipments = async (req, res) => {
       results,
     });
   } catch (error) {
-    console.error("Bulk create shipments error:", error);
+    log.error("Bulk create shipments error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -512,7 +535,7 @@ exports.bulkPrintLabels = async (req, res) => {
       failed,
     });
   } catch (error) {
-    console.error("Bulk print labels error:", error);
+    log.error("Bulk print labels error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

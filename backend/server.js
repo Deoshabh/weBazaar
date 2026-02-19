@@ -299,6 +299,10 @@ async function startServer() {
       log.info("CORS allowed origins", { origins: allowedOrigins });
       startShiprocketReconciliationWorker();
       startPublishWorkflowWorker();
+
+      // Start abandoned Razorpay order cleanup scheduler
+      const { startCleanupScheduler } = require("./services/abandonedOrderCleanup");
+      startCleanupScheduler();
     });
   } catch (err) {
     log.error("Fatal startup error", err);

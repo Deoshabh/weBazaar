@@ -1,5 +1,6 @@
 const StorefrontConfig = require('../models/StorefrontConfig');
 const SettingAuditLog = require('../models/SettingAuditLog');
+const { log } = require("../utils/logger");
 const {
   PUBLIC_SETTING_KEYS,
   isKnownSettingKey,
@@ -384,7 +385,7 @@ exports.updateSetting = async (req, res, next) => {
         singleton.theme = value;
         await singleton.save();
       } catch (dualWriteErr) {
-        console.error('[settingsController] theme dual-write failed:', dualWriteErr.message);
+        log.error('Theme dual-write failed', dualWriteErr.message);
       }
     }
 

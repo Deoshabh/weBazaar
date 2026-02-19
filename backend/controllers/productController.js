@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Review = require("../models/Review");
 const { getOrSetCache } = require("../utils/cache");
+const { log } = require("../utils/logger");
 
 // Escape special regex characters to prevent ReDoS attacks
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -91,7 +92,7 @@ exports.getAllProducts = async (req, res) => {
             }
 
             if (validIdList.length !== idList.length) {
-              console.warn("Ignoring invalid product ids in ids filter");
+              log.warn("Ignoring invalid product ids in ids filter");
             }
 
             query._id = { $in: validIdList };
@@ -129,8 +130,6 @@ exports.getAllProducts = async (req, res) => {
           }
         }
 
-        console.log("📦 Fetching products with query:", query);
-
         // Build sort options
         let sortOptions = {};
         if (sortBy) {
@@ -141,8 +140,6 @@ exports.getAllProducts = async (req, res) => {
           sortOptions = { createdAt: -1 };
         }
 
-        console.log("📊 Sorting by:", sortOptions);
-
         let mongooseQuery = Product.find(query).sort(sortOptions);
 
         // Optional limit support for lightweight list views
@@ -151,7 +148,6 @@ exports.getAllProducts = async (req, res) => {
         }
 
         const results = await mongooseQuery;
-        console.log(`✅ Found ${results.length} products`);
         return results;
       },
       ttl,
@@ -159,7 +155,7 @@ exports.getAllProducts = async (req, res) => {
 
     res.json(products);
   } catch (error) {
-    console.error("Get products error:", error);
+    log.error("Get products error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -209,7 +205,7 @@ exports.getTopRatedProducts = async (req, res) => {
 
     return res.json(sortedProducts);
   } catch (error) {
-    console.error("Get top-rated products error:", error);
+    log.error("Get top-rated products error", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -252,11 +248,9 @@ exports.searchProducts = async (req, res) => {
       600 // 10 minutes cache
     );
 
-    console.log(`🔍 Search for "${q}": found ${products.length} results`);
-
     res.json(products);
   } catch (error) {
-    console.error("Search products error:", error);
+    log.error("Search products error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -285,7 +279,7 @@ exports.getProductBySlug = async (req, res) => {
 
     res.json(product);
   } catch (error) {
-    console.error("Get product by slug error:", error);
+    log.error("Get product by slug error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -303,7 +297,7 @@ exports.getCategories = async (req, res) => {
 
     res.json(categories);
   } catch (error) {
-    console.error("Get categories error:", error);
+    log.error("Get categories error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -326,7 +320,7 @@ exports.getBrands = async (req, res) => {
 
     res.json(brands);
   } catch (error) {
-    console.error("Get brands error:", error);
+    log.error("Get brands error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -372,7 +366,7 @@ exports.getMaterials = async (req, res) => {
     const materials = Array.from(materialsSet).sort();
     res.json(materials);
   } catch (error) {
-    console.error("Get materials error:", error);
+    log.error("Get materials error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -400,7 +394,7 @@ exports.getPriceRange = async (req, res) => {
       res.json({ min: 0, max: 100000 });
     }
   } catch (error) {
-    console.error("Get price range error:", error);
+    log.error("Get price range error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -416,7 +410,7 @@ exports.getColors = async (req, res) => {
     const sortedColors = colors.filter(Boolean).sort();
     res.json(sortedColors);
   } catch (error) {
-    console.error("Get colors error:", error);
+    log.error("Get colors error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -454,7 +448,7 @@ exports.getSizes = async (req, res) => {
 
     res.json(sizes);
   } catch (error) {
-    console.error("Get sizes error:", error);
+    log.error("Get sizes error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

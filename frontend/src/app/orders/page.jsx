@@ -6,32 +6,84 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { orderAPI } from '@/utils/api';
-import { FiPackage, FiTruck, FiCheck, FiX, FiEye, FiClock } from 'react-icons/fi';
+import {
+  FiPackage,
+  FiTruck,
+  FiCheck,
+  FiX,
+  FiEye,
+  FiClock,
+  FiChevronRight,
+  FiMapPin,
+  FiShoppingBag,
+} from 'react-icons/fi';
+
+/* ─── Status helpers ─── */
+const statusMap = {
+  delivered: {
+    icon: FiCheck,
+    bg: 'bg-success/10',
+    text: 'text-success',
+    ring: 'ring-success/20',
+  },
+  cancelled: {
+    icon: FiX,
+    bg: 'bg-error/10',
+    text: 'text-error',
+    ring: 'ring-error/20',
+  },
+  shipped: {
+    icon: FiTruck,
+    bg: 'bg-info/10',
+    text: 'text-info',
+    ring: 'ring-info/20',
+  },
+  processing: {
+    icon: FiClock,
+    bg: 'bg-warning/10',
+    text: 'text-warning',
+    ring: 'ring-warning/20',
+  },
+};
+
+function StatusBadge({ status }) {
+  const key = status?.toLowerCase();
+  const s = statusMap[key] || {
+    icon: FiPackage,
+    bg: 'bg-espresso/10',
+    text: 'text-espresso',
+    ring: 'ring-espresso/20',
+  };
+  const Icon = s.icon;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ring-1 ${s.bg} ${s.text} ${s.ring}`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {status || 'Confirmed'}
+    </span>
+  );
+}
 
 export default function OrdersPage() {
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, delivered, cancelled
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/auth/login');
-    }
+    if (!loading && !isAuthenticated) router.push('/auth/login');
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchOrders();
-    }
+    if (isAuthenticated) fetchOrders();
   }, [isAuthenticated]);
 
   const fetchOrders = async () => {
     try {
       setLoadingOrders(true);
       const response = await orderAPI.getAll();
-      // Backend returns {orders: [...]}
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
@@ -40,112 +92,99 @@ export default function OrdersPage() {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered':
-        return <FiCheck className="w-5 h-5 text-green-600" />;
-      case 'cancelled':
-        return <FiX className="w-5 h-5 text-red-600" />;
-      case 'shipped':
-        return <FiTruck className="w-5 h-5 text-blue-600" />;
-      case 'processing':
-        return <FiClock className="w-5 h-5 text-yellow-600" />;
-      default:
-        return <FiPackage className="w-5 h-5 text-primary-600" />;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-300';
-      case 'shipped':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'processing':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'confirmed':
-        return 'bg-primary-100 text-primary-800 border-primary-300';
-      default:
-        return 'bg-primary-100 text-primary-800 border-primary-300';
-    }
-  };
-
   const filteredOrders = orders.filter((order) => {
     if (filter === 'all') return true;
     return order.status?.toLowerCase() === filter;
   });
 
+  const filters = ['all', 'delivered', 'cancelled'];
+
+  /* ── Loading ── */
   if (loading || loadingOrders) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-primary-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-900"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-cream gap-3">
+        <div className="w-10 h-10 border-2 border-sand border-t-espresso rounded-full animate-spin" />
+        <p className="text-body-sm text-caramel">Loading orders...</p>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-primary-50">
-      <div className="container-custom section-padding max-w-6xl">
+    <div className="min-h-screen bg-cream">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-caption text-caramel mb-4">
+          <Link href="/" className="hover:text-ink transition-colors">Home</Link>
+          <FiChevronRight className="w-3 h-3" />
+          <span className="text-ink">My Orders</span>
+        </nav>
+
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-primary-900 mb-2">My Orders</h1>
-          <p className="text-sm sm:text-base text-primary-600">Track and manage your orders</p>
+        <div className="mb-6">
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink">My Orders</h1>
+          <p className="text-body-sm text-caramel mt-1">Track and manage your orders</p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
-          <div className="flex flex-wrap gap-2">
-            {['all', 'delivered', 'cancelled'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm sm:text-base transition-colors touch-manipulation ${filter === status
-                    ? 'bg-primary-900 text-white'
-                    : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-                  }`}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
-          </div>
+        <div className="flex gap-2 mb-6">
+          {filters.map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={[
+                'px-4 py-2 rounded-full text-body-sm font-medium transition-all duration-fast capitalize',
+                filter === s
+                  ? 'bg-espresso text-white shadow-sm'
+                  : 'bg-white text-walnut border border-sand/30 hover:border-caramel',
+              ].join(' ')}
+            >
+              {s}
+            </button>
+          ))}
         </div>
 
-        {/* Orders List */}
+        {/* Empty state */}
         {filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <FiPackage className="w-16 h-16 text-primary-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-primary-900 mb-2">No orders found</h3>
-            <p className="text-primary-600 mb-6">
+          <div className="bg-white rounded-xl border border-sand/20 shadow-card p-12 text-center">
+            <div className="w-16 h-16 mx-auto bg-linen rounded-full flex items-center justify-center mb-4">
+              <FiPackage className="w-7 h-7 text-caramel" />
+            </div>
+            <h3 className="font-display text-xl font-semibold text-ink mb-2">No orders found</h3>
+            <p className="text-body-sm text-caramel mb-6 max-w-sm mx-auto">
               {filter === 'all'
                 ? "You haven't placed any orders yet."
                 : `No ${filter} orders found.`}
             </p>
-            <Link href="/products" className="btn btn-primary">
-              Start Shopping
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-espresso text-white text-body-sm font-medium rounded-lg hover:bg-ink transition-colors duration-fast"
+            >
+              <FiShoppingBag className="w-4 h-4" /> Start Shopping
             </Link>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <div key={order._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div
+                key={order._id}
+                className="bg-white rounded-xl border border-sand/20 shadow-card overflow-hidden hover:shadow-card-hover transition-shadow duration-normal"
+              >
                 {/* Order Header */}
-                <div className="bg-primary-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-primary-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-wrap">
+                <div className="bg-linen/50 px-5 py-4 border-b border-sand/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
                       <div>
-                        <p className="text-xs sm:text-sm text-primary-600">Order ID</p>
-                        <p className="font-semibold text-sm sm:text-base text-primary-900 break-all">{order.orderId}</p>
+                        <p className="text-caption text-caramel">Order ID</p>
+                        <p className="text-body-sm font-semibold text-ink break-all font-mono">
+                          {order.orderId}
+                        </p>
                       </div>
-                      <div className="hidden sm:block h-8 w-px bg-primary-300"></div>
+                      <div className="hidden sm:block w-px h-8 bg-sand/40" />
                       <div>
-                        <p className="text-xs sm:text-sm text-primary-600">Order Date</p>
-                        <p className="font-semibold text-sm sm:text-base text-primary-900">
+                        <p className="text-caption text-caramel">Date</p>
+                        <p className="text-body-sm font-medium text-ink">
                           {new Date(order.createdAt).toLocaleDateString('en-IN', {
                             day: 'numeric',
                             month: 'short',
@@ -153,48 +192,46 @@ export default function OrdersPage() {
                           })}
                         </p>
                       </div>
-                      <div className="hidden sm:block h-8 w-px bg-primary-300"></div>
+                      <div className="hidden sm:block w-px h-8 bg-sand/40" />
                       <div>
-                        <p className="text-xs sm:text-sm text-primary-600">Total Amount</p>
-                        <p className="font-semibold text-sm sm:text-base text-primary-900">
+                        <p className="text-caption text-caramel">Total</p>
+                        <p className="text-body-sm font-semibold text-ink tabular-nums">
                           ₹{(order.totalAmount || order.total || 0).toLocaleString('en-IN')}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs sm:text-sm ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        <span className="font-medium capitalize">{order.status || 'confirmed'}</span>
-                      </div>
+                    <div className="flex items-center gap-2.5">
+                      <StatusBadge status={order.status} />
                       <Link
                         href={`/orders/${order._id}`}
-                        className="btn btn-secondary flex items-center gap-2"
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-sand/30 text-body-sm font-medium text-espresso rounded-lg hover:border-espresso hover:bg-espresso/[0.03] transition-all duration-fast"
                       >
-                        <FiEye /> View Details
+                        <FiEye className="w-3.5 h-3.5" /> View
                       </Link>
                     </div>
                   </div>
 
-                  {/* Shipping Info - NEW */}
+                  {/* Shipping Info */}
                   {order.shipping?.awb_code && (
-                    <div className="mt-3 pt-3 border-t border-primary-200">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm">
-                        <div className="flex items-center gap-2 text-blue-700">
-                          <FiTruck className="w-4 h-4" />
-                          <span className="font-medium">{order.shipping.courier_name || order.shipping.courier}</span>
-                        </div>
-                        <div className="hidden sm:block h-4 w-px bg-blue-300"></div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-primary-600">AWB:</span>
-                          <span className="font-mono font-semibold text-primary-900">{order.shipping.awb_code}</span>
-                        </div>
+                    <div className="mt-3 pt-3 border-t border-sand/20">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption">
+                        <span className="flex items-center gap-1.5 text-info font-medium">
+                          <FiTruck className="w-3.5 h-3.5" />
+                          {order.shipping.courier_name || order.shipping.courier}
+                        </span>
+                        <span className="w-px h-3 bg-sand/40 hidden sm:block" />
+                        <span className="text-caramel">
+                          AWB:{' '}
+                          <span className="font-mono font-semibold text-ink">
+                            {order.shipping.awb_code}
+                          </span>
+                        </span>
                         {order.shipping.current_status && (
                           <>
-                            <div className="hidden sm:block h-4 w-px bg-blue-300"></div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-primary-600">Status:</span>
-                              <span className="font-semibold text-green-700">{order.shipping.current_status}</span>
-                            </div>
+                            <span className="w-px h-3 bg-sand/40 hidden sm:block" />
+                            <span className="text-success font-semibold">
+                              {order.shipping.current_status}
+                            </span>
                           </>
                         )}
                       </div>
@@ -203,48 +240,57 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Order Items */}
-                <div className="p-6">
-                  <div className="space-y-4">
+                <div className="p-5">
+                  <div className="space-y-3">
                     {order.items?.slice(0, 3).map((item, index) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <div className="relative w-16 h-16 flex-shrink-0">
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="relative w-14 h-16 flex-shrink-0 rounded-md overflow-hidden bg-linen border border-sand/20">
                           <Image
-                            src={item.product?.images?.[0]?.url || item.product?.images?.[0] || '/placeholder.svg'}
+                            src={
+                              item.product?.images?.[0]?.url ||
+                              item.product?.images?.[0] ||
+                              '/placeholder.svg'
+                            }
                             alt={item.product?.name || 'Product'}
                             fill
-                            sizes="64px"
-                            className="object-cover rounded border border-primary-200"
+                            sizes="56px"
+                            className="object-cover"
                           />
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-primary-900">{item.product?.name || 'Product'}</h4>
-                          <p className="text-sm text-primary-600">
-                            Size: {item.size} | Quantity: {item.quantity}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-body-sm font-medium text-ink truncate">
+                            {item.product?.name || 'Product'}
+                          </h4>
+                          <p className="text-caption text-caramel normal-case tracking-normal">
+                            Size UK {item.size} · Qty {item.quantity}
                           </p>
                         </div>
-                        <p className="font-semibold text-primary-900">₹{item.price?.toLocaleString()}</p>
+                        <span className="text-body-sm font-medium text-ink tabular-nums">
+                          ₹{item.price?.toLocaleString('en-IN')}
+                        </span>
                       </div>
                     ))}
                     {order.items?.length > 3 && (
-                      <p className="text-sm text-primary-600 text-center">
-                        +{order.items.length - 3} more item(s)
+                      <p className="text-caption text-caramel text-center">
+                        +{order.items.length - 3} more item{order.items.length - 3 !== 1 ? 's' : ''}
                       </p>
                     )}
                   </div>
 
-                  {/* Shipping Address */}
-                  <div className="mt-6 pt-6 border-t border-primary-200">
-                    <p className="text-sm font-medium text-primary-700 mb-2">Shipping Address</p>
-                    <p className="text-sm text-primary-900">
-                      {order.shippingAddress?.fullName}
-                    </p>
-                    <p className="text-sm text-primary-600">
-                      {order.shippingAddress?.addressLine1}, {order.shippingAddress?.city},{' '}
-                      {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}
-                    </p>
-                    <p className="text-sm text-primary-600">
-                      Phone: {order.shippingAddress?.phone}
-                    </p>
+                  {/* Shipping address */}
+                  <div className="mt-4 pt-4 border-t border-sand/20">
+                    <div className="flex items-start gap-2">
+                      <FiMapPin className="w-3.5 h-3.5 text-caramel mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-body-sm font-medium text-ink">
+                          {order.shippingAddress?.fullName}
+                        </p>
+                        <p className="text-caption text-walnut normal-case tracking-normal">
+                          {order.shippingAddress?.addressLine1}, {order.shippingAddress?.city},{' '}
+                          {order.shippingAddress?.state} — {order.shippingAddress?.postalCode}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

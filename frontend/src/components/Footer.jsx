@@ -102,7 +102,7 @@ export default function Footer() {
                 'Premium handcrafted shoes made with timeless craftsmanship and finest materials.'}
             </p>
             {showSocials && socialLinks.length > 0 && (
-              <div className={`flex gap-4 ${isCenteredLayout ? 'justify-center' : ''}`}>
+              <div className={`flex gap-2 ${isCenteredLayout ? 'justify-center' : ''}`}>
                 {socialLinks.map((social) => {
                   const Icon = SOCIAL_ICON_MAP[social.platform] || FiInstagram;
                   return (
@@ -111,7 +111,7 @@ export default function Footer() {
                       href={social.url || '#'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:opacity-75 transition-opacity"
+                      className="w-10 h-10 rounded-full flex items-center justify-center hover:opacity-75 transition-opacity"
                       style={{ color: textColor }}
                     >
                       <Icon className="w-5 h-5" />
@@ -183,14 +183,14 @@ export default function Footer() {
             <div className="max-w-md mx-auto text-center">
               <h4 className="text-lg font-semibold mb-2">{footerContent.newsletter?.title || 'Subscribe to Our Newsletter'}</h4>
               <p className="opacity-80 mb-4">{footerContent.newsletter?.description || 'Get updates on new products and exclusive offers'}</p>
-              <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   value={newsletterEmail}
                   onChange={(event) => setNewsletterEmail(event.target.value)}
                   required
                   placeholder={footerContent.newsletter?.placeholder || 'Enter your email'}
-                  className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brand-tan placeholder-white/50"
+                  className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/50"
                   style={{ color: textColor, borderColor: `${textColor}33` }}
                 />
                 <button

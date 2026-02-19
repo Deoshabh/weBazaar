@@ -27,6 +27,19 @@ api.interceptors.request.use(
   },
 );
 
+// Token refresh mutex — prevents multiple concurrent refresh requests
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function onTokenRefreshed(newToken) {
+  refreshSubscribers.forEach((cb) => cb(newToken));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(callback) {
+  refreshSubscribers.push(callback);
+}
+
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
@@ -36,6 +49,18 @@ api.interceptors.response.use(
     // If error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
+      // If a refresh is already in progress, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken) => {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
 
       try {
         // Backend sends refreshToken in httpOnly cookie, so we don't need to send it
@@ -50,9 +75,15 @@ api.interceptors.response.use(
         const { accessToken } = response.data;
         Cookies.set("accessToken", accessToken, { expires: 1 }); // 1 day
 
+        isRefreshing = false;
+        onTokenRefreshed(accessToken);
+
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        isRefreshing = false;
+        refreshSubscribers = [];
+
         // Refresh failed - clear tokens
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");

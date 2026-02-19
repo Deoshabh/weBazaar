@@ -1,5 +1,6 @@
 const Address = require("../models/Address");
 const { validateAddress } = require("../utils/addressValidator");
+const { log } = require("../utils/logger");
 
 // Helper to normalize phone to bare 10-digit Indian number
 const normalizePhone = (phone) =>
@@ -46,7 +47,7 @@ exports.validateAddressAPI = async (req, res) => {
       ...result,
     });
   } catch (error) {
-    console.error("Address validation error:", error);
+    log.error("Address validation error", error);
     res.status(500).json({
       success: false,
       message: "Address validation failed",
@@ -78,7 +79,7 @@ exports.checkPincodeServiceability = async (req, res) => {
       ...result,
     });
   } catch (error) {
-    console.error("PIN code check error:", error);
+    log.error("PIN code check error", error);
     res.status(500).json({
       success: false,
       message: "Failed to check PIN code serviceability",
@@ -97,7 +98,7 @@ exports.getAddresses = async (req, res) => {
     });
     res.json(addresses);
   } catch (error) {
-    console.error("Get addresses error:", error);
+    log.error("Get addresses error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -133,6 +134,15 @@ exports.createAddress = async (req, res) => {
         .json({ message: "Please provide all required fields" });
     }
 
+    // Enforce address count limit
+    const MAX_ADDRESSES = 10;
+    const existingCount = await Address.countDocuments({ user: req.user.id });
+    if (existingCount >= MAX_ADDRESSES) {
+      return res.status(400).json({
+        message: `Maximum ${MAX_ADDRESSES} addresses allowed. Please delete an existing address first.`,
+      });
+    }
+
     // Create address
     const address = await Address.create({
       user: req.user.id,
@@ -149,7 +159,7 @@ exports.createAddress = async (req, res) => {
 
     res.status(201).json(address);
   } catch (error) {
-    console.error("Create address error:", error);
+    log.error("Create address error", error);
 
     // Return validation errors to frontend
     if (error.name === "ValidationError") {
@@ -199,7 +209,7 @@ exports.updateAddress = async (req, res) => {
 
     res.json(address);
   } catch (error) {
-    console.error("Update address error:", error);
+    log.error("Update address error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -220,7 +230,7 @@ exports.deleteAddress = async (req, res) => {
 
     res.json({ message: "Address deleted successfully" });
   } catch (error) {
-    console.error("Delete address error:", error);
+    log.error("Delete address error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -242,7 +252,7 @@ exports.setDefaultAddress = async (req, res) => {
 
     res.json(address);
   } catch (error) {
-    console.error("Set default address error:", error);
+    log.error("Set default address error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

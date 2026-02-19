@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { cartAPI } from '@/utils/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -36,7 +36,7 @@ export const CartProvider = ({ children }) => {
     };
   }, [isAuthenticated]);
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       const response = await cartAPI.get();
@@ -47,9 +47,9 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addToCart = async (productId, size, color = '', quantity = 1) => {
+  const addToCart = useCallback(async (productId, size, color = '', quantity = 1) => {
     try {
       const response = await cartAPI.add({ productId, size, color, quantity });
       // Backend returns {items, totalItems, totalAmount} directly
@@ -65,9 +65,9 @@ export const CartProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-  };
+  }, []);
 
-  const removeFromCart = async (productId, size) => {
+  const removeFromCart = useCallback(async (productId, size) => {
     try {
       const response = await cartAPI.remove(productId, size);
       // Backend returns {items, totalItems, totalAmount} directly
@@ -83,9 +83,9 @@ export const CartProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-  };
+  }, []);
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     try {
       await cartAPI.clear();
       setCart(null);
@@ -100,21 +100,21 @@ export const CartProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-  };
+  }, []);
 
-  const getCartCount = () => {
+  const getCartCount = useCallback(() => {
     if (!cart || !cart.items) return 0;
     return cart.items.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [cart]);
 
-  const getCartTotal = () => {
+  const getCartTotal = useCallback(() => {
     if (!cart || !cart.items) return 0;
     return cart.items.reduce((total, item) => {
       return total + (item.product.price * item.quantity);
     }, 0);
-  };
+  }, [cart]);
 
-  const updateItemQuantity = async (productId, size, quantity) => {
+  const updateItemQuantity = useCallback(async (productId, size, quantity) => {
     try {
       const response = await cartAPI.update({ productId, size, quantity });
       setCart(response.data);
@@ -128,9 +128,9 @@ export const CartProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     cart,
     loading,
     addToCart,
@@ -141,7 +141,7 @@ export const CartProvider = ({ children }) => {
     refreshCart: fetchCart,
     cartCount: getCartCount(),
     cartTotal: getCartTotal(),
-  };
+  }), [cart, loading, addToCart, removeFromCart, updateItemQuantity, clearCart, fetchCart, getCartCount, getCartTotal]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

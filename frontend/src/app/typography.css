@@ -1,0 +1,235 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   weBazaar Typography System
+   Display: Cormorant Garamond — editorial, luxury
+   Body:    Roboto — clean, readable
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ─── Base body ─── */
+body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ─── Display / Hero ─── */
+  .text-display,
+  h1.display {
+    font-family: var(--font-display);
+    font-size: 72px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  /* ─── Headings ─── */
+  h1,
+  .text-h1 {
+    font-family: var(--font-display);
+    font-size: 48px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  h2,
+  .text-h2 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  h3,
+  .text-h3 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  h4,
+  .text-h4 {
+    font-family: var(--font-body);
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  h5,
+  .text-h5 {
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  h6,
+  .text-h6 {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--color-walnut);
+  }
+
+  /* ─── Body text ─── */
+  .text-body-lg {
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.7;
+  }
+
+  .text-body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .text-body-sm {
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ─── Caption / Overline ─── */
+  .text-caption {
+    font-family: var(--font-body);
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .text-overline {
+    font-family: var(--font-body);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-caramel);
+  }
+
+  /* ─── Paragraph spacing ─── */
+  p {
+    margin-bottom: var(--space-4);
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ─── Links ─── */
+  a {
+    color: var(--color-espresso);
+    text-decoration-color: var(--color-sand);
+    text-underline-offset: 3px;
+    transition: color var(--duration-fast) var(--ease-out),
+                text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+  a:hover {
+    color: var(--color-gold-dark);
+    text-decoration-color: var(--color-gold);
+  }
+
+  /* ─── Strong / emphasis ─── */
+  strong,
+  b {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  /* ─── Lists ─── */
+  ul,
+  ol {
+    padding-left: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+  li {
+    margin-bottom: var(--space-2);
+  }
+
+  /* ─── Blockquote ─── */
+  blockquote {
+    font-family: var(--font-display);
+    font-size: 24px;
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--color-walnut);
+    border-left: 3px solid var(--color-gold);
+    padding-left: var(--space-6);
+    margin: var(--space-8) 0;
+  }
+
+  /* ─── Code inline ─── */
+  code {
+    font-size: 0.875em;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-linen);
+    color: var(--color-espresso);
+  }
+
+  /* ─── Responsive heading scale ─── */
+  @media (max-width: 768px) {
+    .text-display,
+    h1.display {
+      font-size: 44px;
+    }
+    h1,
+    .text-h1 {
+      font-size: 32px;
+    }
+    h2,
+    .text-h2 {
+      font-size: 26px;
+    }
+    h3,
+    .text-h3 {
+      font-size: 22px;
+    }
+    h4,
+    .text-h4 {
+      font-size: 18px;
+    }
+    blockquote {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .text-display,
+    h1.display {
+      font-size: 36px;
+    }
+    h1,
+    .text-h1 {
+      font-size: 28px;
+    }
+    h2,
+    .text-h2 {
+      font-size: 22px;
+    }
+  }
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

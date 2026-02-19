@@ -122,7 +122,7 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
           <AnimatedEntry className="mb-6 sm:mb-8" delay={0}>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-2">Admin Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold font-display text-primary-900 mb-2">Admin Dashboard</h1>
             <p className="text-sm sm:text-base text-primary-600">Welcome back, {user?.name}!</p>
           </AnimatedEntry>
 
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                 <Link
                   key={index}
                   href={card.link}
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl shadow-card p-6 hover:shadow-card-hover transition-shadow"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -167,8 +167,8 @@ export default function AdminDashboard() {
           </div>
 
           {/* Quick Links */}
-          <AnimatedEntry className="bg-white rounded-lg shadow-md p-6" delay={300}>
-            <h2 className="text-xl font-bold text-primary-900 mb-6">Quick Actions</h2>
+          <AnimatedEntry className="bg-white rounded-xl shadow-card p-6" delay={300}>
+            <h2 className="text-xl font-bold font-display text-primary-900 mb-6">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {quickLinks.map((link, index) => {
                 const Icon = link.icon;
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
                     className="border border-primary-200 rounded-lg p-4 hover:border-primary-400 hover:bg-primary-50 transition-all group"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="p-2 bg-primary-100 rounded-lg group-hover:bg-brand-brown group-hover:text-white transition-colors">
+                      <div className="p-2 bg-primary-100 rounded-lg group-hover:bg-espresso group-hover:text-white transition-colors">
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1">

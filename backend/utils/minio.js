@@ -1,5 +1,6 @@
 const Minio = require("minio");
 const https = require("https");
+const { log } = require("./logger");
 
 /**
  * ===============================
@@ -49,14 +50,7 @@ async function initializeBucket() {
   if (isInitialized) return;
 
   try {
-    console.log("🪣 Initializing S3-compatible storage client...");
-    console.log("📡 Endpoint:", MINIO_ENDPOINT);
-    console.log("🔐 Port:", MINIO_PORT);
-    console.log("🔐 SSL:", MINIO_USE_SSL);
-    console.log(
-      "🔑 Access Key:",
-      MINIO_ACCESS_KEY ? "***" + MINIO_ACCESS_KEY.slice(-4) : "NOT SET",
-    );
+    log.info("Initializing S3-compatible storage", { endpoint: MINIO_ENDPOINT, port: MINIO_PORT, ssl: MINIO_USE_SSL });
 
 
 
@@ -70,29 +64,22 @@ async function initializeBucket() {
       secretKey: MINIO_SECRET_KEY,
     };
 
-    // Accept self-signed certificates when using SSL
+    // Accept self-signed certificates when using SSL (configurable)
     if (useSSL) {
-      clientOptions.transportAgent = new https.Agent({ rejectUnauthorized: false });
-      console.log("🔐 SSL: Configured with flexible certificate validation");
+      const rejectUnauthorized = process.env.MINIO_REJECT_UNAUTHORIZED !== 'false';
+      clientOptions.transportAgent = new https.Agent({ rejectUnauthorized });
     }
 
     minioClient = new Minio.Client(clientOptions);
 
-    console.log(
-      `🔍 Testing connection to ${useSSL ? "https" : "http"}://${MINIO_ENDPOINT}:${MINIO_PORT}`,
-    );
-
     // Check bucket
     const exists = await minioClient.bucketExists(MINIO_BUCKET);
     if (!exists) {
-      console.log(`📦 Bucket '${MINIO_BUCKET}' does not exist, creating...`);
       await minioClient.makeBucket(MINIO_BUCKET, REGION);
-      console.log(`✅ Bucket created: ${MINIO_BUCKET}`);
-    } else {
-      console.log(`✅ Bucket exists: ${MINIO_BUCKET}`);
+      log.info("Storage bucket created", { bucket: MINIO_BUCKET });
     }
 
-    // Public read policy
+    // Public read policy — restricted to product-media/ prefix only
     const policy = {
       Version: "2012-10-17",
       Statement: [
@@ -100,48 +87,21 @@ async function initializeBucket() {
           Effect: "Allow",
           Principal: { AWS: ["*"] },
           Action: ["s3:GetObject"],
-          Resource: [`arn:aws:s3:::${MINIO_BUCKET}/*`],
+          Resource: [`arn:aws:s3:::${MINIO_BUCKET}/product-media/*`],
         },
       ],
     };
 
     await minioClient.setBucketPolicy(MINIO_BUCKET, JSON.stringify(policy));
 
-    console.log("✅ Storage bucket policy set (public read)");
+    log.info("Storage initialized", { bucket: MINIO_BUCKET });
     isInitialized = true;
   } catch (error) {
-    console.error("❌ S3 storage initialization failed:");
-    console.error("  Error Code:", error.code);
-    console.error("  Error Message:", error.message);
-    console.error("  Status Code:", error.statusCode);
-    console.error("  Full Error:", JSON.stringify(error, null, 2));
-    // Log raw response body if available (helps diagnose HTML/non-XML responses)
-    if (error.body) console.error("  Response Body:", error.body);
-    if (error.headers) console.error("  Response Headers:", JSON.stringify(error.headers));
-    // Try a raw HTTPS request to see what the endpoint returns
-    const sslEnabled = String(MINIO_USE_SSL).toLowerCase() === "true";
-    try {
-      const httpMod = require(sslEnabled ? "https" : "http");
-      const testReq = httpMod.request({
-        hostname: MINIO_ENDPOINT,
-        port: Number(MINIO_PORT),
-        path: "/minio/health/live",
-        method: "GET",
-        rejectUnauthorized: false,
-        timeout: 5000,
-      }, (testRes) => {
-        let data = "";
-        testRes.on("data", (chunk) => { data += chunk; });
-        testRes.on("end", () => {
-          console.log(`  🔍 Health check response (${testRes.statusCode}):`, data.substring(0, 500));
-          console.log(`  🔍 Content-Type:`, testRes.headers["content-type"]);
-        });
-      });
-      testReq.on("error", (e) => console.error("  🔍 Health check failed:", e.message));
-      testReq.end();
-    } catch (diagErr) {
-      console.error("  🔍 Diagnostic request failed:", diagErr.message);
-    }
+    log.error("S3 storage initialization failed", {
+      code: error.code,
+      message: error.message,
+      statusCode: error.statusCode,
+    });
     throw error;
   }
 }
@@ -163,7 +123,7 @@ async function generateSignedUploadUrl(key, contentType) {
 
   const allowedTypes = [
     "image/jpeg", "image/jpg", "image/png", "image/webp",
-    "image/gif", "image/avif", "image/svg+xml",
+    "image/gif", "image/avif",
     "image/x-icon", "image/vnd.microsoft.icon",
   ];
 

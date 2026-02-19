@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const { log } = require("../utils/logger");
 
 // @desc    Get active categories
 // @route   GET /api/v1/categories
@@ -11,7 +12,7 @@ exports.getActiveCategories = async (req, res) => {
     });
     res.json({ categories });
   } catch (error) {
-    console.error("Get categories error:", error);
+    log.error("Get categories error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -30,7 +31,7 @@ exports.getNavbarCategories = async (req, res) => {
     });
     res.json({ categories });
   } catch (error) {
-    console.error("Get navbar categories error:", error);
+    log.error("Get navbar categories error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -51,7 +52,7 @@ exports.getCategoryBySlug = async (req, res) => {
 
     res.json({ category });
   } catch (error) {
-    console.error("Get category by slug error:", error);
+    log.error("Get category by slug error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

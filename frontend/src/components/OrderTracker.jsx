@@ -49,17 +49,14 @@ export default function OrderTracker({ orderId, order, showTimeline = true }) {
 
     // Connection state handlers
     pusher.connection.bind("connected", () => {
-      console.log("✅ Soketi connected");
       setIsConnected(true);
     });
 
     pusher.connection.bind("disconnected", () => {
-      console.log("⚠️ Soketi disconnected");
       setIsConnected(false);
     });
 
-    pusher.connection.bind("error", (err) => {
-      console.error("❌ Soketi connection error:", err);
+    pusher.connection.bind("error", () => {
       setIsConnected(false);
     });
 
@@ -69,7 +66,6 @@ export default function OrderTracker({ orderId, order, showTimeline = true }) {
 
     // Listen for tracking updates
     channel.bind("tracking-update", (data) => {
-      console.log("📦 Tracking update received:", data);
 
       setTrackingData((prev) => ({
         ...prev,

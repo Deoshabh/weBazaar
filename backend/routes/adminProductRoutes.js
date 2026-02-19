@@ -14,6 +14,8 @@ const {
 } = require("../controllers/adminProductController");
 const { authenticate } = require("../middleware/auth");
 const admin = require("../middleware/admin");
+const { validateRequest } = require("../middleware/validateRequest");
+const { createProductSchema, updateProductSchema, productIdSchema } = require("../validators/schemas");
 
 // All routes require authentication and admin role
 router.use(authenticate);
@@ -23,7 +25,7 @@ router.use(admin);
 router.get("/", getAllProducts);
 
 // @route   GET /api/admin/products/:id
-router.get("/:id", getProductById);
+router.get("/:id", validateRequest(productIdSchema), getProductById);
 
 // @route   POST /api/admin/products/bulk-delete
 router.post("/bulk-delete", bulkDeleteProducts);
@@ -32,10 +34,10 @@ router.post("/bulk-delete", bulkDeleteProducts);
 router.post("/bulk-status", bulkUpdateStatus);
 
 // @route   POST /api/admin/products
-router.post("/", createProduct);
+router.post("/", validateRequest(createProductSchema), createProduct);
 
 // @route   PATCH /api/admin/products/:id
-router.patch("/:id", updateProduct);
+router.patch("/:id", validateRequest(updateProductSchema), updateProduct);
 
 // @route   PATCH /api/admin/products/:id/toggle
 router.patch("/:id/toggle", toggleProductStatus);

@@ -2,6 +2,7 @@ const { generateSignedUploadUrl, deleteObject, uploadBuffer } = require("../util
 const sharp = require("sharp");
 const Product = require("../models/Product");
 const { getOrSetCache, invalidateCache } = require("../utils/cache");
+const { log } = require("../utils/logger");
 
 /**
  * Generate signed upload URL for admin
@@ -11,7 +12,7 @@ exports.getUploadUrl = async (req, res) => {
   try {
     const { fileName, fileType, productSlug, folder } = req.body;
     
-    console.log("Upload URL request:", { fileName, fileType, folder, productSlug });
+    log.debug("Upload URL request", { fileName, fileType, folder, productSlug });
 
     // Validate input
     if (!fileName || !fileType) {
@@ -51,7 +52,7 @@ exports.getUploadUrl = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error("Error generating upload URL:", error);
+    log.error("Error generating upload URL", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to generate upload URL",
@@ -81,7 +82,7 @@ exports.deleteMedia = async (req, res) => {
       message: "Media deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting media:", error);
+    log.error("Error deleting media", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to delete media",
@@ -152,7 +153,7 @@ exports.uploadFrames = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error uploading frames:", error);
+    log.error("Error uploading frames", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to upload frames",
@@ -218,7 +219,7 @@ exports.getFrameManifest = async (req, res) => {
       data: manifest,
     });
   } catch (error) {
-    console.error("Error fetching frame manifest:", error);
+    log.error("Error fetching frame manifest", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch frame manifest",

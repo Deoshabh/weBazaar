@@ -104,7 +104,7 @@ exports.getAllUsers = async (req, res) => {
 
     res.json({ users: usersWithStatus });
   } catch (error) {
-    console.error("Get all users error:", error);
+    log.error("Get all users error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -176,7 +176,7 @@ exports.getUserById = async (req, res) => {
 
     res.json({ user: { ...userObj, addresses: allAddresses, activeSessions } });
   } catch (error) {
-    console.error("Get user by ID error:", error);
+    log.error("Get user by ID error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -253,7 +253,7 @@ exports.updateUserRole = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Update user role error:", error);
+    log.error("Update user role error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -263,12 +263,6 @@ exports.updateUserRole = async (req, res) => {
 // @access  Private/Admin
 exports.toggleUserBlock = async (req, res) => {
   try {
-    console.log("Toggle block request:", {
-      userId: req.params.id,
-      requesterId: req.user?.id || req.user?._id,
-      requesterRole: req.user?.role,
-    });
-
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
@@ -276,7 +270,6 @@ exports.toggleUserBlock = async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (!user) {
-      console.log("User not found:", req.params.id);
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -285,7 +278,6 @@ exports.toggleUserBlock = async (req, res) => {
 
     // Prevent admin from blocking themselves
     if (user._id.toString() === requesterId) {
-      console.log("Admin attempted to block themselves");
       return res.status(400).json({ message: "Cannot block yourself" });
     }
 
@@ -322,11 +314,6 @@ exports.toggleUserBlock = async (req, res) => {
       },
     });
 
-    console.log("User block status toggled:", {
-      userId: user._id,
-      isBlocked: user.isBlocked,
-    });
-
     res.json({
       message: `User ${user.isBlocked ? "blocked" : "unblocked"} successfully`,
       user: {
@@ -340,10 +327,7 @@ exports.toggleUserBlock = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Toggle user block error:", error);
-    console.error("Error stack:", error.stack);
-    console.error("Request params:", req.params);
-    console.error("Request user:", req.user?._id);
+    log.error("Toggle user block error", error);
     res.status(500).json({
       message: "Server error",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
@@ -386,7 +370,7 @@ exports.getSecurityEvents = async (req, res) => {
       events,
     });
   } catch (error) {
-    console.error("Get security events error:", error);
+    log.error("Get security events error", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -463,7 +447,7 @@ exports.createAdmin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Create admin error:", error);
+    log.error("Create admin error", error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -613,7 +597,7 @@ exports.getUserHistory = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get user history error:", error);
+    log.error("Get user history error", error);
     res.status(500).json({
       success: false,
       message: "Server error",

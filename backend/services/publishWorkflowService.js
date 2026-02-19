@@ -1,5 +1,6 @@
 const StorefrontConfig = require('../models/StorefrontConfig');
 const SettingAuditLog = require('../models/SettingAuditLog');
+const { log } = require('../utils/logger');
 
 const DEFAULT_INTERVAL_MS = Number(process.env.PUBLISH_WORKFLOW_INTERVAL_MS || 60000);
 const WORKER_LEASE_MS = Number(process.env.PUBLISH_WORKFLOW_LEASE_MS || 45000);
@@ -98,14 +99,14 @@ const runScheduledPublishCheck = async () => {
       },
     });
 
-    console.log('[publish-workflow] Scheduled publish promoted to live.');
+    log.info("Scheduled publish promoted to live");
     return {
       promoted: true,
       reason: 'scheduled-promoted',
       publishedAt: settings.publishWorkflow.publishedAt,
     };
   } catch (error) {
-    console.error('[publish-workflow] Failed scheduled publish check:', error.message);
+    log.error("Failed scheduled publish check", { error: error.message });
     return {
       promoted: false,
       reason: 'error',

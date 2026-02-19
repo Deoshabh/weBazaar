@@ -1,5 +1,6 @@
 const Coupon = require('../models/Coupon');
 const Order = require('../models/Order');
+const { log } = require('../utils/logger');
 
 class CouponService {
     /**
@@ -21,40 +22,45 @@ class CouponService {
                 return { valid: false, message: 'Invalid coupon code' };
             }
 
-            if (!coupon.active) {
+            if (!coupon.isActive) {
                 return { valid: false, message: 'Coupon is inactive' };
             }
 
             const now = new Date();
-            if (now < coupon.startDate) {
+            if (coupon.validFrom && now < coupon.validFrom) {
                 return { valid: false, message: 'Coupon is not yet valid' };
             }
 
-            if (now > coupon.endDate) {
+            if (now > coupon.expiry) {
                 return { valid: false, message: 'Coupon has expired' };
             }
 
-            if (cartTotal < coupon.minOrderValue) {
+            if (coupon.minOrder && cartTotal < coupon.minOrder) {
                 return { 
                     valid: false, 
-                    message: `Minimum order value of ₹${coupon.minOrderValue} required` 
+                    message: `Minimum order value of ₹${coupon.minOrder} required` 
                 };
             }
 
-            if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) {
+            if (coupon.usageLimit != null && coupon.usedCount >= coupon.usageLimit) {
                 return { valid: false, message: 'Coupon usage limit reached' };
             }
 
-            // Check if user has already used this coupon (if one-time use per user logic exists)
-            // For now, let's assume standard usage limits logic
-            // Ideally we'd check Order history here if 'once per user' is a requirement.
+            // Check if user has already used this coupon
+            if (userId) {
+                const userUsageCount = await Order.countDocuments({
+                    user: userId,
+                    'coupon.code': coupon.code,
+                    status: { $ne: 'cancelled' },
+                });
+                if (userUsageCount > 0) {
+                    return { valid: false, message: 'You have already used this coupon' };
+                }
+            }
             
             let discountAmount = 0;
-            if (coupon.type === 'percentage') {
+            if (coupon.type === 'percent') {
                 discountAmount = (cartTotal * coupon.value) / 100;
-                if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
-                    discountAmount = coupon.maxDiscount;
-                }
             } else if (coupon.type === 'flat') {
                 discountAmount = coupon.value;
             }
@@ -77,7 +83,7 @@ class CouponService {
             };
 
         } catch (error) {
-            console.error('Coupon Validation Error:', error);
+            log.error('Coupon validation error', error);
             throw new Error('Error validating coupon');
         }
     }

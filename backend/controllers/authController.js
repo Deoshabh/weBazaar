@@ -427,11 +427,7 @@ exports.forgotPassword = async (req, res, next) => {
     await user.save();
 
     if (process.env.NODE_ENV !== "production") {
-      console.log(
-        `Password reset requested for ${email}. Token expires at ${new Date(
-          user.resetPasswordExpires,
-        ).toISOString()}`,
-      );
+      log.debug("Password reset requested", { email, expiresAt: new Date(user.resetPasswordExpires).toISOString() });
     }
 
     res.json({ message: "If that email exists, a reset link has been sent" });
@@ -515,10 +511,7 @@ exports.firebaseLogin = async (req, res, next) => {
     // ── Early environment check ──
     const jwtSecret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
     if (!jwtSecret || !process.env.JWT_REFRESH_SECRET) {
-      console.error("❌ FATAL: Missing JWT env vars", {
-        hasJwtSecret: Boolean(jwtSecret),
-        hasRefreshSecret: Boolean(process.env.JWT_REFRESH_SECRET),
-      });
+      log.error("Missing JWT env vars", { hasJwtSecret: Boolean(jwtSecret), hasRefreshSecret: Boolean(process.env.JWT_REFRESH_SECRET) });
       return res.status(500).json({
         message: "Server configuration error: JWT secrets not set",
         error: "SERVER_CONFIG_ERROR",
@@ -526,12 +519,6 @@ exports.firebaseLogin = async (req, res, next) => {
     }
 
     const { firebaseToken, email, phoneNumber, displayName, photoURL } = req.body;
-
-    console.log("🔑 Firebase login request received", {
-      hasToken: Boolean(firebaseToken),
-      hasEmail: Boolean(email),
-      email: email || "(none)",
-    });
 
     if (!firebaseToken) {
       log.warn("Firebase token missing in login request");
@@ -564,8 +551,8 @@ exports.firebaseLogin = async (req, res, next) => {
 
     if (!user && decodedToken.email) {
       user = await User.findOne({
-        email: { $regex: `^${decodedToken.email}$`, $options: "i" },
-      });
+        email: decodedToken.email,
+      }).collation({ locale: 'en', strength: 2 });
 
       if (user && !user.firebaseUid) {
         log.info("Linking Firebase UID to existing email account");
@@ -633,10 +620,8 @@ exports.firebaseLogin = async (req, res, next) => {
       return res.status(403).json({ message: "Your account has been blocked" });
     }
 
-    console.log("🔐 Generating tokens for user:", user._id, user.email);
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user, req.ip);
-    console.log("✅ Tokens generated successfully");
 
     setRefreshCookie(res, refreshToken).json({
       message: "Firebase authentication successful",

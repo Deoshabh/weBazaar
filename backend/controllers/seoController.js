@@ -1,4 +1,5 @@
 const SeoSetting = require("../models/SeoSetting");
+const { log } = require("../utils/logger");
 
 // Default SEO values for all pages
 const SEO_DEFAULTS = {
@@ -213,7 +214,7 @@ exports.getAllSeoSettings = async (req, res) => {
 
     res.json({ success: true, data: merged });
   } catch (error) {
-    console.error("Error fetching SEO settings:", error);
+    log.error("Error fetching SEO settings", error);
     res.status(500).json({ success: false, message: "Failed to fetch SEO settings" });
   }
 };
@@ -255,7 +256,7 @@ exports.getSeoByPageKey = async (req, res) => {
 
     res.json({ success: true, data: setting });
   } catch (error) {
-    console.error("Error fetching SEO setting:", error);
+    log.error("Error fetching SEO setting", error);
     res.status(500).json({ success: false, message: "Failed to fetch SEO setting" });
   }
 };
@@ -347,7 +348,7 @@ exports.upsertSeoSetting = async (req, res) => {
 
     res.json({ success: true, data: setting });
   } catch (error) {
-    console.error("Error upserting SEO setting:", error);
+    log.error("Error upserting SEO setting", error);
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((e) => e.message);
       return res.status(400).json({ success: false, message: messages.join(", "), errors: error.errors });
@@ -365,7 +366,7 @@ exports.deleteSeoSetting = async (req, res) => {
     await SeoSetting.deleteOne({ page_key: pageKey });
     res.json({ success: true, message: "SEO setting deleted, defaults will be used" });
   } catch (error) {
-    console.error("Error deleting SEO setting:", error);
+    log.error("Error deleting SEO setting", error);
     res.status(500).json({ success: false, message: "Failed to delete SEO setting" });
   }
 };
@@ -420,7 +421,7 @@ exports.resetToDefault = async (req, res) => {
 
     res.json({ success: true, message: "Reset to defaults", data: defaults });
   } catch (error) {
-    console.error("Error resetting SEO setting:", error);
+    log.error("Error resetting SEO setting", error);
     res.status(500).json({ success: false, message: "Failed to reset SEO setting" });
   }
 };
@@ -491,7 +492,7 @@ exports.bulkCopy = async (req, res) => {
 
     res.json({ success: true, data: results });
   } catch (error) {
-    console.error("Error bulk copying SEO:", error);
+    log.error("Error bulk copying SEO", error);
     res.status(500).json({ success: false, message: "Failed to bulk copy" });
   }
 };
@@ -513,7 +514,7 @@ exports.getHistory = async (req, res) => {
     const history = (setting.history || []).reverse();
     res.json({ success: true, data: history });
   } catch (error) {
-    console.error("Error fetching SEO history:", error);
+    log.error("Error fetching SEO history", error);
     res.status(500).json({ success: false, message: "Failed to fetch history" });
   }
 };

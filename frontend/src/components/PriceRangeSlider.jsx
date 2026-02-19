@@ -34,20 +34,20 @@ export default function PriceRangeSlider({ min, max, value, onChange }) {
   const getSliderBackground = () => {
     const minPercent = ((minValue - min) / (max - min)) * 100;
     const maxPercent = ((maxValue - min) / (max - min)) * 100;
-    return `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${minPercent}%, #8B4513 ${minPercent}%, #8B4513 ${maxPercent}%, #e5e7eb ${maxPercent}%, #e5e7eb 100%)`;
+    return `linear-gradient(to right, var(--color-sand) 0%, var(--color-sand) ${minPercent}%, var(--color-espresso) ${minPercent}%, var(--color-espresso) ${maxPercent}%, var(--color-sand) ${maxPercent}%, var(--color-sand) 100%)`;
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-primary-600">₹{minValue.toLocaleString('en-IN')}</span>
-        <span className="text-primary-600">₹{maxValue.toLocaleString('en-IN')}</span>
+      <div className="flex items-center justify-between text-body-sm">
+        <span className="text-ink font-medium tabular-nums">₹{minValue.toLocaleString('en-IN')}</span>
+        <span className="text-ink font-medium tabular-nums">₹{maxValue.toLocaleString('en-IN')}</span>
       </div>
 
       <div className="relative h-2">
         {/* Background track */}
         <div 
-          className="absolute w-full h-2 rounded-full"
+          className="absolute w-full h-1.5 rounded-full top-0.5"
           style={{ background: getSliderBackground() }}
         />
         
@@ -61,7 +61,7 @@ export default function PriceRangeSlider({ min, max, value, onChange }) {
           onChange={handleMinChange}
           onMouseUp={handleMinBlur}
           onTouchEnd={handleMinBlur}
-          className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-brown [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brand-brown [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md"
+          className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-espresso [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-cream [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-150 [&::-webkit-slider-thumb]:hover:scale-110 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-espresso [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-cream [&::-moz-range-thumb]:shadow-md"
         />
         
         {/* Max slider */}
@@ -74,7 +74,7 @@ export default function PriceRangeSlider({ min, max, value, onChange }) {
           onChange={handleMaxChange}
           onMouseUp={handleMaxBlur}
           onTouchEnd={handleMaxBlur}
-          className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-brown [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brand-brown [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md"
+          className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-espresso [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-cream [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-150 [&::-webkit-slider-thumb]:hover:scale-110 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-espresso [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-cream [&::-moz-range-thumb]:shadow-md"
         />
       </div>
 
@@ -86,9 +86,9 @@ export default function PriceRangeSlider({ min, max, value, onChange }) {
           onBlur={handleMinBlur}
           min={min}
           max={maxValue - 1000}
-          className="w-24 px-2 py-1 border border-primary-200 rounded focus:outline-none focus:ring-1 focus:ring-brand-brown"
+          className="w-24 px-2 py-1.5 border border-sand/40 rounded-md text-body-sm text-ink bg-cream focus:outline-none focus:ring-2 focus:ring-espresso/12 focus:border-espresso transition-colors"
         />
-        <span className="text-primary-400">to</span>
+        <span className="text-caramel text-body-sm">to</span>
         <input
           type="number"
           value={maxValue}
@@ -96,7 +96,7 @@ export default function PriceRangeSlider({ min, max, value, onChange }) {
           onBlur={handleMaxBlur}
           min={minValue + 1000}
           max={max}
-          className="w-24 px-2 py-1 border border-primary-200 rounded focus:outline-none focus:ring-1 focus:ring-brand-brown"
+          className="w-24 px-2 py-1.5 border border-sand/40 rounded-md text-body-sm text-ink bg-cream focus:outline-none focus:ring-2 focus:ring-espresso/12 focus:border-espresso transition-colors"
         />
       </div>
     </div>

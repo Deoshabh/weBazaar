@@ -112,27 +112,21 @@ const syncOrderWithShiprocket = async (order) => {
   let hasChanges = false;
 
   if (latestStatus && latestStatus !== order.shipping?.current_status) {
-    order.shipping = {
-      ...order.shipping,
-      current_status: latestStatus,
-    };
+    if (!order.shipping) order.shipping = {};
+    order.shipping.current_status = latestStatus;
     hasChanges = true;
   }
 
   if (trackedAwb && !order.shipping?.awb_code) {
-    order.shipping = {
-      ...order.shipping,
-      awb_code: trackedAwb,
-      trackingId: trackedAwb,
-    };
+    if (!order.shipping) order.shipping = {};
+    order.shipping.awb_code = trackedAwb;
+    order.shipping.trackingId = trackedAwb;
     hasChanges = true;
   }
 
   if (trackingData.track_url && trackingData.track_url !== order.shipping?.tracking_url) {
-    order.shipping = {
-      ...order.shipping,
-      tracking_url: trackingData.track_url,
-    };
+    if (!order.shipping) order.shipping = {};
+    order.shipping.tracking_url = trackingData.track_url;
     hasChanges = true;
   }
 
@@ -140,10 +134,8 @@ const syncOrderWithShiprocket = async (order) => {
     trackingData.etd &&
     trackingData.etd !== order.shipping?.estimated_delivery_date
   ) {
-    order.shipping = {
-      ...order.shipping,
-      estimated_delivery_date: trackingData.etd,
-    };
+    if (!order.shipping) order.shipping = {};
+    order.shipping.estimated_delivery_date = trackingData.etd;
     hasChanges = true;
   }
 
@@ -152,10 +144,8 @@ const syncOrderWithShiprocket = async (order) => {
     hasChanges = true;
   }
 
-  order.shipping = {
-    ...order.shipping,
-    last_tracking_update: new Date(),
-  };
+  if (!order.shipping) order.shipping = {};
+  order.shipping.last_tracking_update = new Date();
 
   if (hasChanges) {
     await order.save();

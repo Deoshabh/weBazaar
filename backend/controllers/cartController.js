@@ -1,5 +1,6 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const { log } = require("../utils/logger");
 
 // Helper: build consistent cart response
 function buildCartResponse(cart) {
@@ -29,7 +30,7 @@ exports.getCart = async (req, res) => {
 
     res.json(buildCartResponse(cart));
   } catch (error) {
-    console.error("Error fetching cart:", error);
+    log.error("Error fetching cart", error);
     res.status(500).json({ message: "Cart operation failed" });
   }
 };
@@ -78,6 +79,22 @@ exports.addToCart = async (req, res) => {
       cart.items = [];
     }
 
+    // Enforce cart size limit (max 50 distinct line items)
+    const MAX_CART_ITEMS = 50;
+    if (cart.items.length >= MAX_CART_ITEMS) {
+      const existingItem = cart.items.find(
+        (item) =>
+          item.product.toString() === productId &&
+          item.size === size &&
+          (item.color || "") === (color || ""),
+      );
+      if (!existingItem) {
+        return res.status(400).json({
+          message: `Cart is full. Maximum ${MAX_CART_ITEMS} different items allowed.`,
+        });
+      }
+    }
+
     // Check if item already exists with same product, size, and color
     const itemColor = color || "";
     const existingItemIndex = cart.items.findIndex(
@@ -116,7 +133,7 @@ exports.addToCart = async (req, res) => {
 
     res.json(buildCartResponse(cart));
   } catch (error) {
-    console.error("Error adding to cart:", error);
+    log.error("Error adding to cart", error);
     res.status(500).json({ message: "Cart operation failed" });
   }
 };
@@ -189,7 +206,7 @@ exports.updateCartItemQuantity = async (req, res) => {
 
     res.json(buildCartResponse(cart));
   } catch (error) {
-    console.error("Error updating cart quantity:", error);
+    log.error("Error updating cart quantity", error);
     res.status(500).json({ message: "Cart update failed" });
   }
 };
@@ -227,7 +244,7 @@ exports.removeFromCart = async (req, res) => {
 
     res.json(buildCartResponse(cart));
   } catch (error) {
-    console.error("Error removing from cart:", error);
+    log.error("Error removing from cart", error);
     res.status(500).json({ message: "Cart operation failed" });
   }
 };
@@ -246,7 +263,7 @@ exports.clearCart = async (req, res) => {
 
     res.json(buildCartResponse(cart));
   } catch (error) {
-    console.error("Error clearing cart:", error);
+    log.error("Error clearing cart", error);
     res.status(500).json({ message: "Cart operation failed" });
   }
 };
@@ -298,7 +315,7 @@ exports.validateCart = async (req, res) => {
 
     res.json({ valid: isValid, changes });
   } catch (error) {
-    console.error("Error validating cart:", error);
+    log.error("Error validating cart", error);
     res.status(500).json({ message: "Validation failed" });
   }
 };

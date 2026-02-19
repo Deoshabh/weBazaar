@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { log } = require("./logger");
 
 class ShiprocketService {
   constructor() {
@@ -9,7 +10,7 @@ class ShiprocketService {
     this.tokenExpiry = null;
     
     if (!this.email || !this.password) {
-      console.warn("⚠️ Shiprocket credentials (SHIPROCKET_EMAIL, SHIPROCKET_PASSWORD) are missing.");
+      log.warn("Shiprocket credentials missing");
     }
   }
 
@@ -57,13 +58,10 @@ class ShiprocketService {
       // Set expiry to 9.5 days from now (safer than 10 days)
       this.tokenExpiry = new Date(Date.now() + 9.5 * 24 * 60 * 60 * 1000);
 
-      console.log("✅ Shiprocket authenticated successfully");
+      log.info("Shiprocket authenticated successfully");
       return this.token;
     } catch (error) {
-      console.error(
-        "❌ Shiprocket authentication failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Shiprocket authentication failed", error.response?.data || error.message);
 
       if (error.code === "SHIPROCKET_CONFIG_ERROR") {
         throw error;
@@ -214,10 +212,7 @@ class ShiprocketService {
 
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Get shipping rates failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Get shipping rates failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to fetch shipping rates",
@@ -296,13 +291,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Shiprocket order created:", response.data);
+      log.info("Shiprocket order created", { orderId: response.data?.order_id });
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Create Shiprocket order failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Create Shiprocket order failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to create Shiprocket order",
@@ -343,7 +335,7 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ AWB assigned successfully:", response.data);
+      log.info("AWB assigned successfully");
 
       return {
         awb_code: this.extractFirstByKeys(response.data, ["awb_code", "awb"]),
@@ -353,10 +345,7 @@ class ShiprocketService {
         ]),
       };
     } catch (error) {
-      console.error(
-        "❌ Assign AWB failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Assign AWB failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to assign AWB",
@@ -398,13 +387,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Pickup scheduled successfully:", response.data);
+      log.info("Pickup scheduled successfully");
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Schedule pickup failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Schedule pickup failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to schedule pickup",
@@ -438,13 +424,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Label generated successfully");
+      log.info("Label generated successfully");
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Generate label failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Generate label failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to generate label",
@@ -478,13 +461,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Manifest generated successfully");
+      log.info("Manifest generated successfully");
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Generate manifest failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Generate manifest failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to generate manifest",
@@ -518,13 +498,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Manifest print URL generated");
+      log.info("Manifest print URL generated");
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Print manifest failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Print manifest failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to print manifest",
@@ -558,13 +535,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Invoice URL generated");
+      log.info("Invoice URL generated");
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Generate invoice failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Generate invoice failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to generate invoice",
@@ -588,10 +562,7 @@ class ShiprocketService {
 
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Track by AWB failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Track by AWB failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to track shipment by AWB",
@@ -615,10 +586,7 @@ class ShiprocketService {
 
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Track by order ID failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Track by order ID failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to track shipment by order ID",
@@ -642,10 +610,7 @@ class ShiprocketService {
 
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Track by shipment ID failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Track by shipment ID failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to track shipment by shipment ID",
@@ -679,13 +644,10 @@ class ShiprocketService {
         );
       }
 
-      console.log("✅ Shipment cancelled successfully");
+      log.info("Shipment cancelled successfully");
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Cancel shipment failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Cancel shipment failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to cancel shipment",
@@ -708,10 +670,7 @@ class ShiprocketService {
 
       return response.data;
     } catch (error) {
-      console.error(
-        "❌ Get pickup addresses failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Get pickup addresses failed", error.response?.data || error.message);
 
       if (error.code === "SHIPROCKET_CONFIG_ERROR") {
         throw error;
@@ -896,10 +855,7 @@ class ShiprocketService {
         warnings,
       };
     } catch (error) {
-      console.error(
-        "❌ Complete shipment creation failed:",
-        error.response?.data || error.message,
-      );
+      log.error("Complete shipment creation failed", error.response?.data || error.message);
       throw this.buildShiprocketError(
         error,
         "Failed to create complete shipment",

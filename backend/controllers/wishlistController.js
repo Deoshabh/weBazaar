@@ -1,4 +1,5 @@
 const Wishlist = require("../models/Wishlist");
+const { log } = require("../utils/logger");
 
 // @desc    Get user's wishlist
 // @route   GET /api/v1/wishlist
@@ -15,7 +16,7 @@ exports.getWishlist = async (req, res) => {
 
     res.json(wishlist);
   } catch (error) {
-    console.error("Get wishlist error:", error);
+    log.error("Get wishlist error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -44,7 +45,13 @@ exports.toggleWishlistItem = async (req, res) => {
         // Remove from wishlist
         wishlist.products.splice(index, 1);
       } else {
-        // Add to wishlist
+        // Add to wishlist — enforce limit
+        const MAX_WISHLIST_ITEMS = 100;
+        if (wishlist.products.length >= MAX_WISHLIST_ITEMS) {
+          return res.status(400).json({
+            message: `Wishlist is full. Maximum ${MAX_WISHLIST_ITEMS} items allowed.`,
+          });
+        }
         wishlist.products.push(productId);
       }
       await wishlist.save();
@@ -54,7 +61,7 @@ exports.toggleWishlistItem = async (req, res) => {
     await wishlist.populate("products");
     res.json(wishlist);
   } catch (error) {
-    console.error("Toggle wishlist error:", error);
+    log.error("Toggle wishlist error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -75,7 +82,7 @@ exports.clearWishlist = async (req, res) => {
 
     res.json({ message: "Wishlist cleared" });
   } catch (error) {
-    console.error("Clear wishlist error:", error);
+    log.error("Clear wishlist error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

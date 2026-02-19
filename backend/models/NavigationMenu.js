@@ -183,11 +183,12 @@ navigationMenuSchema.virtual("activeItems").get(function () {
 });
 
 // Pre-save hook to generate cache key
-navigationMenuSchema.pre("save", function () {
+navigationMenuSchema.pre("save", function (next) {
   if (this.isModified("items") || this.isModified("isActive")) {
     this.cacheKey = `cms:menu:${this.slug}:${Date.now()}`;
     this.lastUpdatedAt = new Date();
   }
+  next();
 });
 
 // Method to add item

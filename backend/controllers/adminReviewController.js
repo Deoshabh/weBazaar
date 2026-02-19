@@ -1,6 +1,7 @@
 const Review = require("../models/Review");
 const Product = require("../models/Product");
 const User = require("../models/User");
+const { log } = require("../utils/logger");
 
 // @desc    Get all reviews with filters (admin)
 // @route   GET /api/v1/admin/reviews
@@ -85,7 +86,7 @@ exports.getAllReviews = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get all reviews error:", error);
+    log.error("Get all reviews error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -107,7 +108,7 @@ exports.getReviewById = async (req, res) => {
 
     res.json(review);
   } catch (error) {
-    console.error("Get review by ID error:", error);
+    log.error("Get review by ID error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -138,7 +139,7 @@ exports.toggleReviewHidden = async (req, res) => {
       review,
     });
   } catch (error) {
-    console.error("Toggle review hidden error:", error);
+    log.error("Toggle review hidden error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -168,7 +169,7 @@ exports.updateReviewNotes = async (req, res) => {
       review,
     });
   } catch (error) {
-    console.error("Update review notes error:", error);
+    log.error("Update review notes error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -196,7 +197,7 @@ exports.deleteReview = async (req, res) => {
           const key = urlParts.slice(4).join("/"); // Get everything after bucket name
           await deleteObject(key);
         } catch (err) {
-          console.error("Error deleting photo from MinIO:", err);
+          log.error("Error deleting photo from MinIO", err);
           // Continue even if photo deletion fails
         }
       }
@@ -206,7 +207,7 @@ exports.deleteReview = async (req, res) => {
 
     res.json({ message: "Review deleted successfully" });
   } catch (error) {
-    console.error("Delete review error:", error);
+    log.error("Delete review error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -234,7 +235,7 @@ exports.bulkHideReviews = async (req, res) => {
       modifiedCount: result.modifiedCount,
     });
   } catch (error) {
-    console.error("Bulk hide reviews error:", error);
+    log.error("Bulk hide reviews error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -259,7 +260,7 @@ exports.bulkDeleteReviews = async (req, res) => {
       deletedCount: result.deletedCount,
     });
   } catch (error) {
-    console.error("Bulk delete reviews error:", error);
+    log.error("Bulk delete reviews error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -364,7 +365,7 @@ exports.getReviewStats = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error("Get review stats error:", error);
+    log.error("Get review stats error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

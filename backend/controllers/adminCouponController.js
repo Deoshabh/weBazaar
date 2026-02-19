@@ -1,4 +1,5 @@
 const Coupon = require("../models/Coupon");
+const { log } = require("../utils/logger");
 
 // @desc    Get all coupons
 // @route   GET /api/v1/admin/coupons
@@ -8,7 +9,7 @@ exports.getAllCoupons = async (req, res) => {
     const coupons = await Coupon.find({}).sort({ createdAt: -1 });
     res.json(coupons);
   } catch (error) {
-    console.error("Get all coupons error:", error);
+    log.error("Get all coupons error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -71,7 +72,7 @@ exports.createCoupon = async (req, res) => {
 
     res.status(201).json(coupon);
   } catch (error) {
-    console.error("Create coupon error:", error);
+    log.error("Create coupon error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -93,7 +94,7 @@ exports.toggleCouponStatus = async (req, res) => {
 
     res.json(coupon);
   } catch (error) {
-    console.error("Toggle coupon status error:", error);
+    log.error("Toggle coupon status error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -168,7 +169,7 @@ exports.updateCoupon = async (req, res) => {
     await coupon.save();
     res.json(coupon);
   } catch (error) {
-    console.error("Update coupon error:", error);
+    log.error("Update coupon error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -188,7 +189,7 @@ exports.deleteCoupon = async (req, res) => {
     await coupon.deleteOne();
     res.json({ message: "Coupon deleted successfully" });
   } catch (error) {
-    console.error("Delete coupon error:", error);
+    log.error("Delete coupon error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -255,7 +256,7 @@ exports.validateCoupon = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Validate coupon error:", error);
+    log.error("Validate coupon error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

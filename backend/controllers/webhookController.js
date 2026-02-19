@@ -8,6 +8,7 @@ const {
   emitOrderUpdate,
   emitGlobalShipmentUpdate,
 } = require("../utils/soketi");
+const { log } = require("../utils/logger");
 
 /**
  * Status mapping: Shiprocket status → Order status
@@ -116,9 +117,7 @@ const processWebhookAsync = async (webhookLog) => {
       webhookLog.error = "Order not found";
       webhookLog.processedAt = new Date();
       await webhookLog.save();
-      console.log(
-        `⚠️ Webhook: Order not found for event ${webhookLog.eventId}`,
-      );
+      log.warn("Webhook: Order not found", { eventId: webhookLog.eventId });
       return;
     }
 
@@ -168,17 +167,13 @@ const processWebhookAsync = async (webhookLog) => {
     const newOrderStatus =
       derivedFromText || mapStatusFromShipmentStatusId(shipmentStatusId);
     if (newOrderStatus && newOrderStatus !== order.status) {
-      console.log(
-        `📦 Order ${order.orderId}: Status ${order.status} → ${newOrderStatus}`,
-      );
+      log.info("Order status changed", { orderId: order.orderId, from: order.status, to: newOrderStatus });
       order.status = newOrderStatus;
     }
 
     // Log lifecycle transition
     if (oldLifecycleStatus !== newLifecycleStatus) {
-      console.log(
-        `🔄 Order ${order.orderId}: Lifecycle ${oldLifecycleStatus} → ${newLifecycleStatus}`,
-      );
+      log.info("Order lifecycle changed", { orderId: order.orderId, from: oldLifecycleStatus, to: newLifecycleStatus });
     }
 
     // Update estimated delivery date if provided
@@ -217,9 +212,9 @@ const processWebhookAsync = async (webhookLog) => {
     webhookLog.processedAt = new Date();
     await webhookLog.save();
 
-    console.log(`✅ Webhook processed: ${webhookLog.eventId}`);
+    log.info("Webhook processed", { eventId: webhookLog.eventId });
   } catch (error) {
-    console.error("❌ Webhook processing error:", error);
+    log.error("Webhook processing error", error);
     webhookLog.status = "failed";
     webhookLog.error = error.message;
     webhookLog.processedAt = new Date();
@@ -239,10 +234,9 @@ exports.handleShiprocketWebhook = async (req, res) => {
       req.headers["x-real-ip"] ||
       req.connection.remoteAddress;
 
-    console.log("📦 Shiprocket webhook received:", {
+    log.info("Shiprocket webhook received", {
       awb: payload.awb || payload.awb_code,
       status: payload.current_status || payload.shipment_status,
-      ip: clientIP,
     });
 
     // Generate unique event ID for idempotency
@@ -251,7 +245,7 @@ exports.handleShiprocketWebhook = async (req, res) => {
     // Check if event already processed (idempotency)
     const existingLog = await WebhookLog.findOne({ eventId });
     if (existingLog) {
-      console.log(`⚠️ Webhook: Duplicate event ${eventId} (already processed)`);
+      log.debug("Webhook: Duplicate event", { eventId });
       // Return 200 to prevent Shiprocket retries
       return res.status(200).json({
         success: true,
@@ -290,13 +284,12 @@ exports.handleShiprocketWebhook = async (req, res) => {
     // In production, use a proper job queue like Bull or BullMQ
     setImmediate(() => processWebhookAsync(webhookLog));
   } catch (error) {
-    console.error("❌ Webhook handler error:", error);
+    log.error("❌ Webhook handler error", error);
 
     // Still return 200 to prevent Shiprocket retries
     res.status(200).json({
       success: false,
       message: "Webhook processing failed",
-      error: error.message,
     });
   }
 };
@@ -329,7 +322,7 @@ exports.getWebhookLogs = async (req, res) => {
       total: count,
     });
   } catch (error) {
-    console.error("Get webhook logs error:", error);
+    log.error("Get webhook logs error", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -373,7 +366,7 @@ exports.retryWebhook = async (req, res) => {
       data: webhookLog,
     });
   } catch (error) {
-    console.error("Retry webhook error:", error);
+    log.error("Retry webhook error", error);
     res.status(500).json({
       success: false,
       message: error.message,

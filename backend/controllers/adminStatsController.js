@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const redis = require("../config/redis");
 const shiprocketService = require("../utils/shiprocket");
 const { getStorageHealth } = require("../utils/minio");
+const { log } = require("../utils/logger");
 
 // @desc    Get admin statistics
 // @route   GET /api/v1/admin/stats
@@ -298,7 +299,7 @@ exports.getAdminStats = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get admin stats error:", error);
+    log.error("Get admin stats error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

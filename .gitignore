@@ -42,6 +42,10 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+.clj-kondo/
+.lsp/
+.serena/
+.continue/
 
 # Testing
 coverage/

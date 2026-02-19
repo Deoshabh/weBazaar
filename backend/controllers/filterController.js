@@ -1,4 +1,5 @@
 const Filter = require("../models/Filter");
+const { log } = require("../utils/logger");
 
 // Get all filters
 exports.getFilters = async (req, res) => {

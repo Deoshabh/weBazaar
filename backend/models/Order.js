@@ -11,8 +11,8 @@ const orderItemSchema = new mongoose.Schema(
     image: String,
     size: String,
     color: { type: String, default: "" },
-    quantity: Number,
-    price: Number, // snapshot price (₹ in cents)
+    quantity: { type: Number, required: true, min: 1 },
+    price: { type: Number, required: true, min: 0 }, // snapshot price (₹ in cents)
   },
   { _id: false },
 );
@@ -33,11 +33,11 @@ const orderSchema = new mongoose.Schema(
 
     items: [orderItemSchema],
 
-    subtotal: Number,
-    shippingCost: { type: Number, default: 0 },
-    discount: { type: Number, default: 0 },
-    total: Number,
-    totalAmount: Number, // Same as total, for frontend clarity
+    subtotal: { type: Number, min: 0 },
+    shippingCost: { type: Number, default: 0, min: 0 },
+    discount: { type: Number, default: 0, min: 0 },
+    total: { type: Number, min: 0 },
+    totalAmount: { type: Number, min: 0 }, // Same as total, for frontend clarity
 
     coupon: {
       code: String,
@@ -178,5 +178,11 @@ orderSchema.pre("save", async function () {
     this.orderId = `ORD-${dateStr}-${String(sequence).padStart(5, "0")}`;
   }
 });
+
+// Indexes for query performance
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ status: 1 });
+orderSchema.index({ orderId: 1 });
+orderSchema.index({ "payment.method": 1, "payment.status": 1, createdAt: 1 });
 
 module.exports = mongoose.model("Order", orderSchema);

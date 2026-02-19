@@ -18,6 +18,14 @@ const couponSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
+      validate: {
+        validator: function (v) {
+          // For percent type, value must be <= 100
+          if (this.type === 'percent' && v > 100) return false;
+          return true;
+        },
+        message: 'Percentage discount cannot exceed 100%',
+      },
     },
     minOrder: {
       type: Number,

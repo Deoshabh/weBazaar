@@ -5,16 +5,17 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const { log } = require("../utils/logger");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Generate unique order ID
+// Generate unique order ID using cryptographically secure random bytes
 const generateOrderId = () => {
   const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+  const random = crypto.randomBytes(4).toString('hex').toUpperCase();
   return `ORD-${timestamp}-${random}`;
 };
 
@@ -247,7 +248,7 @@ exports.createOrder = async (req, res) => {
     // Emit Real-time Event to Admin Dashboard
     const { emitAdminOrderCreated } = require("../utils/soketi");
     // Fire and forget - don't await/block response
-    emitAdminOrderCreated(order).catch(err => console.error("Socket emit failed", err));
+    emitAdminOrderCreated(order).catch(err => log.error("Socket emit failed", err));
 
     // Return created order
     res.status(201).json({
@@ -255,7 +256,7 @@ exports.createOrder = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("Create order error:", error);
+    log.error("Create order error", error);
 
     // Stock-related errors from transaction
     if (error.message && error.message.includes("Insufficient stock")) {
@@ -299,7 +300,7 @@ exports.getUserOrders = async (req, res) => {
       orders: ordersWithSummary,
     });
   } catch (error) {
-    console.error("Get user orders error:", error);
+    log.error("Get user orders error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -326,7 +327,7 @@ exports.getOrderById = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("Get order by ID error:", error);
+    log.error("Get order by ID error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -336,7 +337,7 @@ exports.createRazorpayOrder = async (req, res) => {
   try {
     // Validate Razorpay credentials first
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      console.error("❌ Razorpay credentials missing in environment variables");
+      log.error("Razorpay credentials missing in environment variables");
       return res.status(500).json({
         message: "Payment system not configured. Please contact support.",
         error: "RAZORPAY_CREDENTIALS_MISSING",
@@ -371,9 +372,7 @@ exports.createRazorpayOrder = async (req, res) => {
     const payAmount = order.total || order.subtotal;
     const amountInPaise = CurrencyUtils.toPaise(payAmount);
 
-    console.log(
-      `Creating Razorpay order for ₹${order.total || order.subtotal} (${amountInPaise} paise)`,
-    );
+    log.info("Creating Razorpay order", { amount: payAmount, paise: amountInPaise });
 
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
@@ -391,7 +390,7 @@ exports.createRazorpayOrder = async (req, res) => {
       key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.error("Create Razorpay order error:", error);
+    log.error("Create Razorpay order error", error);
 
     // Provide more specific error messages
     if (error.error && error.error.description) {
@@ -446,7 +445,7 @@ exports.verifyRazorpayPayment = async (req, res) => {
 
     res.json({ success: true, message: "Payment verified successfully" });
   } catch (error) {
-    console.error("Verify Razorpay payment error:", error);
+    log.error("Verify Razorpay payment error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -518,7 +517,7 @@ exports.cancelOrder = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("Cancel order error:", error);
+    log.error("Cancel order error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -3,6 +3,8 @@
  * Catches all errors and returns consistent error responses
  */
 
+const { log } = require("../utils/logger");
+
 // Not Found Handler - 404
 const notFoundHandler = (req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
@@ -30,7 +32,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Log error for debugging, unless it's a known bot probe returning 404
   if (!isBotProbe || res.statusCode !== 404) {
-    console.error("❌ Error:", {
+    log.error("Request error", {
       message: err.message,
       stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
       path: req.path,
@@ -106,7 +108,6 @@ const errorHandler = (err, req, res, next) => {
   if (err.message && err.message.includes("CORS")) {
     return res.status(403).json({
       message: "CORS policy violation",
-      error: err.message,
       stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   }

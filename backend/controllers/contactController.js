@@ -1,4 +1,5 @@
 const ContactMessage = require('../models/ContactMessage');
+const { log } = require("../utils/logger");
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -43,7 +44,7 @@ exports.submitContactMessage = async (req, res) => {
       });
     }
 
-    console.error('Submit contact message error:', error);
+    log.error('Submit contact message error', error);
     return res.status(500).json({
       message: 'Failed to submit contact form',
     });

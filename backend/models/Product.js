@@ -52,6 +52,7 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
+      min: 0,
     },
     gstPercentage: {
       type: Number,
@@ -77,12 +78,13 @@ const productSchema = new mongoose.Schema(
     },
     stock: {
       type: Number,
-      default: 100, // Default to 100 so products are available immediately
+      default: 100,
+      min: 0,
     },
     sizes: [
       {
         size: String,
-        stock: Number,
+        stock: { type: Number, min: 0 },
       },
     ],
     colors: [String],
@@ -162,7 +164,6 @@ productSchema.index({ createdAt: -1 });
 productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ brand: 1, isActive: 1 });
 productSchema.index({ price: 1, isActive: 1 });
-productSchema.index({ status: 1, isActive: 1 });
 
 // Virtual field for inStock (calculated from stock quantity)
 productSchema.virtual("inStock").get(function () {

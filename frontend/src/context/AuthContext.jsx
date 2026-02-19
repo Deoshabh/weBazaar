@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { authAPI } from '@/utils/api';
 import Cookies from 'js-cookie';
 import {
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     return { success: false, error: 'Use the Firebase register page' };
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutFirebase();
       await authAPI.logout();
@@ -97,13 +97,13 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove('accessToken');
       setUser(null);
     }
-  };
+  }, []);
 
   const updateUser = useCallback((userData) => {
     setUser(userData);
   }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     login,
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
     loginInProgressRef,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
-  };
+  }), [user, loading, logout, updateUser, syncWithBackend]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

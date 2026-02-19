@@ -135,8 +135,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-900"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-cream gap-3">
+        <div className="w-10 h-10 border-2 border-sand border-t-espresso rounded-full animate-spin" />
+        <p className="text-body-sm text-caramel">Loading profile...</p>
       </div>
     );
   }
@@ -145,19 +146,22 @@ export default function ProfilePage() {
     return null;
   }
 
+  const inputClass =
+    'w-full px-4 py-3 bg-cream border border-sand/40 rounded-lg text-body-sm text-ink placeholder:text-caramel/60 focus:outline-none focus:border-espresso focus:ring-2 focus:ring-espresso/12 transition-all duration-normal disabled:bg-linen disabled:text-caramel disabled:cursor-not-allowed';
+
   return (
-    <div className="min-h-screen bg-primary-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-4xl">
+    <div className="min-h-screen bg-cream">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         {/* Profile Information */}
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary-900">My Profile</h1>
+        <div className="bg-white rounded-xl border border-sand/20 shadow-card p-5 sm:p-6 mb-5">
+          <div className="flex items-center justify-between mb-5">
+            <h1 className="font-display text-xl sm:text-2xl font-semibold text-ink">My Profile</h1>
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 text-brand-brown hover:text-brand-brown-dark"
+                className="flex items-center gap-1.5 text-body-sm font-medium text-espresso hover:text-ink transition-colors"
               >
-                <FiEdit2 /> Edit Profile
+                <FiEdit2 className="w-4 h-4" /> Edit
               </button>
             )}
           </div>
@@ -165,57 +169,30 @@ export default function ProfilePage() {
           <form onSubmit={handleProfileUpdate}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900 disabled:bg-primary-50 disabled:cursor-not-allowed"
-                  required
-                />
+                <label className="block text-body-sm font-medium text-ink mb-1.5">Name</label>
+                <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} disabled={!isEditing} className={inputClass} required />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  disabled
-                  className="w-full px-4 py-2 border border-primary-200 rounded-lg bg-primary-50 cursor-not-allowed"
-                />
-                <p className="text-xs text-primary-600 mt-1">Email cannot be changed</p>
+                <label className="block text-body-sm font-medium text-ink mb-1.5">Email</label>
+                <input type="email" value={formData.email} disabled className={inputClass} />
+                <p className="text-caption text-caramel mt-1 normal-case tracking-normal">Email cannot be changed</p>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900 disabled:bg-primary-50 disabled:cursor-not-allowed"
-                />
+                <label className="block text-body-sm font-medium text-ink mb-1.5">Phone</label>
+                <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} disabled={!isEditing} className={inputClass} />
               </div>
 
               {isEditing && (
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className="btn btn-primary flex items-center gap-2">
-                    <FiSave /> Save Changes
+                <div className="flex gap-3 pt-3">
+                  <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-espresso text-white text-body-sm font-medium rounded-lg hover:bg-ink transition-colors duration-fast">
+                    <FiSave className="w-4 h-4" /> Save Changes
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsEditing(false);
-                      setFormData({
-                        name: user.name || '',
-                        email: user.email || '',
-                        phone: user.phone || '',
-                      });
-                    }}
-                    className="btn btn-secondary flex items-center gap-2"
+                    onClick={() => { setIsEditing(false); setFormData({ name: user.name || '', email: user.email || '', phone: user.phone || '' }); }}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-linen text-ink text-body-sm font-medium rounded-lg border border-sand/40 hover:bg-sand/20 transition-colors duration-fast"
                   >
-                    <FiX /> Cancel
+                    <FiX className="w-4 h-4" /> Cancel
                   </button>
                 </div>
               )}
@@ -223,117 +200,49 @@ export default function ProfilePage() {
           </form>
         </div>
 
-        {/* Change Password - Only for Firebase Auth users (not OAuth) who can change password */}
+        {/* Change Password */}
         {['password', 'local'].includes(user?.authProvider) && (
-          <div className="mb-6">
+          <div className="mb-5">
             <ChangePassword />
           </div>
         )}
 
         {/* Addresses */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-primary-900">Saved Addresses</h2>
+        <div className="bg-white rounded-xl border border-sand/20 shadow-card p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display text-xl font-semibold text-ink">Saved Addresses</h2>
             <button
-              onClick={() => {
-                setShowAddressForm(true);
-                setEditingAddressId(null);
-                resetAddressForm();
-              }}
-              className="flex items-center gap-2 text-brand-brown hover:text-brand-brown-dark"
+              onClick={() => { setShowAddressForm(true); setEditingAddressId(null); resetAddressForm(); }}
+              className="flex items-center gap-1.5 text-body-sm font-medium text-espresso hover:text-ink transition-colors"
             >
-              <FiPlus /> Add New Address
+              <FiPlus className="w-4 h-4" /> Add New
             </button>
           </div>
 
           {/* Address Form */}
           {showAddressForm && (
-            <form onSubmit={handleAddressSubmit} className="mb-6 p-4 border border-primary-200 rounded-lg bg-primary-50">
-              <h3 className="font-semibold text-primary-900 mb-4">
+            <form onSubmit={handleAddressSubmit} className="mb-5 p-4 border border-sand/20 rounded-lg bg-linen">
+              <h3 className="font-display text-base font-semibold text-ink mb-4">
                 {editingAddressId ? 'Edit Address' : 'Add New Address'}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={addressForm.fullName}
-                  onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })}
-                  className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  required
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone"
-                  value={addressForm.phone}
-                  onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-                  className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Address Line 1"
-                  value={addressForm.addressLine1}
-                  onChange={(e) => setAddressForm({ ...addressForm, addressLine1: e.target.value })}
-                  className="md:col-span-2 px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Address Line 2 (Optional)"
-                  value={addressForm.addressLine2}
-                  onChange={(e) => setAddressForm({ ...addressForm, addressLine2: e.target.value })}
-                  className="md:col-span-2 px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                />
-                <input
-                  type="text"
-                  placeholder="City"
-                  value={addressForm.city}
-                  onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                  className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="State"
-                  value={addressForm.state}
-                  onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
-                  className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Pin Code"
-                  value={addressForm.postalCode}
-                  onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
-                  className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
-                  required
-                  maxLength="6"
-                  pattern="[0-9]{6}"
-                  title="Please enter a valid 6-digit PIN code"
-                />
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={addressForm.isDefault}
-                    onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm text-primary-700">Set as default address</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" placeholder="Full Name" value={addressForm.fullName} onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })} className={inputClass} required />
+                <input type="tel" placeholder="Phone" value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} className={inputClass} required />
+                <input type="text" placeholder="Address Line 1" value={addressForm.addressLine1} onChange={(e) => setAddressForm({ ...addressForm, addressLine1: e.target.value })} className={`sm:col-span-2 ${inputClass}`} required />
+                <input type="text" placeholder="Address Line 2 (Optional)" value={addressForm.addressLine2} onChange={(e) => setAddressForm({ ...addressForm, addressLine2: e.target.value })} className={`sm:col-span-2 ${inputClass}`} />
+                <input type="text" placeholder="City" value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} className={inputClass} required />
+                <input type="text" placeholder="State" value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} className={inputClass} required />
+                <input type="text" placeholder="PIN Code" value={addressForm.postalCode} onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })} className={inputClass} required maxLength="6" pattern="[0-9]{6}" title="Please enter a valid 6-digit PIN code" />
+                <label className="flex items-center gap-2.5 py-3">
+                  <input type="checkbox" checked={addressForm.isDefault} onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })} className="w-4 h-4 rounded border-sand accent-espresso" />
+                  <span className="text-body-sm text-walnut">Set as default address</span>
                 </label>
               </div>
               <div className="flex gap-3 mt-4">
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="px-5 py-2.5 bg-espresso text-white text-body-sm font-medium rounded-lg hover:bg-ink transition-colors duration-fast">
                   {editingAddressId ? 'Update' : 'Add'} Address
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddressForm(false);
-                    setEditingAddressId(null);
-                    resetAddressForm();
-                  }}
-                  className="btn btn-secondary"
-                >
+                <button type="button" onClick={() => { setShowAddressForm(false); setEditingAddressId(null); resetAddressForm(); }} className="px-5 py-2.5 bg-linen text-ink text-body-sm font-medium rounded-lg border border-sand/40 hover:bg-sand/20 transition-colors duration-fast">
                   Cancel
                 </button>
               </div>
@@ -341,42 +250,34 @@ export default function ProfilePage() {
           )}
 
           {/* Address List */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {addresses.length === 0 ? (
-              <p className="text-center text-primary-600 py-8">No addresses saved yet</p>
+              <p className="text-center text-caramel py-8 text-body-sm">No addresses saved yet</p>
             ) : (
               addresses.map((address) => (
-                <div key={address._id} className="border border-primary-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
+                <div key={address._id} className="border border-sand/30 rounded-lg p-4 hover:border-caramel transition-colors duration-fast">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FiMapPin className="text-brand-brown" />
-                        <span className="font-semibold text-primary-900">{address.fullName}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <FiMapPin className="w-4 h-4 text-caramel flex-shrink-0" />
+                        <span className="font-display text-base font-semibold text-ink">{address.fullName}</span>
                         {address.isDefault && (
-                          <span className="px-2 py-1 text-xs bg-brand-brown text-white rounded">Default</span>
+                          <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-gold/10 text-gold-dark rounded-full">Default</span>
                         )}
                       </div>
-                      <p className="text-primary-700">{address.addressLine1}</p>
-                      {address.addressLine2 && <p className="text-primary-700">{address.addressLine2}</p>}
-                      <p className="text-primary-700">
-                        {address.city}, {address.state} - {address.postalCode}
+                      <p className="text-body-sm text-walnut">{address.addressLine1}</p>
+                      {address.addressLine2 && <p className="text-body-sm text-walnut">{address.addressLine2}</p>}
+                      <p className="text-body-sm text-walnut">
+                        {address.city}, {address.state} — {address.postalCode}
                       </p>
-                      <p className="text-primary-600 text-sm mt-1">Phone: {address.phone}</p>
+                      <p className="text-caption text-caramel mt-1">Phone: {address.phone}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEditAddress(address)}
-                        className="p-2 text-primary-600 hover:text-brand-brown transition-colors"
-                        title="Edit"
-                      >
-                        <FiEdit2 />
+                    <div className="flex gap-1 ml-2 flex-shrink-0">
+                      <button onClick={() => handleEditAddress(address)} className="w-10 h-10 rounded-lg flex items-center justify-center text-caramel hover:text-espresso hover:bg-linen transition-colors duration-fast" title="Edit">
+                        <FiEdit2 className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleDeleteAddress(address._id)}
-                        className="p-2 text-red-600 hover:text-red-700 transition-colors"
-                        title="Delete"
-                      >
-                        <FiTrash2 />
+                      <button onClick={() => handleDeleteAddress(address._id)} className="w-10 h-10 rounded-lg flex items-center justify-center text-caramel hover:text-error hover:bg-error/5 transition-colors duration-fast" title="Delete">
+                        <FiTrash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

@@ -76,7 +76,7 @@ const Sidebar = ({ navItems, isActive }) => {
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-md fixed left-0 top-[80px] bottom-0 overflow-y-auto">
       <div className="p-4 border-b border-primary-200">
-        <h2 className="text-xl font-bold text-primary-900">Admin Panel</h2>
+        <h2 className="text-xl font-bold font-display text-primary-900">Admin Panel</h2>
       </div>
       <nav className="p-4">
         <ul ref={sidebarRef} className="space-y-2">
@@ -152,11 +152,11 @@ function AdminLayoutContent({ children }) {
       {/* Admin Header */}
       <header className="fixed top-0 left-0 right-0 h-[80px] bg-white shadow-sm z-50 px-4 lg:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-xl font-bold font-serif text-primary-900">weBazaar Admin</span>
+          <span className="text-xl font-bold font-display text-primary-900">weBazaar Admin</span>
         </div>
         <button
           onClick={handleBackToStore}
-          className="flex items-center gap-2 text-primary-600 hover:text-brand-brown transition-colors px-3 py-2 rounded-lg hover:bg-primary-50"
+          className="flex items-center gap-2 text-primary-600 hover:text-espresso transition-colors px-3 py-2 rounded-lg hover:bg-primary-50"
         >
           <FiArrowLeft className="w-5 h-5" />
           <span className="hidden sm:inline">Back to Store</span>

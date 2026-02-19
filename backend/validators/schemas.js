@@ -274,15 +274,14 @@ const createCouponSchema = z.object({
       .min(3, "Coupon code must be at least 3 characters")
       .max(20)
       .toUpperCase(),
-    type: z.enum(["percentage", "fixed"], {
-      errorMap: () => ({ message: "Type must be percentage or fixed" }),
+    type: z.enum(["flat", "percent"], {
+      errorMap: () => ({ message: "Type must be flat or percent" }),
     }),
     value: z.number().min(0, "Value must be positive"),
-    minOrderValue: z.number().min(0).optional(),
-    maxDiscount: z.number().min(0).optional(),
+    minOrder: z.number().min(0).optional(),
     usageLimit: z.number().int().min(1).optional(),
     validFrom: z.string().datetime().optional(),
-    validUntil: z.string().datetime(),
+    expiry: z.string().datetime(),
     isActive: z.boolean().optional(),
   }),
 });

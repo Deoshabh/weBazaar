@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const { log } = require("../utils/logger");
 
 // @desc    Get all categories
 // @route   GET /api/v1/admin/categories
@@ -11,7 +12,7 @@ exports.getAllCategories = async (req, res) => {
     });
     res.json({ categories });
   } catch (error) {
-    console.error("Get categories error:", error);
+    log.error("Get categories error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -47,7 +48,7 @@ exports.createCategory = async (req, res) => {
     });
     res.status(201).json({ category });
   } catch (error) {
-    console.error("Create category error:", error);
+    log.error("Create category error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -68,7 +69,7 @@ exports.toggleCategoryStatus = async (req, res) => {
 
     res.json({ category });
   } catch (error) {
-    console.error("Toggle category error:", error);
+    log.error("Toggle category error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -118,7 +119,7 @@ exports.updateCategory = async (req, res) => {
     await category.save();
     res.json({ category });
   } catch (error) {
-    console.error("Update category error:", error);
+    log.error("Update category error", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -137,7 +138,7 @@ exports.deleteCategory = async (req, res) => {
     await category.deleteOne();
     res.json({ message: "Category deleted successfully" });
   } catch (error) {
-    console.error("Delete category error:", error);
+    log.error("Delete category error", error);
     res.status(500).json({ message: "Server error" });
   }
 };

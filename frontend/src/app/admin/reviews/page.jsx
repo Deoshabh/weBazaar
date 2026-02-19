@@ -209,30 +209,30 @@ export default function AdminReviewsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-serif font-bold text-primary-900 mb-2">Review Management</h1>
+            <h1 className="text-3xl font-display font-bold text-primary-900 mb-2">Review Management</h1>
             <p className="text-primary-600">Manage customer product reviews</p>
           </div>
 
           {/* Statistics Cards */}
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-card p-6">
                 <div className="text-sm text-primary-600 mb-1">Total Reviews</div>
                 <div className="text-2xl font-bold text-primary-900">{stats.totalReviews}</div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-card p-6">
                 <div className="text-sm text-primary-600 mb-1">Average Rating</div>
                 <div className="text-2xl font-bold text-primary-900">{stats.averageRating.toFixed(1)} ⭐</div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-card p-6">
                 <div className="text-sm text-primary-600 mb-1">Hidden</div>
                 <div className="text-2xl font-bold text-red-600">{stats.hiddenReviews}</div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-card p-6">
                 <div className="text-sm text-primary-600 mb-1">Verified</div>
                 <div className="text-2xl font-bold text-green-600">{stats.verifiedReviews}</div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-card p-6">
                 <div className="text-sm text-primary-600 mb-1">With Photos</div>
                 <div className="text-2xl font-bold text-primary-900">{stats.totalPhotos}</div>
               </div>
@@ -249,12 +249,12 @@ export default function AdminReviewsPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search reviews by title or comment..."
-                    className="w-full px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-brand-brown"
+                    className="w-full px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-espresso focus:border-espresso"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-brand-brown text-white rounded-lg hover:bg-brand-tan transition-colors"
+                  className="px-6 py-2 bg-espresso text-white rounded-lg hover:bg-caramel transition-colors"
                 >
                   <FiSearch className="w-5 h-5" />
                 </button>
@@ -264,7 +264,7 @@ export default function AdminReviewsPage() {
                 <select
                   value={filters.rating}
                   onChange={(e) => setFilters({ ...filters, rating: e.target.value })}
-                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-brand-brown"
+                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-espresso focus:border-espresso"
                 >
                   <option value="">All Ratings</option>
                   <option value="5">5 Stars</option>
@@ -277,7 +277,7 @@ export default function AdminReviewsPage() {
                 <select
                   value={filters.isHidden}
                   onChange={(e) => setFilters({ ...filters, isHidden: e.target.value })}
-                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-brand-brown"
+                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-espresso focus:border-espresso"
                 >
                   <option value="">All Reviews</option>
                   <option value="false">Visible</option>
@@ -287,7 +287,7 @@ export default function AdminReviewsPage() {
                 <select
                   value={filters.verifiedPurchase}
                   onChange={(e) => setFilters({ ...filters, verifiedPurchase: e.target.value })}
-                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-brand-brown"
+                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-espresso focus:border-espresso"
                 >
                   <option value="">All Purchases</option>
                   <option value="true">Verified Only</option>
@@ -297,7 +297,7 @@ export default function AdminReviewsPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-brand-brown focus:border-brand-brown"
+                  className="px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-espresso focus:border-espresso"
                 >
                   <option value="createdAt">Date</option>
                   <option value="rating">Rating</option>
@@ -319,7 +319,7 @@ export default function AdminReviewsPage() {
 
                   fetchReviews({ page: 1, search: '', filters: clearedFilters });
                 }}
-                className="text-sm text-brand-brown hover:underline"
+                className="text-sm text-espresso hover:underline"
               >
                 Clear Filters
               </button>
@@ -328,18 +328,18 @@ export default function AdminReviewsPage() {
 
           {/* Bulk Actions */}
           {selectedReviews.length > 0 && (
-            <div className="bg-brand-brown text-white rounded-lg shadow mb-6 p-4 flex items-center justify-between">
+            <div className="bg-espresso text-white rounded-lg shadow mb-6 p-4 flex items-center justify-between">
               <span>{selectedReviews.length} review(s) selected</span>
               <div className="flex gap-3">
                 <button
                   onClick={() => handleBulkHide(true)}
-                  className="px-4 py-2 bg-white text-brand-brown rounded hover:bg-primary-50 transition-colors"
+                  className="px-4 py-2 bg-white text-espresso rounded hover:bg-primary-50 transition-colors"
                 >
                   Hide Selected
                 </button>
                 <button
                   onClick={() => handleBulkHide(false)}
-                  className="px-4 py-2 bg-white text-brand-brown rounded hover:bg-primary-50 transition-colors"
+                  className="px-4 py-2 bg-white text-espresso rounded hover:bg-primary-50 transition-colors"
                 >
                   Unhide Selected
                 </button>
@@ -357,7 +357,7 @@ export default function AdminReviewsPage() {
           <div className="bg-white rounded-lg shadow overflow-hidden">
             {loading ? (
               <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-brown"></div>
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-espresso"></div>
                 <p className="text-primary-600 mt-2">Loading reviews...</p>
               </div>
             ) : reviews.length === 0 ? (
@@ -375,7 +375,7 @@ export default function AdminReviewsPage() {
                             type="checkbox"
                             checked={selectedReviews.length === reviews.length}
                             onChange={toggleSelectAll}
-                            className="rounded border-primary-300 text-brand-brown focus:ring-brand-brown"
+                            className="rounded border-primary-300 text-espresso focus:ring-espresso"
                           />
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
@@ -409,7 +409,7 @@ export default function AdminReviewsPage() {
                               type="checkbox"
                               checked={selectedReviews.includes(review._id)}
                               onChange={() => toggleSelectReview(review._id)}
-                              className="rounded border-primary-300 text-brand-brown focus:ring-brand-brown"
+                              className="rounded border-primary-300 text-espresso focus:ring-espresso"
                             />
                           </td>
                           <td className="px-6 py-4">

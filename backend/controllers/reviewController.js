@@ -1,10 +1,10 @@
 const Review = require('../models/Review');
 const Product = require('../models/Product');
-// const { Queue } = require('bullmq'); // Removed in favor of simple redis list
 const Minio = require('minio');
 const https = require('https');
 const crypto = require('crypto');
 const path = require('path');
+const { log } = require("../utils/logger");
 
 // Initialize MinIO Client
 const useSSL = String(process.env.MINIO_USE_SSL).toLowerCase() === 'true';
@@ -31,7 +31,6 @@ const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'webazaar-reviews';
     const exists = await minioClient.bucketExists(BUCKET_NAME);
     if (!exists) {
       await minioClient.makeBucket(BUCKET_NAME, 'us-east-1');
-      console.log(`Bucket ${BUCKET_NAME} created.`);
       
       // Set public policy for read access
       const policy = {
@@ -48,7 +47,7 @@ const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'webazaar-reviews';
       await minioClient.setBucketPolicy(BUCKET_NAME, JSON.stringify(policy));
     }
   } catch (err) {
-    console.error('MinIO Bucket Error:', err);
+    log.error('MinIO bucket error', err);
   }
 })();
 
@@ -128,7 +127,7 @@ exports.createReview = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create Review Error:', error);
+    log.error('Create review error', error);
     res.status(500).json({ message: 'Failed to submit review', error: error.message });
   }
 };
@@ -165,7 +164,7 @@ exports.getProductReviews = async (req, res) => {
       totalReviews: count
     });
   } catch (error) {
-    console.error('Get Product Reviews Error:', error);
+    log.error('Get product reviews error', error);
     res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
   }
 };
@@ -179,7 +178,7 @@ exports.getMyReviews = async (req, res) => {
 
     res.json(reviews);
   } catch (error) {
-    console.error('Get My Reviews Error:', error);
+    log.error('Get my reviews error', error);
     res.status(500).json({ message: 'Failed to fetch your reviews', error: error.message });
   }
 };
@@ -222,7 +221,7 @@ exports.updateReview = async (req, res) => {
 
     res.json({ message: 'Review updated successfully', review });
   } catch (error) {
-    console.error('Update Review Error:', error);
+    log.error('Update review error', error);
     res.status(500).json({ message: 'Failed to update review', error: error.message });
   }
 };
@@ -247,7 +246,7 @@ exports.deleteReview = async (req, res) => {
 
     res.json({ message: 'Review deleted successfully' });
   } catch (error) {
-    console.error('Delete Review Error:', error);
+    log.error('Delete review error', error);
     res.status(500).json({ message: 'Failed to delete review', error: error.message });
   }
 };
@@ -268,7 +267,7 @@ exports.markReviewHelpful = async (req, res) => {
 
     res.json({ message: 'Marked as helpful', helpfulVotes: review.helpfulVotes });
   } catch (error) {
-    console.error('Mark Helpful Error:', error);
+    log.error('Mark helpful error', error);
     res.status(500).json({ message: 'Failed to mark review as helpful', error: error.message });
   }
 };
@@ -292,7 +291,7 @@ exports.uploadReviewPhotos = async (req, res) => {
       images: uploadedImages 
     });
   } catch (error) {
-    console.error('Upload Photos Error:', error);
+    log.error('Upload photos error', error);
     res.status(500).json({ message: 'Failed to upload photos', error: error.message });
   }
 };

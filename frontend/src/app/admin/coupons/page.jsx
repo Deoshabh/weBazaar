@@ -214,11 +214,11 @@ export default function CouponsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {coupon.type === 'percent' ? (
-                        <span className="text-2xl font-bold text-brand-brown">
+                        <span className="text-2xl font-bold text-espresso">
                           {coupon.value}% OFF
                         </span>
                       ) : (
-                        <span className="text-2xl font-bold text-brand-brown">
+                        <span className="text-2xl font-bold text-espresso">
                           ₹{coupon.value} OFF
                         </span>
                       )}

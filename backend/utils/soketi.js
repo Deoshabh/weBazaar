@@ -2,6 +2,7 @@
 // Soketi (Pusher) Client Configuration
 // ===============================
 const Pusher = require("pusher");
+const { log } = require("./logger");
 
 /**
  * Initialize Soketi client
@@ -32,9 +33,9 @@ const emitOrderUpdate = async (orderId, data) => {
       timestamp: new Date().toISOString(),
       ...data,
     });
-    console.log(`✅ Soketi: Emitted tracking-update for order ${orderId}`);
+    log.debug(`Soketi: tracking-update for order ${orderId}`);
   } catch (error) {
-    console.error("❌ Soketi emit error:", error.message);
+    log.error("Soketi emit error", error.message);
   }
 };
 
@@ -48,9 +49,9 @@ const emitGlobalShipmentUpdate = async (data) => {
       timestamp: new Date().toISOString(),
       ...data,
     });
-    console.log(`✅ Soketi: Emitted global shipment-update`);
+    log.debug("Soketi: global shipment-update emitted");
   } catch (error) {
-    console.error("❌ Soketi emit error:", error.message);
+    log.error("Soketi emit error", error.message);
   }
 };
 
@@ -66,9 +67,9 @@ const emitAdminOrderCreated = async (order) => {
       customer: order.shippingAddress?.fullName,
       timestamp: new Date().toISOString(),
     });
-    console.log(`✅ Soketi: Emitted admin order:created for ${order.orderId}`);
+    log.debug(`Soketi: admin order:created for ${order.orderId}`);
   } catch (error) {
-    console.error("❌ Soketi emit error:", error.message);
+    log.error("Soketi emit error", error.message);
   }
 };
 
