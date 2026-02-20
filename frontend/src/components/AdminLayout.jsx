@@ -124,11 +124,35 @@ function Sidebar({ collapsed, onToggle, pathname, onNavClick }) {
       <div className={`flex items-center h-14 shrink-0 px-3 border-b border-zinc-800/60 ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
         {!collapsed && (
           <>
-            <span className="font-bold text-sm tracking-wide text-white truncate">weBazaar</span>
-            <span className="ml-auto text-[10px] font-semibold tracking-widest uppercase text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded">Admin</span>
+            <svg
+              viewBox="0 0 440 72"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-auto"
+              role="img"
+              aria-label="WeBazaar"
+            >
+              <defs>
+                <linearGradient id="al-wb-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#4ade80" />
+                  <stop offset="100%" stopColor="#86efac" />
+                </linearGradient>
+              </defs>
+              <text
+                x="0"
+                y="58"
+                fontSize="64"
+                fontWeight="700"
+                fontFamily="Inter, Poppins, system-ui, -apple-system, sans-serif"
+                fill="url(#al-wb-grad)"
+                letterSpacing="-2"
+              >
+                WeBazaar
+              </text>
+            </svg>
+            <span className="ml-auto text-[10px] font-semibold tracking-widest uppercase text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded shrink-0">Admin</span>
           </>
         )}
-        {collapsed && <span className="font-bold text-base text-amber-400">W</span>}
+        {collapsed && <span className="font-bold text-base text-green-400">W</span>}
       </div>
 
       {/* Nav */}

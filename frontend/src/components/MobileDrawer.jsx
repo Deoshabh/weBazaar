@@ -100,7 +100,34 @@ export default function MobileDrawer({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b border-sand/50 flex-shrink-0">
-          <span className="font-display text-xl font-semibold text-ink">Menu</span>
+          <Link href="/" onClick={onClose} aria-label="WeBazaar Home">
+            <svg
+              viewBox="0 0 440 72"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-7 w-auto"
+              role="img"
+              aria-label="WeBazaar"
+            >
+              <defs>
+                <linearGradient id="md-wb-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#14532d" />
+                  <stop offset="55%" stopColor="#166534" />
+                  <stop offset="100%" stopColor="#16a34a" />
+                </linearGradient>
+              </defs>
+              <text
+                x="0"
+                y="58"
+                fontSize="64"
+                fontWeight="700"
+                fontFamily="Inter, Poppins, system-ui, -apple-system, sans-serif"
+                fill="url(#md-wb-grad)"
+                letterSpacing="-2"
+              >
+                WeBazaar
+              </text>
+            </svg>
+          </Link>
           <button
             onClick={onClose}
             className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-linen text-ink transition-colors duration-fast"

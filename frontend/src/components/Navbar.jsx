@@ -171,21 +171,44 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-full gap-4">
 
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0 z-20" aria-label="weBazaar Home">
+            <Link href="/" className="flex-shrink-0 z-20" aria-label="WeBazaar Home">
               {settings?.branding?.logo?.url ? (
                 <div className="relative" style={{ width: `${logoWidth}px`, height: `${logoHeight}px` }}>
                   <Image
                     src={settings.branding.logo.url}
-                    alt={settings.branding.logo.alt || 'weBazaar'}
+                    alt={settings.branding.logo.alt || 'WeBazaar'}
                     fill
                     className="object-contain"
                     priority
                   />
                 </div>
               ) : (
-                <span className="font-display text-2xl sm:text-[28px] font-semibold text-ink tracking-tight hover:text-walnut transition-colors duration-fast">
-                  {settings?.branding?.siteName || 'weBazaar'}
-                </span>
+                <svg
+                  viewBox="0 0 440 72"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 sm:h-8 md:h-9 w-auto"
+                  role="img"
+                  aria-label="WeBazaar"
+                >
+                  <defs>
+                    <linearGradient id="nb-wb-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#14532d" />
+                      <stop offset="55%" stopColor="#166534" />
+                      <stop offset="100%" stopColor="#16a34a" />
+                    </linearGradient>
+                  </defs>
+                  <text
+                    x="0"
+                    y="58"
+                    fontSize="64"
+                    fontWeight="700"
+                    fontFamily="Inter, Poppins, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+                    fill="url(#nb-wb-grad)"
+                    letterSpacing="-2"
+                  >
+                    WeBazaar
+                  </text>
+                </svg>
               )}
             </Link>
 
