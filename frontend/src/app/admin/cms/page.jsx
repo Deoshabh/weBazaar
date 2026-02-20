@@ -30,11 +30,13 @@ export default function AdminCMSPage() {
   const [saving, setSaving] = useState(false);
 
   /* ── State ── */
-  const [branding, setBranding] = useState({ logo: { url: '', alt: 'Logo' }, favicon: { url: '' }, siteName: 'weBazaar' });
+  const [branding, setBranding] = useState({ logo: { url: '', alt: 'Logo' }, favicon: { url: '' }, ogImage: { url: '', alt: '', width: 1200, height: 630 }, siteName: 'weBazaar', siteDescription: '' });
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [faviconFile, setFaviconFile] = useState(null);
   const [faviconPreview, setFaviconPreview] = useState(null);
+  const [ogImageFile, setOgImageFile] = useState(null);
+  const [ogImagePreview, setOgImagePreview] = useState(null);
   const [banners, setBanners] = useState([]);
   const [announcementBar, setAnnouncementBar] = useState({
     enabled: true, text: '', link: '', backgroundColor: '#10b981', textColor: '#ffffff', dismissible: true,
@@ -79,7 +81,7 @@ export default function AdminCMSPage() {
         ...advObj,
         theme: { ...(s.theme || {}), ...(advObj.theme || {}) },
       });
-      setBranding(s.branding || { logo: {}, favicon: {}, siteName: '' });
+      setBranding(s.branding || { logo: {}, favicon: {}, ogImage: {}, siteName: '', siteDescription: '' });
       setBanners(s.banners || s.bannerSystem?.banners || []);
       setAnnouncementBar(s.announcementBar || {
         enabled: true, text: '', link: '', backgroundColor: '#10b981', textColor: '#ffffff', dismissible: true,
@@ -508,6 +510,59 @@ export default function AdminCMSPage() {
                 </Field>
               </div>
 
+              {/* ── OG / Social Sharing Image ── */}
+              <Field label="OG / Social Sharing Image" hint="Shown when the site is shared on Facebook, Twitter, WhatsApp, etc. Recommended: 1200×630 JPG/PNG. Falls back to logo if not set.">
+                <div
+                  className="relative mt-1 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors cursor-pointer bg-white"
+                  onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('border-gray-500', 'bg-gray-50'); }}
+                  onDragLeave={e => { e.currentTarget.classList.remove('border-gray-500', 'bg-gray-50'); }}
+                  onDrop={e => {
+                    e.preventDefault(); e.currentTarget.classList.remove('border-gray-500', 'bg-gray-50');
+                    const file = e.dataTransfer.files?.[0];
+                    if (file && file.type.startsWith('image/')) { setOgImageFile(file); setOgImagePreview(URL.createObjectURL(file)); }
+                  }}
+                  onClick={() => document.getElementById('og-image-upload-input')?.click()}
+                >
+                  <input id="og-image-upload-input" type="file" accept="image/*" className="hidden" onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) { setOgImageFile(file); setOgImagePreview(URL.createObjectURL(file)); }
+                  }} />
+                  {(ogImagePreview || branding.ogImage?.url) ? (
+                    <div className="relative">
+                      <div className="h-28 flex items-center justify-center">
+                        <Image src={ogImagePreview || branding.ogImage.url} alt="OG Image" width={240} height={126} className="object-contain max-h-28 rounded" />
+                      </div>
+                      <button type="button" className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-sm" onClick={e => {
+                        e.stopPropagation(); setOgImageFile(null); setOgImagePreview(null); setBranding(p => ({ ...p, ogImage: { ...p.ogImage, url: '' } }));
+                      }}><FiX className="w-3 h-3" /></button>
+                      <p className="text-xs text-gray-500 mt-2">Click or drag to replace</p>
+                    </div>
+                  ) : (
+                    <div className="py-4">
+                      <FiUploadCloud className="mx-auto w-8 h-8 text-gray-400" />
+                      <p className="text-sm text-gray-600 mt-2 font-medium">Click to upload or drag & drop</p>
+                      <p className="text-xs text-gray-400 mt-1">JPG, PNG — 1200×630px recommended</p>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <TextInput value={branding.ogImage?.url} onChange={v => { setBranding(p => ({ ...p, ogImage: { ...p.ogImage, url: v } })); setOgImageFile(null); setOgImagePreview(null); }} placeholder="Or paste OG image URL..." />
+                </div>
+                <Field label="OG Image Alt Text" className="mt-2">
+                  <TextInput value={branding.ogImage?.alt} onChange={v => setBranding(p => ({ ...p, ogImage: { ...p.ogImage, alt: v } }))} placeholder="e.g. WeBazaar — Premium Shoes" />
+                </Field>
+              </Field>
+
+              <Field label="Site Description" hint="Used in meta description and OG description if not overridden per page.">
+                <textarea
+                  value={branding.siteDescription || ''}
+                  onChange={e => setBranding(p => ({ ...p, siteDescription: e.target.value }))}
+                  rows={3}
+                  className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 resize-none"
+                  placeholder="Conscious style, delivered. Shop premium leather & vegan shoes..."
+                />
+              </Field>
+
               <SaveButton onClick={async () => {
                 try {
                   setSaving(true);
@@ -519,6 +574,10 @@ export default function AdminCMSPage() {
                   if (faviconFile) {
                     updated.favicon = { ...updated.favicon, url: await uploadImage(faviconFile) };
                     setFaviconFile(null); setFaviconPreview(null);
+                  }
+                  if (ogImageFile) {
+                    updated.ogImage = { ...updated.ogImage, url: await uploadImage(ogImageFile) };
+                    setOgImageFile(null); setOgImagePreview(null);
                   }
                   setBranding(updated);
                   await adminAPI.updateSettings({ branding: updated });

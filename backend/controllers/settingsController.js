@@ -113,7 +113,9 @@ exports.updateSettings = async (req, res, next) => {
     if (branding) {
       if (branding.logo) settings.branding.logo = { ...settings.branding.logo, ...branding.logo };
       if (branding.favicon) settings.branding.favicon = { ...settings.branding.favicon, ...branding.favicon };
+      if (branding.ogImage) settings.branding.ogImage = { ...settings.branding.ogImage, ...branding.ogImage };
       if (branding.siteName) settings.branding.siteName = branding.siteName;
+      if (branding.siteDescription !== undefined) settings.branding.siteDescription = branding.siteDescription;
     }
     
     if (banners) {

@@ -18,13 +18,19 @@ export const generateMetadata = ({
   title = SITE_NAME,
   description = SITE_DESCRIPTION,
   image = SITE_IMAGE,
+  imageAlt,
+  imageWidth = 1200,
+  imageHeight = 630,
   url = SITE_URL,
   type = "website",
   keywords = [],
   noindex = false,
   nofollow = false,
+  favicon,
+  siteName = SITE_NAME,
 }) => {
-  const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
+  const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+  const resolvedAlt = imageAlt || (image === SITE_IMAGE ? SITE_IMAGE_ALT : fullTitle);
 
   const metadata = {
     title: fullTitle,
@@ -44,13 +50,13 @@ export const generateMetadata = ({
       title: fullTitle,
       description,
       url,
-      siteName: SITE_NAME,
+      siteName: siteName,
       images: [
         {
           url: image,
-          width: 1200,
-          height: 630,
-          alt: image === SITE_IMAGE ? SITE_IMAGE_ALT : fullTitle,
+          width: imageWidth,
+          height: imageHeight,
+          alt: resolvedAlt,
         },
       ],
       locale: "en_IN",
@@ -75,8 +81,8 @@ export const generateMetadata = ({
 
     // Icons
     icons: {
-      icon: "/favicon.ico",
-      shortcut: "/favicon-16x16.png",
+      icon: favicon || "/favicon.ico",
+      shortcut: favicon || "/favicon-16x16.png",
       apple: "/apple-touch-icon.png",
     },
 

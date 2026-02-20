@@ -27,30 +27,71 @@ const cormorant = Cormorant_Garamond({
   display: 'swap',
 });
 
-const DEFAULT_OG_IMAGE = 'https://webazaar.in/og/webazaar-og-banner.jpg';
+const SITE_URL = 'https://webazaar.in';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og/webazaar-og-banner.jpg`;
+const DEFAULT_TITLE = 'WeBazaar — Premium Leather & Vegan Shoes';
+const DEFAULT_DESCRIPTION =
+  'Conscious style, delivered. Shop premium leather & vegan shoes at WeBazaar — cruelty-free, sustainable, and designed for modern living.';
 
-async function fetchBrandingImage() {
+/** Ensure a URL coming from the DB/CDN is absolute. */
+function toAbsoluteUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  // Relative path stored in DB — prefix with site origin
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
+/** Fetch branding from the public settings endpoint with no-store so every
+ *  deployment/request gets fresh data. Falls back gracefully on any error. */
+async function fetchBranding() {
   try {
     const { getServerApiUrl } = require('@/utils/serverApi');
-    const res = await fetch(
-      `${getServerApiUrl()}/settings/public`,
-      { next: { revalidate: 300 } } // cache 5 minutes
-    );
-    if (!res.ok) return DEFAULT_OG_IMAGE;
+    const res = await fetch(`${getServerApiUrl()}/settings/public`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
     const data = await res.json();
-    return data?.settings?.branding?.logo?.url || DEFAULT_OG_IMAGE;
+    return data?.settings?.branding ?? null;
   } catch {
-    return DEFAULT_OG_IMAGE;
+    return null;
   }
 }
 
 export async function generateMetadata() {
-  const ogImage = await fetchBrandingImage();
+  const branding = await fetchBranding();
+
+  // Priority: ogImage.url → logo.url → static default
+  const rawOgImage =
+    branding?.ogImage?.url ||
+    branding?.logo?.url ||
+    DEFAULT_OG_IMAGE;
+  const ogImageUrl = toAbsoluteUrl(rawOgImage) || DEFAULT_OG_IMAGE;
+
+  const ogImageAlt =
+    branding?.ogImage?.alt ||
+    branding?.logo?.alt ||
+    'WeBazaar — Premium Leather & Vegan Shoes';
+
+  const siteName = branding?.siteName || 'WeBazaar';
+  const title = `${siteName} — Premium Leather & Vegan Shoes`;
+  const description = branding?.siteDescription || DEFAULT_DESCRIPTION;
+
+  // Dynamic favicon (falls back to /favicon.ico if not set)
+  const faviconUrl = toAbsoluteUrl(branding?.favicon?.url) || '/favicon.ico';
+
   return generateSEOMetadata({
-    title: 'weBazaar — Premium Leather & Vegan Shoes',
-    description: 'Conscious style, delivered. Shop premium leather & vegan shoes at weBazaar — cruelty-free, sustainable, and designed for modern living.',
-    image: ogImage,
-    keywords: ['vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear', 'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes'],
+    title,
+    description,
+    image: ogImageUrl,
+    imageAlt: ogImageAlt,
+    imageWidth: branding?.ogImage?.width || 1200,
+    imageHeight: branding?.ogImage?.height || 630,
+    keywords: [
+      'vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear',
+      'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes',
+    ],
+    favicon: faviconUrl,
+    siteName,
   });
 }
 

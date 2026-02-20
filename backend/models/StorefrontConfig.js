@@ -6,11 +6,21 @@ const storefrontConfigSchema = new mongoose.Schema(
       logo: {
         url: { type: String, default: '' },
         alt: { type: String, default: 'Logo' },
+        width:  { type: Number, default: 120 },
+        height: { type: Number, default: 40 },
       },
       favicon: {
         url: { type: String, default: '' },
       },
+      // Dedicated OG/social sharing image. Falls back to logo if absent.
+      ogImage: {
+        url: { type: String, default: '' },
+        alt: { type: String, default: '' },
+        width:  { type: Number, default: 1200 },
+        height: { type: Number, default: 630 },
+      },
       siteName: { type: String, default: 'weBazaar' },
+      siteDescription: { type: String, default: '' },
     },
     banners: [
       {
