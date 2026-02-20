@@ -389,6 +389,8 @@ exports.getDependenciesHealth = async (_req, res) => {
     health.status = "DEGRADED";
   }
 
-  const statusCode = health.status === "OK" ? 200 : 503;
-  return res.status(statusCode).json(health);
+  // Always return 200 — the JSON payload contains the real status.
+  // A 503 HTTP code causes Axios to throw, breaking any consumer that uses
+  // Promise.all. Callers should inspect health.status / health.dependencies.
+  return res.status(200).json(health);
 };

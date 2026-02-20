@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/utils/api';
@@ -36,29 +36,38 @@ export default function AdminStatsPage() {
     }
   }, [user, isAuthenticated, loading, router]);
 
-  useEffect(() => {
-    if (isAuthenticated && user?.role === 'admin') {
-      fetchStats();
-    }
-  }, [isAuthenticated, user]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoadingStats(true);
-      const [statsResponse, depsResponse] = await Promise.all([
+      // allSettled so a degraded health check (was 503, now 200) never
+      // prevents the main stats from loading.
+      const [statsResult, depsResult] = await Promise.allSettled([
         adminAPI.getAdminStats(),
         adminAPI.getDependenciesHealth(),
       ]);
 
-      setStats(statsResponse.data);
-      setDepsHealth(depsResponse.data);
+      if (statsResult.status === 'fulfilled') {
+        setStats(statsResult.value.data);
+      } else {
+        toast.error('Failed to fetch statistics');
+      }
+
+      if (depsResult.status === 'fulfilled') {
+        setDepsHealth(depsResult.value.data);
+      }
+      // silently swallow deps health failure — it's informational only
     } catch (error) {
       toast.error('Failed to fetch statistics');
-      console.error('Failed to fetch statistics:', error);
     } finally {
       setLoadingStats(false);
     }
-  };
+  }, []);  // no external deps — adminAPI is a module-level constant
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin') {
+      fetchStats();
+    }
+  }, [isAuthenticated, user, fetchStats]);
 
   const formatCurrency = (amount) => {
     return `₹${(amount || 0).toLocaleString('en-IN')}`;
