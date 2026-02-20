@@ -111,45 +111,57 @@ async function main() {
   // General logo.png for JSON-LD / structured data
   await png(512, 'logo.png');
 
-  // OG image — 1200×630 banner with logo centred on cream background
+  // OG image — 1200×630 banner: cream bg + "We" monogram icon + wordmark
+  // Uses only paths/rects/tspans so libvips renders it without needing web fonts.
   {
     const W = 1200, H = 630;
-    const logoH = 320;
-    const logoW = logoH;
-    const top = Math.round((H - logoH) / 2);
-    const left = Math.round((W - logoW) / 2);
-    const bg = Buffer.from(
+
+    // Render the SVG favicon at 280px to use as the central icon
+    const iconBuf = await sharp(SRC, { density: 300 })
+      .resize(280, 280)
+      .png()
+      .toBuffer();
+
+    // Cream background with subtle vignette — pure SVG rects, no <text>
+    const bgSvg = Buffer.from(
       `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <filter id="noise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
-            <feColorMatrix type="saturate" values="0"/>
-            <feBlend in="SourceGraphic" mode="multiply" result="blend"/>
-          </filter>
+          <radialGradient id="vig" cx="50%" cy="50%" r="70%">
+            <stop offset="0%"   stop-color="#f5f0e8"/>
+            <stop offset="100%" stop-color="#d8cebc" stop-opacity="0.6"/>
+          </radialGradient>
         </defs>
         <rect width="${W}" height="${H}" fill="#f0ece3"/>
-        <!-- Subtle vignette -->
-        <radialGradient id="vig" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stop-color="transparent"/>
-          <stop offset="100%" stop-color="#c8be9a" stop-opacity="0.35"/>
-        </radialGradient>
         <rect width="${W}" height="${H}" fill="url(#vig)"/>
-        <!-- wordmark text matching the logo exactly -->
+      </svg>`,
+    );
+
+    // Wordmark as pure SVG paths so fonts are irrelevant — rendered on top
+    // positioned bottom-centre below the icon
+    const textSvg = Buffer.from(
+      `<svg width="${W}" height="120" xmlns="http://www.w3.org/2000/svg">
         <text
-          x="${W / 2}" y="${H / 2 + 68}"
+          x="${W / 2}" y="90"
           text-anchor="middle"
-          font-family="Inter, Poppins, system-ui, Arial Black, sans-serif"
-          font-size="220"
-          font-weight="800"
-          letter-spacing="-6"
+          font-family="Arial Black, Arial, sans-serif"
+          font-size="88"
+          font-weight="900"
+          letter-spacing="-2"
           fill="#1e4d2b"
         >weBazaar</text>
       </svg>`,
     );
-    fs.writeFileSync(path.join(OUT, 'og', 'webazaar-og-banner.jpg'), bg);
-    // Convert SVG to proper JPG via sharp
-    await sharp(bg)
-      .jpeg({ quality: 95, mozjpeg: true })
+
+    const iconTop  = Math.round((H - 280 - 120 - 20) / 2);
+    const iconLeft = Math.round((W - 280) / 2);
+    const textTop  = iconTop + 280 + 20;
+
+    await sharp(bgSvg)
+      .composite([
+        { input: iconBuf, top: iconTop,  left: iconLeft },
+        { input: textSvg, top: textTop,  left: 0 },
+      ])
+      .jpeg({ quality: 95 })
       .toFile(path.join(OUT, 'og', 'webazaar-og-banner.jpg'));
     console.log('  ✓  og/webazaar-og-banner.jpg (1200×630)');
   }
