@@ -79,20 +79,53 @@ export async function generateMetadata() {
   // Dynamic favicon (falls back to /favicon.ico if not set)
   const faviconUrl = toAbsoluteUrl(branding?.favicon?.url) || '/favicon.ico';
 
-  return generateSEOMetadata({
-    title,
-    description,
-    image: ogImageUrl,
-    imageAlt: ogImageAlt,
-    imageWidth: branding?.ogImage?.width || 1200,
-    imageHeight: branding?.ogImage?.height || 630,
-    keywords: [
-      'vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear',
-      'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes',
+  return {
+    ...generateSEOMetadata({
+      title,
+      description,
+      image: ogImageUrl,
+      imageAlt: ogImageAlt,
+      imageWidth: branding?.ogImage?.width || 1200,
+      imageHeight: branding?.ogImage?.height || 630,
+      keywords: [
+        'vegan shoes', 'vegan leather', 'cruelty-free', 'sustainable footwear',
+        'ethical shoes', 'oxford', 'sneakers', 'loafer', 'premium leather shoes',
+      ],
+      favicon: faviconUrl,
+      siteName,
+    }),
+    // Full icon suite generated from the weBazaar W-monogram SVG
+    icons: {
+      icon: [
+        { url: '/favicon.ico',         sizes: '16x16 32x32 48x48' },
+        { url: '/favicon-16x16.png',   sizes: '16x16',  type: 'image/png' },
+        { url: '/favicon-32x32.png',   sizes: '32x32',  type: 'image/png' },
+        { url: '/favicon-96x96.png',   sizes: '96x96',  type: 'image/png' },
+        { url: '/favicon.svg',                          type: 'image/svg+xml' },
+      ],
+      apple: [
+        { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      ],
+      other: [
+        { rel: 'mask-icon', url: '/favicon.svg', color: '#1e4d2b' },
+      ],
+    },
+    manifest: '/site.webmanifest',
+    themeColor: [
+      { media: '(prefers-color-scheme: light)', color: '#f0ece3' },
+      { media: '(prefers-color-scheme: dark)',  color: '#1e4d2b' },
     ],
-    favicon: faviconUrl,
-    siteName,
-  });
+    other: {
+      'msapplication-TileColor': '#1e4d2b',
+      'msapplication-TileImage': '/android-chrome-192x192.png',
+      'application-name': siteName,
+      'apple-mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-status-bar-style': 'default',
+      'apple-mobile-web-app-title': siteName,
+      'format-detection': 'telephone=no',
+      'mobile-web-app-capable': 'yes',
+    },
+  };
 }
 
 import QueryProvider from '@/providers/QueryProvider';
@@ -104,6 +137,9 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${roboto.variable} ${cormorant.variable}`}>
       <head>
         <link rel="preconnect" href="https://api.webazaar.in" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#1e4d2b" />
+        <meta name="msapplication-TileColor" content="#1e4d2b" />
         <script src={`https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`} async defer></script>
       </head>
       <body className="antialiased">

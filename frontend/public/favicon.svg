@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Cream/parchment background matching the logo -->
+  <rect width="512" height="512" rx="80" fill="#f0ece3"/>
+  <!-- Subtle inner shadow / depth ring (mimics the letterpress style) -->
+  <rect width="512" height="512" rx="80" fill="none" stroke="#c8c0b0" stroke-width="8" opacity="0.5"/>
+  <!-- "W" letterform — bold, matching weBazaar logo proportions -->
+  <text
+    x="256"
+    y="370"
+    text-anchor="middle"
+    font-family="Inter, Poppins, system-ui, -apple-system, Arial Black, sans-serif"
+    font-size="360"
+    font-weight="800"
+    letter-spacing="-12"
+    fill="#1e4d2b"
+  >W</text>
+  <!-- Texture overlay — subtle diagonal lines for the woven/fabric effect -->
+  <defs>
+    <pattern id="tex" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#2d6b38" stroke-width="0.8" opacity="0.18"/>
+    </pattern>
+    <clipPath id="wClip">
+      <text
+        x="256"
+        y="370"
+        text-anchor="middle"
+        font-family="Inter, Poppins, system-ui, -apple-system, Arial Black, sans-serif"
+        font-size="360"
+        font-weight="800"
+        letter-spacing="-12"
+      >W</text>
+    </clipPath>
+  </defs>
+  <!-- Texture applied only inside the W letterform -->
+  <rect width="512" height="512" fill="url(#tex)" clip-path="url(#wClip)"/>
+</svg>
