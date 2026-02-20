@@ -388,7 +388,7 @@ export default function AdminSeoPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-primary-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
               <FiSearch className="w-6 h-6" />
               SEO Manager
             </h1>
@@ -407,7 +407,7 @@ export default function AdminSeoPage() {
                   placeholder="Filter pages..."
                   value={searchFilter}
                   onChange={e => setSearchFilter(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                 />
               </div>
               {loading ? (
@@ -427,7 +427,7 @@ export default function AdminSeoPage() {
                           className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
                             active
                               ? 'bg-primary-900 text-white'
-                              : 'text-gray-700 hover:bg-primary-50'
+                              : 'text-gray-700 hover:bg-zinc-50'
                           }`}
                         >
                           <span className="truncate">{page.page_label || page.page_key}</span>
@@ -459,7 +459,7 @@ export default function AdminSeoPage() {
                 {/* Score + actions bar */}
                 <div className="bg-white rounded-xl shadow-sm border p-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold text-primary-900">{formData.page_label || selectedKey}</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">{formData.page_label || selectedKey}</h2>
                     <ScoreBadge score={seoScore.score} />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -511,7 +511,7 @@ export default function AdminSeoPage() {
                         onClick={() => setActiveTab(tab.key)}
                         className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                           activeTab === tab.key
-                            ? 'border-primary-900 text-primary-900'
+                            ? 'border-primary-900 text-zinc-900'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                       >
@@ -534,7 +534,7 @@ export default function AdminSeoPage() {
                             type="text"
                             value={formData.meta_title}
                             onChange={e => setFormData(p => ({ ...p, meta_title: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder="Page title for search engines..."
                           />
                         </div>
@@ -546,7 +546,7 @@ export default function AdminSeoPage() {
                           <textarea
                             value={formData.meta_description}
                             onChange={e => setFormData(p => ({ ...p, meta_description: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             rows={3}
                             placeholder="Brief description for search results..."
                           />
@@ -557,7 +557,7 @@ export default function AdminSeoPage() {
                             type="text"
                             value={formData.meta_keywords}
                             onChange={e => setFormData(p => ({ ...p, meta_keywords: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder="vegan shoes, cruelty-free, sustainable footwear..."
                           />
                         </div>
@@ -579,7 +579,7 @@ export default function AdminSeoPage() {
                             type="text"
                             value={formData.og_title}
                             onChange={e => setFormData(p => ({ ...p, og_title: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder={formData.meta_title || 'Falls back to meta title...'}
                           />
                         </div>
@@ -588,7 +588,7 @@ export default function AdminSeoPage() {
                           <textarea
                             value={formData.og_description}
                             onChange={e => setFormData(p => ({ ...p, og_description: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             rows={2}
                             placeholder={formData.meta_description || 'Falls back to meta description...'}
                           />
@@ -599,7 +599,7 @@ export default function AdminSeoPage() {
                             type="url"
                             value={formData.og_image}
                             onChange={e => setFormData(p => ({ ...p, og_image: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder="https://webazaar.in/og/webazaar-og-banner.jpg"
                           />
                         </div>
@@ -608,7 +608,7 @@ export default function AdminSeoPage() {
                           <select
                             value={formData.og_type}
                             onChange={e => setFormData(p => ({ ...p, og_type: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                           >
                             <option value="website">website</option>
                             <option value="article">article</option>
@@ -632,7 +632,7 @@ export default function AdminSeoPage() {
                             type="text"
                             value={formData.twitter_title}
                             onChange={e => setFormData(p => ({ ...p, twitter_title: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder={formData.og_title || formData.meta_title || 'Falls back to OG/meta title...'}
                           />
                         </div>
@@ -641,7 +641,7 @@ export default function AdminSeoPage() {
                           <textarea
                             value={formData.twitter_description}
                             onChange={e => setFormData(p => ({ ...p, twitter_description: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             rows={2}
                             placeholder={formData.og_description || formData.meta_description || 'Falls back to OG/meta description...'}
                           />
@@ -652,7 +652,7 @@ export default function AdminSeoPage() {
                             type="url"
                             value={formData.twitter_image}
                             onChange={e => setFormData(p => ({ ...p, twitter_image: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder={formData.og_image || 'Falls back to OG image...'}
                           />
                         </div>
@@ -669,7 +669,7 @@ export default function AdminSeoPage() {
                             type="url"
                             value={formData.canonical_url}
                             onChange={e => setFormData(p => ({ ...p, canonical_url: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             placeholder="https://weBazaar.in/your-page"
                           />
                         </div>
@@ -678,7 +678,7 @@ export default function AdminSeoPage() {
                           <select
                             value={formData.robots}
                             onChange={e => setFormData(p => ({ ...p, robots: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                           >
                             <option value="index, follow">index, follow (Recommended)</option>
                             <option value="noindex, follow">noindex, follow</option>
@@ -691,7 +691,7 @@ export default function AdminSeoPage() {
                           <textarea
                             value={formData.schema_json}
                             onChange={e => setFormData(p => ({ ...p, schema_json: e.target.value }))}
-                            className="w-full px-3 py-2 border rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 border rounded-lg text-sm font-mono focus:ring-2 focus:ring-zinc-500 focus:border-primary-500"
                             rows={8}
                             placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "WebPage",\n  ...\n}'}
                           />

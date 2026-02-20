@@ -92,7 +92,7 @@ export default function AdminUsersPage() {
 
   if (loading || loadingUsers) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-primary-50">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-900"></div>
       </div>
     );
@@ -100,12 +100,12 @@ export default function AdminUsersPage() {
 
   return (
     <AdminLayout>
-    <div className="min-h-screen bg-primary-50">
+    <div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
         <div className="mb-6 sm:mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Users Management</h1>
-            <p className="text-sm sm:text-base text-primary-600 mt-1">Manage user accounts and permissions</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">Users Management</h1>
+            <p className="text-sm sm:text-base text-zinc-500 mt-1">Manage user accounts and permissions</p>
           </div>
           <button
             onClick={() => setShowCreateAdminModal(true)}
@@ -127,7 +127,7 @@ export default function AdminUsersPage() {
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
               />
             </div>
               <div className="flex gap-2">
@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
                   className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-colors touch-manipulation ${
                     filterRole === role
                       ? 'bg-primary-900 text-white'
-                      : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
+                      : 'bg-zinc-100 text-zinc-700 hover:bg-primary-200'
                   }`}
                 >
                     {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -151,55 +151,55 @@ export default function AdminUsersPage() {
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-primary-50 border-b border-primary-200">
+              <thead className="bg-zinc-50 border-b border-zinc-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-primary-900">User</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-primary-900">Contact</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-primary-900">Joined</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-primary-900">Role</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-primary-900">Status</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-primary-900">History</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-900">User</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-900">Contact</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-900">Joined</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-900">Role</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-900">Status</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-900">History</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-primary-200">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-primary-600">
+                    <td colSpan="6" className="px-6 py-12 text-center text-zinc-500">
                       No users found
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((u) => (
-                    <tr key={u._id} className="hover:bg-primary-50 transition-colors">
+                    <tr key={u._id} className="hover:bg-zinc-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary-900 text-white flex items-center justify-center font-semibold">
                             {u.name?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-primary-900">{u.name}</p>
-                            <p className="text-sm text-primary-600">{u.email}</p>
+                            <p className="font-medium text-zinc-900">{u.name}</p>
+                            <p className="text-sm text-zinc-500">{u.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleViewContact(u)}
-                          className="flex items-center gap-2 px-3 py-2 bg-primary-100 text-primary-900 rounded-lg hover:bg-primary-200 transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 bg-zinc-100 text-zinc-900 rounded-lg hover:bg-primary-200 transition-colors"
                           title="View Contact Details"
                         >
                           <FiEye className="w-4 h-4" />
                           View
                         </button>
                       </td>
-                      <td className="px-6 py-4 text-primary-700">
+                      <td className="px-6 py-4 text-zinc-700">
                         {new Date(u.createdAt).toLocaleDateString('en-IN')}
                       </td>
                       <td className="px-6 py-4">
                         <select
                           value={u.role}
                           onChange={(e) => handleUpdateRole(u._id, e.target.value)}
-                          className="px-3 py-1 rounded-lg border border-primary-300 bg-white text-primary-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                          className="px-3 py-1 rounded-lg border border-primary-300 bg-white text-primary-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-zinc-500 cursor-pointer"
                         >
                           <option value="customer">Customer</option>
                           <option value="designer">Designer</option>
@@ -239,17 +239,17 @@ export default function AdminUsersPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           <div className="bg-white rounded-lg shadow-md p-6">
-            <p className="text-primary-600 text-sm mb-1">Total Users</p>
-            <p className="text-2xl font-bold text-primary-900">{users.length}</p>
+            <p className="text-zinc-500 text-sm mb-1">Total Users</p>
+            <p className="text-2xl font-bold text-zinc-900">{users.length}</p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
-            <p className="text-primary-600 text-sm mb-1">Admin Users</p>
+            <p className="text-zinc-500 text-sm mb-1">Admin Users</p>
             <p className="text-2xl font-bold text-yellow-600">
               {users.filter((u) => u.role === 'admin').length}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
-            <p className="text-primary-600 text-sm mb-1">Active Users</p>
+            <p className="text-zinc-500 text-sm mb-1">Active Users</p>
             <p className="text-2xl font-bold text-green-600">
               {users.filter((u) => u.isActive).length}
             </p>

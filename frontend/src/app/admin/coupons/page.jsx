@@ -172,7 +172,7 @@ export default function CouponsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-primary-50 flex justify-center items-center">
+      <div className="min-h-screen bg-zinc-50 flex justify-center items-center">
         <div className="spinner"></div>
       </div>
     );
@@ -180,12 +180,12 @@ export default function CouponsPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-primary-50">
+      <div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Coupons</h1>
-              <p className="text-sm sm:text-base text-primary-600 mt-1">Manage discount coupons</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">Coupons</h1>
+              <p className="text-sm sm:text-base text-zinc-500 mt-1">Manage discount coupons</p>
             </div>
             <button
               onClick={() => handleOpenModal()}
@@ -207,8 +207,8 @@ export default function CouponsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <FiTag className="w-5 h-5 text-primary-600" />
-                      <h3 className="text-xl font-bold text-primary-900">
+                      <FiTag className="w-5 h-5 text-zinc-500" />
+                      <h3 className="text-xl font-bold text-zinc-900">
                         {coupon.code}
                       </h3>
                     </div>
@@ -236,7 +236,7 @@ export default function CouponsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm text-primary-600 mb-4">
+                <div className="space-y-2 text-sm text-zinc-500 mb-4">
                   {coupon.minPurchase && (
                     <p>• Min. purchase: ₹{coupon.minPurchase.toLocaleString()}</p>
                   )}
@@ -252,17 +252,17 @@ export default function CouponsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-3 border-t border-primary-100">
+                <div className="flex items-center gap-2 pt-3 border-t border-zinc-100">
                   <button
                     onClick={() => handleToggleStatus(coupon._id, coupon.isActive)}
                     disabled={isExpired(coupon.validUntil)}
-                    className="flex-1 px-3 py-2 text-sm border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                    className="flex-1 px-3 py-2 text-sm border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                   >
                     {coupon.isActive ? 'Deactivate' : 'Activate'}
                   </button>
                   <button
                     onClick={() => handleOpenModal(coupon)}
-                    className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors touch-manipulation"
+                    className="p-2 text-zinc-500 hover:bg-zinc-50 rounded-lg transition-colors touch-manipulation"
                   >
                     <FiEdit2 className="w-5 h-5" />
                   </button>
@@ -279,7 +279,7 @@ export default function CouponsPage() {
 
           {coupons.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-primary-600">No coupons found. Create your first coupon!</p>
+              <p className="text-zinc-500">No coupons found. Create your first coupon!</p>
             </div>
           )}
         </div>
@@ -288,13 +288,13 @@ export default function CouponsPage() {
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-primary-200 px-4 sm:px-6 py-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-primary-900">
+              <div className="sticky top-0 bg-white border-b border-zinc-200 px-4 sm:px-6 py-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-zinc-900">
                   {editMode ? 'Edit Coupon' : 'Add New Coupon'}
                 </h2>
                 <button
                   onClick={handleCloseModal}
-                  className="p-2 hover:bg-primary-100 rounded-lg transition-colors touch-manipulation"
+                  className="p-2 hover:bg-zinc-100 rounded-lg transition-colors touch-manipulation"
                 >
                   <FiX className="w-5 h-5" />
                 </button>
@@ -302,7 +302,7 @@ export default function CouponsPage() {
 
               <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Coupon Code *
                   </label>
                   <input
@@ -311,14 +311,14 @@ export default function CouponsPage() {
                     value={formData.code}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900 uppercase"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500 uppercase"
                     placeholder="e.g., SAVE20"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">
+                    <label className="block text-sm font-medium text-zinc-900 mb-2">
                       Discount Type *
                     </label>
                     <select
@@ -326,7 +326,7 @@ export default function CouponsPage() {
                       value={formData.type}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                      className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     >
                       <option value="percent">Percentage</option>
                       <option value="flat">Fixed Amount</option>
@@ -334,7 +334,7 @@ export default function CouponsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">
+                    <label className="block text-sm font-medium text-zinc-900 mb-2">
                       {formData.type === 'percent' ? 'Percentage (%)' : 'Amount (₹)'} *
                     </label>
                     <input
@@ -345,7 +345,7 @@ export default function CouponsPage() {
                       required
                       min="1"
                       max={formData.type === 'percent' ? '100' : undefined}
-                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                      className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                       placeholder={formData.type === 'percent' ? '10' : '500'}
                     />
                   </div>
@@ -353,7 +353,7 @@ export default function CouponsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">
+                    <label className="block text-sm font-medium text-zinc-900 mb-2">
                       Min. Purchase (₹)
                     </label>
                     <input
@@ -362,14 +362,14 @@ export default function CouponsPage() {
                       value={formData.minPurchase}
                       onChange={handleChange}
                       min="0"
-                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                      className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                       placeholder="e.g., 1000"
                     />
                   </div>
 
                   {formData.type === 'percent' && (
                     <div>
-                      <label className="block text-sm font-medium text-primary-900 mb-2">
+                      <label className="block text-sm font-medium text-zinc-900 mb-2">
                         Max. Discount (₹)
                       </label>
                       <input
@@ -378,7 +378,7 @@ export default function CouponsPage() {
                         value={formData.maxDiscount}
                         onChange={handleChange}
                         min="0"
-                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                        className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                         placeholder="e.g., 500"
                       />
                     </div>
@@ -386,7 +386,7 @@ export default function CouponsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Usage Limit
                   </label>
                   <input
@@ -395,14 +395,14 @@ export default function CouponsPage() {
                     value={formData.usageLimit}
                     onChange={handleChange}
                     min="1"
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., 100 (leave empty for unlimited)"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">
+                    <label className="block text-sm font-medium text-zinc-900 mb-2">
                       Valid From
                     </label>
                     <input
@@ -410,12 +410,12 @@ export default function CouponsPage() {
                       name="validFrom"
                       value={formData.validFrom}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                      className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 mb-2">
+                    <label className="block text-sm font-medium text-zinc-900 mb-2">
                       Valid Until
                     </label>
                     <input
@@ -423,7 +423,7 @@ export default function CouponsPage() {
                       name="validUntil"
                       value={formData.validUntil}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                      className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     />
                   </div>
                 </div>
@@ -435,9 +435,9 @@ export default function CouponsPage() {
                       name="isActive"
                       checked={formData.isActive}
                       onChange={handleChange}
-                      className="w-4 h-4 text-primary-900 rounded focus:ring-2 focus:ring-primary-900"
+                      className="w-4 h-4 text-zinc-900 rounded focus:ring-2 focus:ring-zinc-500"
                     />
-                    <span className="text-sm font-medium text-primary-900">Active Coupon</span>
+                    <span className="text-sm font-medium text-zinc-900">Active Coupon</span>
                   </label>
                 </div>
 

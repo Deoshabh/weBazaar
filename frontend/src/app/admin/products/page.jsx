@@ -149,20 +149,20 @@ export default function AdminProductsPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-primary-50">
+      <div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Products Management</h1>
-              <p className="text-sm sm:text-base text-primary-600 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">Products Management</h1>
+              <p className="text-sm sm:text-base text-zinc-500 mt-1">
                 {totalProducts} products found
               </p>
             </div>
             <div className="flex gap-2">
               {selectedProducts.length > 0 && (
-                <div className="flex items-center gap-2 mr-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-primary-200">
-                  <span className="text-sm font-medium text-primary-700">{selectedProducts.length} selected</span>
+                <div className="flex items-center gap-2 mr-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-zinc-200">
+                  <span className="text-sm font-medium text-zinc-700">{selectedProducts.length} selected</span>
                   <div className="h-4 w-px bg-primary-200 mx-1"></div>
                   <button
                     onClick={() => handleBulkStatus('active')}
@@ -186,7 +186,7 @@ export default function AdminProductsPage() {
               )}
               <button
                 onClick={() => router.push('/admin/products/bulk')}
-                className="btn bg-white border border-primary-200 text-primary-700 hover:bg-primary-50 flex items-center gap-2 justify-center w-full sm:w-auto touch-manipulation mr-2"
+                className="btn bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 flex items-center gap-2 justify-center w-full sm:w-auto touch-manipulation mr-2"
               >
                 <FiGrid /> Bulk Edit
               </button>
@@ -231,22 +231,22 @@ export default function AdminProductsPage() {
           />
 
           {/* Pagination */}
-          <div className="bg-white border-t border-primary-200 px-6 py-4 flex items-center justify-between rounded-b-lg shadow-md mt-[-1px]">
-            <p className="text-sm text-primary-600">
+          <div className="bg-white border-t border-zinc-200 px-6 py-4 flex items-center justify-between rounded-b-lg shadow-md mt-[-1px]">
+            <p className="text-sm text-zinc-500">
               Page {currentPage} of {totalPages}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage <= 1}
-                className="px-3 py-1 text-sm border border-primary-200 rounded hover:bg-primary-50 disabled:opacity-50"
+                className="px-3 py-1 text-sm border border-zinc-200 rounded hover:bg-zinc-50 disabled:opacity-50"
               >
                 Previous
               </button>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages}
-                className="px-3 py-1 text-sm border border-primary-200 rounded hover:bg-primary-50 disabled:opacity-50"
+                className="px-3 py-1 text-sm border border-zinc-200 rounded hover:bg-zinc-50 disabled:opacity-50"
               >
                 Next
               </button>

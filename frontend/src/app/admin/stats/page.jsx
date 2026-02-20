@@ -87,7 +87,7 @@ export default function AdminStatsPage() {
   if (loading || loadingStats) {
     return (
       <AdminLayout>
-        <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center py-32">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
         </div>
       </AdminLayout>
@@ -97,7 +97,7 @@ export default function AdminStatsPage() {
   if (!stats) {
     return (
       <AdminLayout>
-        <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center py-32">
           <div className="text-center">
             <FiAlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">No statistics available</p>
@@ -109,7 +109,7 @@ export default function AdminStatsPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50">
+      <div>
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Header */}
           <div className="mb-8">

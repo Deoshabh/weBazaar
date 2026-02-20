@@ -205,36 +205,36 @@ export default function AdminReviewsPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-primary-50 py-8">
+      <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-display font-bold text-primary-900 mb-2">Review Management</h1>
-            <p className="text-primary-600">Manage customer product reviews</p>
+            <h1 className="text-3xl font-display font-bold text-zinc-900 mb-2">Review Management</h1>
+            <p className="text-zinc-500">Manage customer product reviews</p>
           </div>
 
           {/* Statistics Cards */}
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
               <div className="bg-white rounded-xl shadow-card p-6">
-                <div className="text-sm text-primary-600 mb-1">Total Reviews</div>
-                <div className="text-2xl font-bold text-primary-900">{stats.totalReviews}</div>
+                <div className="text-sm text-zinc-500 mb-1">Total Reviews</div>
+                <div className="text-2xl font-bold text-zinc-900">{stats.totalReviews}</div>
               </div>
               <div className="bg-white rounded-xl shadow-card p-6">
-                <div className="text-sm text-primary-600 mb-1">Average Rating</div>
-                <div className="text-2xl font-bold text-primary-900">{stats.averageRating.toFixed(1)} ⭐</div>
+                <div className="text-sm text-zinc-500 mb-1">Average Rating</div>
+                <div className="text-2xl font-bold text-zinc-900">{stats.averageRating.toFixed(1)} ⭐</div>
               </div>
               <div className="bg-white rounded-xl shadow-card p-6">
-                <div className="text-sm text-primary-600 mb-1">Hidden</div>
+                <div className="text-sm text-zinc-500 mb-1">Hidden</div>
                 <div className="text-2xl font-bold text-red-600">{stats.hiddenReviews}</div>
               </div>
               <div className="bg-white rounded-xl shadow-card p-6">
-                <div className="text-sm text-primary-600 mb-1">Verified</div>
+                <div className="text-sm text-zinc-500 mb-1">Verified</div>
                 <div className="text-2xl font-bold text-green-600">{stats.verifiedReviews}</div>
               </div>
               <div className="bg-white rounded-xl shadow-card p-6">
-                <div className="text-sm text-primary-600 mb-1">With Photos</div>
-                <div className="text-2xl font-bold text-primary-900">{stats.totalPhotos}</div>
+                <div className="text-sm text-zinc-500 mb-1">With Photos</div>
+                <div className="text-2xl font-bold text-zinc-900">{stats.totalPhotos}</div>
               </div>
             </div>
           )}
@@ -333,13 +333,13 @@ export default function AdminReviewsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => handleBulkHide(true)}
-                  className="px-4 py-2 bg-white text-espresso rounded hover:bg-primary-50 transition-colors"
+                  className="px-4 py-2 bg-white text-espresso rounded hover:bg-zinc-50 transition-colors"
                 >
                   Hide Selected
                 </button>
                 <button
                   onClick={() => handleBulkHide(false)}
-                  className="px-4 py-2 bg-white text-espresso rounded hover:bg-primary-50 transition-colors"
+                  className="px-4 py-2 bg-white text-espresso rounded hover:bg-zinc-50 transition-colors"
                 >
                   Unhide Selected
                 </button>
@@ -358,17 +358,17 @@ export default function AdminReviewsPage() {
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-espresso"></div>
-                <p className="text-primary-600 mt-2">Loading reviews...</p>
+                <p className="text-zinc-500 mt-2">Loading reviews...</p>
               </div>
             ) : reviews.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-primary-600">No reviews found</p>
+                <p className="text-zinc-500">No reviews found</p>
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-primary-200">
-                    <thead className="bg-primary-50">
+                    <thead className="bg-zinc-50">
                       <tr>
                         <th className="px-6 py-3 text-left">
                           <input
@@ -378,25 +378,25 @@ export default function AdminReviewsPage() {
                             className="rounded border-primary-300 text-espresso focus:ring-espresso"
                           />
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Product
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Customer
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Rating
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Review
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-primary-700 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-zinc-700 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -413,7 +413,7 @@ export default function AdminReviewsPage() {
                             />
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-primary-900">
+                            <div className="text-sm font-medium text-zinc-900">
                               {review.product?.name || 'N/A'}
                             </div>
                             <div className="text-xs text-primary-500">
@@ -421,7 +421,7 @@ export default function AdminReviewsPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-primary-900">{review.user?.name || 'Unknown'}</div>
+                            <div className="text-sm text-zinc-900">{review.user?.name || 'Unknown'}</div>
                             <div className="text-xs text-primary-500">{review.user?.email || ''}</div>
                           </td>
                           <td className="px-6 py-4">
@@ -438,13 +438,13 @@ export default function AdminReviewsPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 max-w-md">
-                            <div className="text-sm font-medium text-primary-900 mb-1">{review.title}</div>
-                            <div className="text-sm text-primary-600 line-clamp-2">{review.comment}</div>
+                            <div className="text-sm font-medium text-zinc-900 mb-1">{review.title}</div>
+                            <div className="text-sm text-zinc-500 line-clamp-2">{review.comment}</div>
                             <div className="text-xs text-primary-500 mt-1">
                               👍 {review.helpfulVotes} helpful
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-primary-600 whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-zinc-500 whitespace-nowrap">
                             {formatDate(review.createdAt)}
                           </td>
                           <td className="px-6 py-4">
@@ -469,7 +469,7 @@ export default function AdminReviewsPage() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleToggleHidden(review._id, review.isHidden)}
-                                className={`p-2 rounded hover:bg-primary-100 transition-colors ${review.isHidden ? 'text-green-600' : 'text-yellow-600'
+                                className={`p-2 rounded hover:bg-zinc-100 transition-colors ${review.isHidden ? 'text-green-600' : 'text-yellow-600'
                                   }`}
                                 title={review.isHidden ? 'Unhide review' : 'Hide review'}
                               >
@@ -492,7 +492,7 @@ export default function AdminReviewsPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="px-6 py-4 bg-primary-50 border-t border-primary-200 flex items-center justify-between">
+                  <div className="px-6 py-4 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between">
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
@@ -500,7 +500,7 @@ export default function AdminReviewsPage() {
                     >
                       Previous
                     </button>
-                    <span className="text-sm text-primary-600">
+                    <span className="text-sm text-zinc-500">
                       Page {page} of {totalPages}
                     </span>
                     <button

@@ -495,13 +495,13 @@ function ProductFormContent() {
   const calculatedStock = formData.sizes.reduce((sum, size) => sum + (formData.sizeStocks[size] || 0), 0);
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900">
             {isEditMode ? 'Edit Product' : 'Add New Product'}
           </h1>
-          <p className="text-sm sm:text-base text-primary-600 mt-1">
+          <p className="text-sm sm:text-base text-zinc-500 mt-1">
             {isEditMode ? 'Update product information' : 'Create a new product listing'}
           </p>
         </div>
@@ -529,8 +529,8 @@ function ProductFormContent() {
 
             {[...existingImages360, ...images360].length > 0 && (
               <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-primary-900 mb-2">360° Hotspot Annotation Editor</h2>
-                <p className="text-sm text-primary-600 mb-4">Click on the 360 viewer to add hotspot annotations for the current frame.</p>
+                <h2 className="text-lg font-semibold text-zinc-900 mb-2">360° Hotspot Annotation Editor</h2>
+                <p className="text-sm text-zinc-500 mb-4">Click on the 360 viewer to add hotspot annotations for the current frame.</p>
                 <ProductViewer360
                   images={[...existingImages360, ...images360].map((img) => img.url)}
                   editableHotspots
@@ -544,11 +544,11 @@ function ProductFormContent() {
 
             {/* Basic Information */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-primary-900 mb-4">Basic Information</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Basic Information</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Product Name *
                   </label>
                   <input
@@ -557,13 +557,13 @@ function ProductFormContent() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., Classic Leather Oxford Shoes"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Slug *
                   </label>
                   <input
@@ -572,7 +572,7 @@ function ProductFormContent() {
                     value={formData.slug}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., classic-leather-oxford-shoes"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -581,7 +581,7 @@ function ProductFormContent() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Description *
                   </label>
                   <textarea
@@ -590,13 +590,13 @@ function ProductFormContent() {
                     onChange={handleChange}
                     required
                     rows="4"
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="Describe your product..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Price (₹) *
                   </label>
                   <input
@@ -607,13 +607,13 @@ function ProductFormContent() {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., 2999"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     GST Percentage (%)
                   </label>
                   <input
@@ -624,7 +624,7 @@ function ProductFormContent() {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., 18"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -633,7 +633,7 @@ function ProductFormContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Average Delivery Cost (₹)
                   </label>
                   <input
@@ -643,7 +643,7 @@ function ProductFormContent() {
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., 100"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -652,7 +652,7 @@ function ProductFormContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Compare Price (₹)
                   </label>
                   <input
@@ -662,7 +662,7 @@ function ProductFormContent() {
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., 3999"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -730,7 +730,7 @@ function ProductFormContent() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Category *
                   </label>
                   <select
@@ -738,7 +738,7 @@ function ProductFormContent() {
                     value={formData.category}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                   >
                     <option value="">Select Category</option>
                     {categories.map(cat => (
@@ -748,7 +748,7 @@ function ProductFormContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Brand
                   </label>
                   <input
@@ -756,13 +756,13 @@ function ProductFormContent() {
                     name="brand"
                     value={formData.brand}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., Nike, Adidas"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     SKU *
                   </label>
                   <input
@@ -771,20 +771,20 @@ function ProductFormContent() {
                     value={formData.sku}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., SH-001"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Total Stock Quantity
                   </label>
                   <input
                     type="number"
                     value={calculatedStock}
                     readOnly
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
                     title="Calculated from individual specific stock sizes below"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -796,18 +796,18 @@ function ProductFormContent() {
 
             {/* Variants */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-primary-900 mb-4">Variants</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Variants</h2>
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Sizes (UK)
                   </label>
                   <input
                     type="text"
                     value={formData.sizes.join(', ')}
                     onChange={handleSizeChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., 6, 7, 8, 9, 10"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -818,13 +818,13 @@ function ProductFormContent() {
                 {/* Stock Per Size Section */}
                 {formData.sizes.length > 0 && (
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <label className="block text-sm font-medium text-primary-900 mb-3">
+                    <label className="block text-sm font-medium text-zinc-900 mb-3">
                       Stock per Size
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {formData.sizes.map(size => (
                         <div key={size}>
-                          <label className="block text-xs text-primary-600 mb-1">
+                          <label className="block text-xs text-zinc-500 mb-1">
                             Size {size}
                           </label>
                           <input
@@ -832,7 +832,7 @@ function ProductFormContent() {
                             min="0"
                             value={formData.sizeStocks[size] || 0}
                             onChange={(e) => handleSizeStockChange(size, e.target.value)}
-                            className="w-full px-3 py-1.5 border border-primary-300 rounded focus:ring-1 focus:ring-primary-900 text-sm"
+                            className="w-full px-3 py-1.5 border border-primary-300 rounded focus:ring-1 focus:ring-zinc-500 text-sm"
                           />
                         </div>
                       ))}
@@ -841,7 +841,7 @@ function ProductFormContent() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-3">
+                  <label className="block text-sm font-medium text-zinc-900 mb-3">
                     Colors
                   </label>
                   <ColorPicker
@@ -854,11 +854,11 @@ function ProductFormContent() {
 
             {/* Specifications */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-primary-900 mb-4">Product Specifications</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Product Specifications</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Material
                   </label>
                   <input
@@ -866,13 +866,13 @@ function ProductFormContent() {
                     name="specifications.material"
                     value={formData.specifications.material}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., Premium Leather, Suede, Canvas"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Sole
                   </label>
                   <input
@@ -880,13 +880,13 @@ function ProductFormContent() {
                     name="specifications.sole"
                     value={formData.specifications.sole}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., Leather Sole, Rubber Sole"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Construction
                   </label>
                   <input
@@ -894,13 +894,13 @@ function ProductFormContent() {
                     name="specifications.construction"
                     value={formData.specifications.construction}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., Goodyear Welted, Blake Stitch"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Made In
                   </label>
                   <input
@@ -908,13 +908,13 @@ function ProductFormContent() {
                     name="specifications.madeIn"
                     value={formData.specifications.madeIn}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., India, Italy"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-primary-900 mb-3">
+                  <label className="block text-sm font-medium text-zinc-900 mb-3">
                     Care Instructions (Add as Points)
                   </label>
 
@@ -926,7 +926,7 @@ function ProductFormContent() {
                             type="text"
                             value={instruction}
                             onChange={(e) => handleUpdateCareInstruction(index, e.target.value)}
-                            className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                            className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                             placeholder={`Care instruction point ${index + 1}`}
                           />
                         </div>
@@ -960,11 +960,11 @@ function ProductFormContent() {
 
             {/* Additional Details */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-primary-900 mb-4">Additional Details</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Additional Details</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                  <label className="block text-sm font-medium text-zinc-900 mb-2">
                     Tags
                   </label>
                   <input
@@ -972,7 +972,7 @@ function ProductFormContent() {
                     name="tags"
                     value={formData.tags}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-900"
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
                     placeholder="e.g., leather, formal, oxford"
                   />
                   <p className="text-xs text-primary-500 mt-1">
@@ -987,9 +987,9 @@ function ProductFormContent() {
                       name="isActive"
                       checked={formData.isActive}
                       onChange={handleChange}
-                      className="w-4 h-4 text-primary-900 rounded focus:ring-2 focus:ring-primary-900"
+                      className="w-4 h-4 text-zinc-900 rounded focus:ring-2 focus:ring-zinc-500"
                     />
-                    <span className="text-sm font-medium text-primary-900">Active Product</span>
+                    <span className="text-sm font-medium text-zinc-900">Active Product</span>
                   </label>
 
                   <label className="flex items-center gap-2 cursor-pointer touch-manipulation">
@@ -998,9 +998,9 @@ function ProductFormContent() {
                       name="isFeatured"
                       checked={formData.isFeatured}
                       onChange={handleChange}
-                      className="w-4 h-4 text-primary-900 rounded focus:ring-2 focus:ring-primary-900"
+                      className="w-4 h-4 text-zinc-900 rounded focus:ring-2 focus:ring-zinc-500"
                     />
-                    <span className="text-sm font-medium text-primary-900">Featured Product</span>
+                    <span className="text-sm font-medium text-zinc-900">Featured Product</span>
                   </label>
                 </div>
               </div>
@@ -1034,10 +1034,10 @@ export default function NewProductPage() {
   return (
     <AdminLayout>
       <Suspense fallback={
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center py-32">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-espresso mx-auto mb-4"></div>
-            <p className="text-primary-600">Loading...</p>
+            <p className="text-zinc-500">Loading...</p>
           </div>
         </div>
       }>

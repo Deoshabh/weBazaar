@@ -196,7 +196,7 @@ export default function AdminCMSPage() {
   if (authLoading || loading) {
     return (
       <AdminLayout>
-        <div className="min-h-screen flex items-center justify-center bg-primary-50">
+        <div className="flex items-center justify-center py-32">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-900" />
         </div>
       </AdminLayout>
@@ -208,7 +208,7 @@ export default function AdminCMSPage() {
   ================================================================ */
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50">
+      <div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
           <div className="mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">CMS & Site Settings</h1>
@@ -260,8 +260,8 @@ export default function AdminCMSPage() {
                 {/* Stats array */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-primary-900">Stats</span>
-                    <button type="button" onClick={() => addArrItem('heroSection', 'stats', { number: '0', label: 'Label' })} className="text-xs text-primary-700 hover:text-primary-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add Stat</button>
+                    <span className="text-sm font-medium text-zinc-900">Stats</span>
+                    <button type="button" onClick={() => addArrItem('heroSection', 'stats', { number: '0', label: 'Label' })} className="text-xs text-zinc-700 hover:text-zinc-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add Stat</button>
                   </div>
                   {(homeSections.heroSection?.stats || []).map((stat, i) => (
                     <div key={stat.id || i} className="flex items-center gap-2 mb-2">
@@ -316,8 +316,8 @@ export default function AdminCMSPage() {
                 {/* Features */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-primary-900">Features</span>
-                    <button type="button" onClick={() => addArrItem('craftProcess', 'features', { number: '01', name: 'Feature', description: '' })} className="text-xs text-primary-700 hover:text-primary-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
+                    <span className="text-sm font-medium text-zinc-900">Features</span>
+                    <button type="button" onClick={() => addArrItem('craftProcess', 'features', { number: '01', name: 'Feature', description: '' })} className="text-xs text-zinc-700 hover:text-zinc-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
                   </div>
                   {(homeSections.craftProcess?.features || []).map((feat, i) => (
                     <div key={feat.id || i} className="flex items-start gap-2 mb-2 bg-gray-50 p-2 rounded">
@@ -339,8 +339,8 @@ export default function AdminCMSPage() {
                 {/* Heritage points */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-primary-900">Heritage Points</span>
-                    <button type="button" onClick={() => addArrItem('heritage', 'points', { icon: '🏛️', title: 'Point', description: '' })} className="text-xs text-primary-700 hover:text-primary-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
+                    <span className="text-sm font-medium text-zinc-900">Heritage Points</span>
+                    <button type="button" onClick={() => addArrItem('heritage', 'points', { icon: '🏛️', title: 'Point', description: '' })} className="text-xs text-zinc-700 hover:text-zinc-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
                   </div>
                   {(homeSections.heritage?.points || []).map((pt, i) => (
                     <div key={pt.id || i} className="flex items-start gap-2 mb-2 bg-gray-50 p-2 rounded">
@@ -358,11 +358,11 @@ export default function AdminCMSPage() {
                 <SectionToggle label="Enable Story" enabled={sec('story', 'enabled') !== false} onChange={v => setSec('story', 'enabled', v)} />
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-primary-900">Paragraphs</span>
+                    <span className="text-sm font-medium text-zinc-900">Paragraphs</span>
                     <button type="button" onClick={() => {
                       const paras = [...(homeSections.story?.paragraphs || [])]; paras.push('');
                       setSec('story', 'paragraphs', paras);
-                    }} className="text-xs text-primary-700 hover:text-primary-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
+                    }} className="text-xs text-zinc-700 hover:text-zinc-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
                   </div>
                   {(homeSections.story?.paragraphs || []).map((p, i) => (
                     <div key={i} className="flex items-start gap-2 mb-2">
@@ -384,8 +384,8 @@ export default function AdminCMSPage() {
                 <SectionToggle label="Enable Testimonials" enabled={sec('testimonials', 'enabled') !== false} onChange={v => setSec('testimonials', 'enabled', v)} />
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-primary-900">Items</span>
-                    <button type="button" onClick={() => addArrItem('testimonials', 'items', { quote: '', name: '', role: '' })} className="text-xs text-primary-700 hover:text-primary-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
+                    <span className="text-sm font-medium text-zinc-900">Items</span>
+                    <button type="button" onClick={() => addArrItem('testimonials', 'items', { quote: '', name: '', role: '' })} className="text-xs text-zinc-700 hover:text-zinc-900 flex items-center gap-1"><FiPlus className="w-3 h-3" /> Add</button>
                   </div>
                   {(homeSections.testimonials?.items || []).map((t, i) => (
                     <div key={t.id || i} className="bg-gray-50 p-3 rounded mb-2 space-y-2">
@@ -539,7 +539,7 @@ export default function AdminCMSPage() {
           {activeTab === 'banners' && (
             <Card>
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-primary-900">Homepage Banners</h3>
+                <h3 className="text-lg font-semibold text-zinc-900">Homepage Banners</h3>
                 <button onClick={handleAddBanner} className="btn btn-secondary flex items-center gap-2 text-sm"><FiPlus className="w-4 h-4" /> Add Banner</button>
               </div>
 
@@ -572,7 +572,7 @@ export default function AdminCMSPage() {
                       <TextInput value={banner.imageUrl} onChange={v => bannerSet(i, 'imageUrl', v)} placeholder="Image URL" />
                       <TextInput value={banner.link} onChange={v => bannerSet(i, 'link', v)} placeholder="Link" />
                       <TextInput value={banner.buttonText} onChange={v => bannerSet(i, 'buttonText', v)} placeholder="Button text" />
-                      <label className="flex items-center gap-2 text-sm text-primary-900">
+                      <label className="flex items-center gap-2 text-sm text-zinc-900">
                         <input type="checkbox" checked={banner.isActive !== false} onChange={e => bannerSet(i, 'isActive', e.target.checked)} className="accent-primary-900" />
                         Active
                       </label>
@@ -596,10 +596,10 @@ export default function AdminCMSPage() {
           {activeTab === 'announcement' && (
             <Card>
               <div>
-                <h3 className="text-lg font-semibold text-primary-900">Announcement Bar</h3>
+                <h3 className="text-lg font-semibold text-zinc-900">Announcement Bar</h3>
                 <p className="text-sm text-gray-500">Edit top-site announcement text and visibility.</p>
               </div>
-              <div className="space-y-4 border rounded-lg p-4 bg-primary-50/40">
+              <div className="space-y-4 border rounded-lg p-4 bg-zinc-50/40">
                 <SectionToggle label="Enable Announcement Bar" enabled={announcementBar.enabled !== false} onChange={v => setAnnouncementBar(p => ({ ...p, enabled: v }))} />
                 <Field label="Announcement Text"><TextInput value={announcementBar.text} onChange={v => setAnnouncementBar(p => ({ ...p, text: v }))} placeholder="Free shipping on all orders above ₹999" /></Field>
                 <Field label="Optional Link"><TextInput value={announcementBar.link} onChange={v => setAnnouncementBar(p => ({ ...p, link: v }))} placeholder="/products" /></Field>
@@ -618,7 +618,7 @@ export default function AdminCMSPage() {
           ============================================================ */}
           {activeTab === 'theme' && (
             <Card>
-              <h3 className="text-lg font-semibold text-primary-900">Theme Colors</h3>
+              <h3 className="text-lg font-semibold text-zinc-900">Theme Colors</h3>
               <p className="text-sm text-gray-500">Customize your brand colors. Changes apply site-wide via CSS variables.</p>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -683,7 +683,7 @@ export default function AdminCMSPage() {
           ============================================================ */}
           {activeTab === 'about' && (
             <Card>
-              <h3 className="text-lg font-semibold text-primary-900">About Page</h3>
+              <h3 className="text-lg font-semibold text-zinc-900">About Page</h3>
               <p className="text-sm text-gray-500">Control the hero banner and story images shown on the About page.</p>
 
               <CollapsibleSection title="Hero Banner Image" defaultOpen>
@@ -723,7 +723,7 @@ export default function AdminCMSPage() {
             <Card>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-primary-900">Policy & Page Content</h3>
+                  <h3 className="text-lg font-semibold text-zinc-900">Policy & Page Content</h3>
                   <p className="text-sm text-gray-500">Edit detailed content for various site sections.</p>
                 </div>
                 <select value={selectedPolicy} onChange={e => setSelectedPolicy(e.target.value)} className="input py-2 text-sm">
@@ -759,7 +759,7 @@ export default function AdminCMSPage() {
           ============================================================ */}
           {activeTab === 'contact' && (
             <Card>
-              <h3 className="text-lg font-semibold text-primary-900 border-b pb-2">Contact Information</h3>
+              <h3 className="text-lg font-semibold text-zinc-900 border-b pb-2">Contact Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field label="Business Address" className="md:col-span-2">
                   <TextArea value={advancedSettings.contactInfo?.address || ''} onChange={v => setAdvancedSettings(p => ({ ...p, contactInfo: { ...p.contactInfo, address: v } }))} />
@@ -788,7 +788,7 @@ export default function AdminCMSPage() {
           ============================================================ */}
           {activeTab === 'system' && (
             <Card>
-              <h3 className="text-lg font-semibold text-primary-900 border-b pb-2">System Settings</h3>
+              <h3 className="text-lg font-semibold text-zinc-900 border-b pb-2">System Settings</h3>
               <SectionToggle label="Maintenance Mode" hint="Temporarily disable the storefront for visitors." enabled={advancedSettings.maintenanceMode?.enabled ?? false} onChange={v => setAdvancedSettings(p => ({ ...p, maintenanceMode: { ...p.maintenanceMode, enabled: v } }))} />
               {advancedSettings.maintenanceMode?.enabled && (
                 <div className="p-4 border rounded-lg animate-fade-in">
