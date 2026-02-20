@@ -30,9 +30,21 @@ services:
     volumes:
       - valkey-data:/data
 
-    # Expose only internally (Dokploy network)
+    # Shared network so backend can reach valkey by hostname
+    networks:
+      - webazaar-shared
+
+    # Expose only internally (shared network)
     expose:
       - "6379"
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  webazaar-shared:
+    name: webazaar-shared
+    driver: bridge
 
 # ============================================
 # VOLUMES
