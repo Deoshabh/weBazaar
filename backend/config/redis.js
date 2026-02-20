@@ -3,6 +3,7 @@ const Redis = require("ioredis");
 // Track auth failures so we don't spam logs or retry endlessly
 let authFailed = false;
 let connectLoggedOnce = false;
+let reconnectCount = 0;
 
 const AUTH_ERRORS = ["WRONGPASS", "NOAUTH", "invalid username-password", "user is disabled"];
 
@@ -19,12 +20,13 @@ const getRedisConfig = () => {
     retryStrategy: (times) => {
       // Never retry after an auth failure — wrong password won't fix itself
       if (authFailed) return null;
-      // Stop after 10 connection attempts for network errors
-      if (times > 10) {
-        console.warn("⚠️  Redis: gave up after 10 reconnect attempts. Caching disabled.");
-        return null;
+      // Log once at 10 attempts, then keep retrying silently every 30s
+      // Network issues (ETIMEDOUT, ENOTFOUND) can resolve without a redeploy
+      if (times === 10) {
+        console.warn("⚠️  Redis: still unreachable after 10 attempts. Will keep retrying every 30s silently.");
       }
-      // Exponential back-off: 500ms → 5s
+      if (times > 10) return 30000; // retry every 30s indefinitely
+      // Exponential back-off: 500ms → 5s for first 10 attempts
       return Math.min(times * 500, 5000);
     },
     maxRetriesPerRequest: 1,
@@ -39,12 +41,15 @@ const redis = new Redis(getRedisConfig());
 redis.on("connect", () => {
   if (!connectLoggedOnce) {
     console.log("✅ Connected to Valkey/Redis");
-    connectLoggedOnce = true;
+  } else if (reconnectCount > 0) {
+    console.log("✅ Reconnected to Valkey/Redis");
   }
+  connectLoggedOnce = true;
 });
 
 redis.on("ready", () => {
   connectLoggedOnce = true;
+  reconnectCount = 0;
 });
 
 redis.on("error", (err) => {
@@ -65,11 +70,14 @@ redis.on("error", (err) => {
   }
 
   console.error("❌ Redis Connection Error:", err.message);
-  console.warn("⚠️  Redis is unavailable. App will continue without caching.");
+  if (reconnectCount <= 10) console.warn("⚠️  Redis is unavailable. App will continue without caching.");
 });
 
 redis.on("reconnecting", () => {
-  if (!authFailed) console.log("🔄 Attempting to reconnect to Redis...");
+  if (authFailed) return;
+  reconnectCount++;
+  // Only log first 10 attempts — after that it retries silently every 30s
+  if (reconnectCount <= 10) console.log("🔄 Attempting to reconnect to Redis...");
 });
 
 redis.on("close", () => {
