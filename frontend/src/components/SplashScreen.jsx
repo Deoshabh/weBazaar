@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-const SPLASH_DURATION = 5000; // 5 seconds
+const SPLASH_DURATION = 3000; // 3 seconds
 const FADE_DURATION = 600;    // fade-out ms
 
 export default function SplashScreen() {
