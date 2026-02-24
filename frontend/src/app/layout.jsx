@@ -129,6 +129,7 @@ export async function generateMetadata() {
 }
 
 import QueryProvider from '@/providers/QueryProvider';
+import SplashScreen from '@/components/SplashScreen';
 
 // ...
 
@@ -143,6 +144,7 @@ export default function RootLayout({ children }) {
         <script src={`https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`} async defer></script>
       </head>
       <body className="antialiased">
+        <SplashScreen />
         <ErrorBoundary>
           <QueryProvider>
             <AuthProvider>
