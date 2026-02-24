@@ -3,26 +3,15 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-const SPLASH_KEY = 'webazaar_splash_shown';
 const SPLASH_DURATION = 5000; // 5 seconds
 const FADE_DURATION = 600;    // fade-out ms
 
 export default function SplashScreen() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    // Only show on the very first visit (localStorage persists across sessions)
-    try {
-      if (localStorage.getItem(SPLASH_KEY)) return;
-      localStorage.setItem(SPLASH_KEY, '1');
-    } catch {
-      // If localStorage is blocked (private browsing edge cases), skip splash
-      return;
-    }
-
-    setVisible(true);
-
+    // Show every time the site is opened
     // Begin fade-out a little before the end so it feels smooth
     const fadeTimer = setTimeout(() => setFading(true), SPLASH_DURATION - FADE_DURATION);
     // Fully unmount after fade completes
@@ -123,7 +112,7 @@ export default function SplashScreen() {
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
           color: '#C9943A',                   // --color-gold
-          margin: '0 0 36px',
+          margin: 0,
           animation: 'splash-rise 0.9s 0.3s cubic-bezier(0.22,1,0.36,1) forwards',
           opacity: 0,
           textAlign: 'center',
@@ -131,32 +120,6 @@ export default function SplashScreen() {
       >
         Conscious Style, Delivered
       </p>
-
-      {/* Progress bar */}
-      <div
-        aria-hidden="true"
-        style={{
-          width: '120px',
-          height: '2px',
-          borderRadius: '9999px',
-          backgroundColor: '#D4B896',         // --color-sand
-          overflow: 'hidden',
-          animation: 'splash-rise 0.9s 0.45s cubic-bezier(0.22,1,0.36,1) forwards',
-          opacity: 0,
-        }}
-      >
-        <div
-          style={{
-            height: '100%',
-            width: '100%',
-            borderRadius: '9999px',
-            backgroundColor: '#C9943A',
-            transformOrigin: 'left center',
-            animation: `splash-progress ${SPLASH_DURATION}ms 0.5s linear forwards`,
-            transform: 'scaleX(0)',
-          }}
-        />
-      </div>
 
       {/* Keyframes injected inline via a style tag */}
       <style>{`
@@ -167,10 +130,6 @@ export default function SplashScreen() {
         @keyframes splash-ring {
           from { transform: scale(0.6); opacity: 0; }
           to   { transform: scale(1);   opacity: 1; }
-        }
-        @keyframes splash-progress {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
         }
       `}</style>
     </div>
