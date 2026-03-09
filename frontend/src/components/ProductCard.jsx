@@ -14,7 +14,7 @@ import anime from 'animejs';
 import { getProductFallbackImage } from '@/constants/defaultImages';
 import Badge from '@/components/ui/Badge';
 
-const BLUR_DATA_URL = 'data:image/gray;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+const BLUR_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 export default function ProductCard({ product, priority = false }) {
   const router = useRouter();

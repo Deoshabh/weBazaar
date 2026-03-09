@@ -12,6 +12,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import MaintenanceModeGate from '@/components/MaintenanceModeGate';
 import { generateMetadata as generateSEOMetadata } from '@/utils/seo';
+import { getServerApiUrl } from '@/utils/serverApi';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -45,7 +46,6 @@ function toAbsoluteUrl(url) {
  *  deployment/request gets fresh data. Falls back gracefully on any error. */
 async function fetchBranding() {
   try {
-    const { getServerApiUrl } = require('@/utils/serverApi');
     const res = await fetch(`${getServerApiUrl()}/settings/public`, {
       cache: 'no-store',
     });
