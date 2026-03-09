@@ -131,6 +131,10 @@ export default function CheckoutPage() {
       setAddresses(addressList);
       const defaultAddr = addressList.find((addr) => addr.isDefault);
       setSelectedAddress(defaultAddr || addressList[0]);
+      // Auto-open form when no addresses exist
+      if (addressList.length === 0) {
+        setShowAddressForm(true);
+      }
     } catch (error) {
       console.error('Failed to fetch addresses:', error);
     }
@@ -425,21 +429,34 @@ export default function CheckoutPage() {
                     >
                       Save Address
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddressForm(false)}
-                      className="px-5 py-2 bg-linen text-ink text-body-sm font-medium rounded-lg border border-sand/40 hover:bg-sand/20 transition-colors duration-fast"
-                    >
-                      Cancel
-                    </button>
+                    {addresses.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAddressForm(false)}
+                        className="px-5 py-2 bg-linen text-ink text-body-sm font-medium rounded-lg border border-sand/40 hover:bg-sand/20 transition-colors duration-fast"
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </div>
                 </form>
               )}
 
               {addresses.length === 0 ? (
-                <p className="text-center text-caramel py-8 text-body-sm">
-                  No saved addresses. Please add one above.
-                </p>
+                <div className="space-y-3">
+                  {!showAddressForm && (
+                    <div className="flex flex-col items-center justify-center py-6 gap-3">
+                      <FiMapPin className="w-8 h-8 text-caramel" />
+                      <p className="text-body-sm text-caramel">No saved addresses. Please add one to continue.</p>
+                      <button
+                        onClick={() => setShowAddressForm(true)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-espresso text-white text-body-sm font-medium rounded-lg hover:bg-ink transition-colors"
+                      >
+                        <FiPlus className="w-4 h-4" /> Add Address
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-2.5">
                   {addresses.map((address) => {
