@@ -228,17 +228,26 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState('30d');
+  const [statsError, setStatsError] = useState(null);
 
   const fetchData = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) setRefreshing(true);
     else setLoading(true);
+    setStatsError(null);
     try {
       const [statsRes, ordersRes, productsRes] = await Promise.allSettled([
         adminAPI.getAdminStats(),
         adminAPI.getOrders({ limit: 8, sort: '-createdAt' }),
         adminAPI.getProducts({ limit: 20, sort: 'stock' }),
       ]);
-      if (statsRes.status === 'fulfilled') setStats(statsRes.value.data);
+      if (statsRes.status === 'fulfilled') {
+        setStats(statsRes.value.data);
+      } else {
+        const errMsg = statsRes.reason?.response?.data?.message || statsRes.reason?.message || 'Unknown error';
+        const errStatus = statsRes.reason?.response?.status;
+        setStatsError(`Stats API failed (${errStatus ?? 'no response'}): ${errMsg}`);
+        console.error('[AdminDashboard] Stats fetch failed:', statsRes.reason);
+      }
       if (ordersRes.status === 'fulfilled') {
         const d = ordersRes.value.data;
         setRecentOrders(Array.isArray(d?.orders) ? d.orders : Array.isArray(d) ? d : []);
@@ -262,8 +271,8 @@ export default function AdminDashboard() {
   const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
 
   const kpiCards = [
-    { title: 'Total Revenue',  value: fmt(stats?.revenue?.total),       delta: stats?.revenue?.deltaPercent ?? null,  icon: FiDollarSign, iconBg: 'bg-emerald-500', href: '/admin/stats' },
-    { title: 'Total Orders',   value: fmtNum(stats?.orders?.total),     delta: stats?.orders?.deltaPercent ?? null,   icon: FiShoppingBag, iconBg: 'bg-blue-500',    href: '/admin/orders' },
+    { title: 'Total Revenue',  value: fmt(stats?.revenue?.total),       delta: stats?.growth?.revenue != null ? parseFloat(stats.growth.revenue) : null,  icon: FiDollarSign, iconBg: 'bg-emerald-500', href: '/admin/stats' },
+    { title: 'Total Orders',   value: fmtNum(stats?.orders?.total),     delta: stats?.growth?.orders != null ? parseFloat(stats.growth.orders) : null,   icon: FiShoppingBag, iconBg: 'bg-blue-500',    href: '/admin/orders' },
     { title: 'Products',       value: fmtNum(stats?.products?.total),   delta: null,                                   icon: FiBox,         iconBg: 'bg-violet-500',  href: '/admin/products' },
     { title: 'Customers',      value: fmtNum(stats?.users?.customers),  delta: stats?.users?.deltaPercent ?? null,    icon: FiUsers,       iconBg: 'bg-amber-500',   href: '/admin/users' },
   ];
@@ -303,6 +312,14 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Stats error banner */}
+        {statsError && (
+          <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+            <FiAlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{statsError}</span>
+          </div>
+        )}
+
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {kpiCards.map((card) => (
@@ -313,10 +330,10 @@ export default function AdminDashboard() {
         {/* Charts row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
-            <RevenueChart data={stats?.revenue_history} />
+            <RevenueChart data={loading ? undefined : (stats?.monthlySalesTrend ?? [])} />
           </div>
           <div>
-            <SalesCategoryPieChart data={stats?.category_sales} />
+            <SalesCategoryPieChart data={loading ? undefined : (stats?.topCategories?.map(c => ({ name: c.category, value: c.revenue })) ?? [])} />
           </div>
         </div>
 

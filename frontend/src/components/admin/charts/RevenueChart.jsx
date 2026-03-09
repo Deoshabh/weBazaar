@@ -22,6 +22,15 @@ export default function RevenueChart({ data }) {
         );
     }
 
+    if (data.length === 0) {
+        return (
+            <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2">
+                <p className="text-sm font-semibold text-gray-800">Revenue Overview</p>
+                <p className="text-gray-400 text-sm">No sales data yet</p>
+            </div>
+        );
+    }
+
     return (
         <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Revenue Overview</h3>
@@ -43,7 +52,7 @@ export default function RevenueChart({ data }) {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                     <XAxis
-                        dataKey="name"
+                        dataKey="month"
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: '#6B7280', fontSize: 12 }}

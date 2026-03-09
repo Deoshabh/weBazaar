@@ -16,6 +16,15 @@ export default function SalesCategoryPieChart({ data }) {
         );
     }
 
+    if (data.length === 0) {
+        return (
+            <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2">
+                <p className="text-sm font-semibold text-gray-800">Sales by Category</p>
+                <p className="text-gray-400 text-sm">No sales data yet</p>
+            </div>
+        );
+    }
+
     return (
         <div className="h-[300px] w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Sales by Category</h3>
