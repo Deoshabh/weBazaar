@@ -114,7 +114,7 @@ function ProductFormContent() {
         description: product.description || '',
         price: product.basePrice || product.price || '',
         gstPercentage: product.gstPercentage || '',
-        averageDeliveryCost: product.averageDeliveryCost || '',,
+        averageDeliveryCost: product.averageDeliveryCost || '',
         comparePrice: product.comparePrice || '',
         category: product.category || '',
         brand: product.brand || '',
