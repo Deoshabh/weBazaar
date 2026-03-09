@@ -47,7 +47,7 @@ export async function generateMetadata({ params }) {
       siteName: 'weBazaar',
       images: [{ url: image, width: 1200, height: 630, alt: product.name }],
       locale: 'en_IN',
-      type: 'product',
+      type: 'website',
     },
     twitter: {
       card: 'summary_large_image',

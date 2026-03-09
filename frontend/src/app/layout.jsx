@@ -111,10 +111,6 @@ export async function generateMetadata() {
       ],
     },
     manifest: '/site.webmanifest',
-    themeColor: [
-      { media: '(prefers-color-scheme: light)', color: '#f0ece3' },
-      { media: '(prefers-color-scheme: dark)',  color: '#1e4d2b' },
-    ],
     other: {
       'msapplication-TileColor': '#1e4d2b',
       'msapplication-TileImage': '/android-chrome-192x192.png',
@@ -130,6 +126,13 @@ export async function generateMetadata() {
 
 import QueryProvider from '@/providers/QueryProvider';
 import SplashScreen from '@/components/SplashScreen';
+
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f0ece3' },
+    { media: '(prefers-color-scheme: dark)',  color: '#1e4d2b' },
+  ],
+};
 
 // ...
 

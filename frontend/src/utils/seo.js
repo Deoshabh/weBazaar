@@ -128,7 +128,7 @@ export const generateProductMetadata = (product) => {
     description: product.description?.substring(0, 160) || SITE_DESCRIPTION,
     image: product.images?.[0] || SITE_IMAGE,
     url: `${SITE_URL}/products/${product.slug}`,
-    type: "product",
+    type: "website",
     keywords: [
       product.name,
       product.brand,
