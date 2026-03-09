@@ -46,6 +46,35 @@ const refreshTokenSchema = z.object({
  */
 
 // Create product schema
+// Image object schema (as stored in MinIO)
+const imageObjectSchema = z.union([
+  z.string().url(),
+  z.object({
+    url: z.string().url(),
+    key: z.string().optional(),
+    isPrimary: z.boolean().optional(),
+    order: z.number().optional(),
+  }).passthrough(),
+]);
+
+// Size entry schema - can be a string ("6") or an object ({size:"6",stock:10})
+const sizeEntrySchema = z.union([
+  z.string(),
+  z.object({
+    size: z.string(),
+    stock: z.number().int().min(0),
+  }),
+]);
+
+// Color entry schema - can be a hex string or an object
+const colorEntrySchema = z.union([
+  z.string(),
+  z.object({
+    name: z.string().optional(),
+    hex: z.string().optional(),
+  }).passthrough(),
+]);
+
 const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(3, "Product name must be at least 3 characters"),
@@ -55,29 +84,36 @@ const createProductSchema = z.object({
       .min(10, "Description must be at least 10 characters"),
     price: z.number().min(0, "Price must be positive"),
     compareAtPrice: z.number().min(0).optional(),
+    comparePrice: z.number().min(0).optional(),
     costPerItem: z.number().min(0).optional(),
+    gstPercentage: z.number().min(0).optional(),
+    averageDeliveryCost: z.number().min(0).optional(),
     category: z.string().min(1, "Category is required"),
     brand: z.string().optional(),
     sku: z.string().optional(),
     barcode: z.string().optional(),
     trackQuantity: z.boolean().optional(),
     quantity: z.number().int().min(0).optional(),
-    images: z.array(z.string().url()).min(1, "At least one image is required"),
-    colors: z
-      .array(
-        z.object({
-          name: z.string(),
-          hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-        }),
-      )
-      .optional(),
-    sizes: z.array(z.string()).optional(),
+    stock: z.number().int().min(0).optional(),
+    images: z.array(imageObjectSchema).min(1, "At least one image is required"),
+    images360: z.array(imageObjectSchema).optional(),
+    hotspots360: z.array(z.any()).optional(),
+    colors: z.array(colorEntrySchema).optional(),
+    sizes: z.array(sizeEntrySchema).optional(),
+    featured: z.boolean().optional(),
     isFeatured: z.boolean().optional(),
     isActive: z.boolean().optional(),
     tags: z.array(z.string()).optional(),
+    specifications: z.object({
+      material: z.string().optional(),
+      sole: z.string().optional(),
+      construction: z.string().optional(),
+      madeIn: z.string().optional(),
+    }).passthrough().optional(),
+    careInstructions: z.array(z.string()).optional(),
     metaTitle: z.string().optional(),
     metaDescription: z.string().optional(),
-  }),
+  }).passthrough(),
 });
 
 // Update product schema (all fields optional except id in params)
@@ -91,29 +127,36 @@ const updateProductSchema = z.object({
     description: z.string().min(10).optional(),
     price: z.number().min(0).optional(),
     compareAtPrice: z.number().min(0).optional(),
+    comparePrice: z.number().min(0).optional(),
     costPerItem: z.number().min(0).optional(),
+    gstPercentage: z.number().min(0).optional(),
+    averageDeliveryCost: z.number().min(0).optional(),
     category: z.string().optional(),
     brand: z.string().optional(),
     sku: z.string().optional(),
     barcode: z.string().optional(),
     trackQuantity: z.boolean().optional(),
     quantity: z.number().int().min(0).optional(),
-    images: z.array(z.string().url()).optional(),
-    colors: z
-      .array(
-        z.object({
-          name: z.string(),
-          hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-        }),
-      )
-      .optional(),
-    sizes: z.array(z.string()).optional(),
+    stock: z.number().int().min(0).optional(),
+    images: z.array(imageObjectSchema).optional(),
+    images360: z.array(imageObjectSchema).optional(),
+    hotspots360: z.array(z.any()).optional(),
+    colors: z.array(colorEntrySchema).optional(),
+    sizes: z.array(sizeEntrySchema).optional(),
+    featured: z.boolean().optional(),
     isFeatured: z.boolean().optional(),
     isActive: z.boolean().optional(),
     tags: z.array(z.string()).optional(),
+    specifications: z.object({
+      material: z.string().optional(),
+      sole: z.string().optional(),
+      construction: z.string().optional(),
+      madeIn: z.string().optional(),
+    }).passthrough().optional(),
+    careInstructions: z.array(z.string()).optional(),
     metaTitle: z.string().optional(),
     metaDescription: z.string().optional(),
-  }),
+  }).passthrough(),
 });
 
 // Get product by ID schema

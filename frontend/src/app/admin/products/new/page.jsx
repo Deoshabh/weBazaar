@@ -218,32 +218,41 @@ function ProductFormContent() {
     setExistingImages360(existing);
   };
 
-  const handleSizeChange = (e) => {
-    const value = e.target.value;
-    const newSizes = value.split(',').map(s => s.trim()).filter(Boolean);
-
-    // Preserve existing stock values for sizes that remain
+  const handleSizeToggle = (size) => {
+    isDirty.current = true;
+    setIsFormDirty(true);
+    const isSelected = formData.sizes.includes(size);
+    let newSizes;
     const newSizeStocks = { ...formData.sizeStocks };
 
-    // Remove stocks for deleted sizes
-    Object.keys(newSizeStocks).forEach(size => {
-      if (!newSizes.includes(size)) {
-        delete newSizeStocks[size];
-      }
-    });
-
-    // Initialize stock for new sizes
-    newSizes.forEach(size => {
+    if (isSelected) {
+      // Deselect: remove this size
+      newSizes = formData.sizes.filter(s => s !== size);
+      delete newSizeStocks[size];
+    } else {
+      // Select: add this size
+      newSizes = [...formData.sizes, size];
       if (newSizeStocks[size] === undefined) {
         newSizeStocks[size] = 0;
       }
-    });
+    }
 
     setFormData({
       ...formData,
       sizes: newSizes,
-      sizeStocks: newSizeStocks
+      sizeStocks: newSizeStocks,
     });
+  };
+
+  const handleCustomSizeAdd = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.trim();
+      if (val && !formData.sizes.includes(val)) {
+        handleSizeToggle(val);
+      }
+      e.target.value = '';
+    }
   };
 
   const handleSizeStockChange = (size, value) => {
@@ -351,7 +360,12 @@ function ProductFormContent() {
             });
           } catch (uploadError) {
             console.error(`Failed to upload image ${i + 1}:`, uploadError);
-            toast.error(`Failed to upload ${file.name}`);
+            const is401 = uploadError?.response?.status === 401 || uploadError?.status === 401;
+            if (is401) {
+              toast.error('Session expired. Please refresh the page and try again.', { id: 'upload' });
+            } else {
+              toast.error(`Failed to upload ${file.name}`);
+            }
             throw uploadError;
           }
         }
@@ -485,7 +499,13 @@ function ProductFormContent() {
     } catch (error) {
       console.error('Failed to save product:', error);
       console.error('Error details:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Failed to save product');
+      const errData = error.response?.data;
+      // Zod validation errors: { message: "Validation failed", errors: [{field, message}] }
+      const fieldErrors = Array.isArray(errData?.errors) && errData.errors.length > 0
+        ? errData.errors.map(e => `${e.field}: ${e.message}`).join('; ')
+        : null;
+      const errMsg = fieldErrors || errData?.message || 'Failed to save product';
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -801,17 +821,41 @@ function ProductFormContent() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-zinc-900 mb-2">
-                    Sizes (UK)
+                    Sizes (UK) — click to toggle
                   </label>
-                  <input
-                    type="text"
-                    value={formData.sizes.join(', ')}
-                    onChange={handleSizeChange}
-                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500"
-                    placeholder="e.g., 6, 7, 8, 9, 10"
-                  />
+                  {/* Preset UK sizes */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {['4', '4.5', '5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12', '13', '14'].map(size => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => handleSizeToggle(size)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                          formData.sizes.includes(size)
+                            ? 'bg-zinc-900 text-white border-zinc-900'
+                            : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Custom size input */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      onKeyDown={handleCustomSizeAdd}
+                      className="w-40 px-3 py-1.5 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-500 text-sm"
+                      placeholder="Custom size + Enter"
+                    />
+                    {formData.sizes.length > 0 && (
+                      <span className="text-xs text-zinc-500">
+                        Selected: {formData.sizes.sort((a, b) => parseFloat(a) - parseFloat(b)).join(', ')}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-primary-500 mt-1">
-                    Separate sizes with commas
+                    Click sizes to select/deselect. For unusual sizes, type in the box and press Enter.
                   </p>
                 </div>
 

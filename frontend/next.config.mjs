@@ -12,23 +12,47 @@ const nextConfig = {
         pathname: "/api/media/**",
       },
       {
+        // MinIO / RustFS / S3 served at minio.webazaar.in
         protocol: "https",
         hostname: "minio.webazaar.in",
-        pathname: "/product-media/**",
+        pathname: "/**",
       },
       {
+        // CDN / proxy in front of object storage
         protocol: "https",
         hostname: "cdn.webazaar.in",
-        pathname: "/product-media/**",
+        pathname: "/**",
       },
       {
+        // Direct S3-compatible endpoint
         protocol: "https",
         hostname: "s3.webazaar.in",
-        pathname: "/product-media/**",
+        pathname: "/**",
       },
       {
+        // API-served media (e.g. through Next.js rewrite)
+        protocol: "https",
+        hostname: "api.webazaar.in",
+        pathname: "/**",
+      },
+      {
+        // Local MinIO for development (http)
         protocol: "http",
         hostname: "localhost",
+        port: "9000",
+        pathname: "/**",
+      },
+      {
+        // Local MinIO for development (https)
+        protocol: "https",
+        hostname: "localhost",
+        port: "9000",
+        pathname: "/**",
+      },
+      {
+        // Docker-internal MinIO (used when building inside containers)
+        protocol: "http",
+        hostname: "minio",
         port: "9000",
         pathname: "/**",
       },

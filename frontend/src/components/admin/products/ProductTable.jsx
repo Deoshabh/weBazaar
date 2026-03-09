@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 import {
     FiChevronUp,
     FiChevronDown,
@@ -115,12 +115,13 @@ export default function ProductTable({
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                         <div className="relative w-12 h-12 flex-shrink-0">
-                                            <Image
+                                            <SafeImage
                                                 src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.svg'}
                                                 alt={product.name}
                                                 fill
                                                 sizes="48px"
                                                 className="object-cover rounded border border-primary-200"
+                                                fallbackText={product.name}
                                             />
                                         </div>
                                         <div>

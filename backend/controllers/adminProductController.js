@@ -191,6 +191,8 @@ exports.createProduct = async (req, res) => {
       category,
       price,
       comparePrice,
+      gstPercentage,
+      averageDeliveryCost,
       brand,
       sku,
       stock,
@@ -202,6 +204,7 @@ exports.createProduct = async (req, res) => {
       hotspots360,
       featured,
       isActive,
+      careInstructions,
     } = req.body;
 
     // Validate required fields
@@ -340,6 +343,8 @@ exports.createProduct = async (req, res) => {
       category,
       price,
       comparePrice,
+      gstPercentage: gstPercentage || 0,
+      averageDeliveryCost: averageDeliveryCost || 0,
       brand,
       sku,
       stock: stock !== undefined ? stock : 100, // Default to 100 if not provided
@@ -349,6 +354,7 @@ exports.createProduct = async (req, res) => {
       images: parsedImages,
       images360: parsedImages360,
       hotspots360: parsedHotspots360,
+      careInstructions: Array.isArray(careInstructions) ? careInstructions : [],
       featured: featured || false,
       isActive: isActive !== undefined ? isActive : true,
       isOutOfStock: false, // Default to not out of stock

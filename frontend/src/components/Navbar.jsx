@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import anime from 'animejs';
 import Link from 'next/link';
 import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   FiShoppingCart,
@@ -257,12 +258,13 @@ export default function Navbar() {
                               >
                                 {cat.image?.url ? (
                                   <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-linen">
-                                    <Image
+                                    <SafeImage
                                       src={cat.image.url}
                                       alt={cat.name}
                                       width={40}
                                       height={40}
                                       className="w-full h-full object-cover group-hover/cat:scale-110 transition-transform duration-normal"
+                                      fallbackText={cat.name}
                                     />
                                   </div>
                                 ) : (
@@ -339,7 +341,7 @@ export default function Navbar() {
                             className="flex items-center gap-3 p-3 hover:bg-linen transition-colors duration-fast"
                           >
                             <div className="relative w-12 h-12 flex-shrink-0 rounded-md overflow-hidden bg-linen">
-                              <Image src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.svg'} alt={product.name} fill sizes="48px" className="object-cover" />
+                              <SafeImage src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.svg'} alt={product.name} fill sizes="48px" className="object-cover" fallbackText={product.name} />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-body-sm font-medium text-ink truncate">{product.name}</p>

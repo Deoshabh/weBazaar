@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '@/utils/api';
 import { FiSave, FiX, FiRefreshCw, FiSearch, FiAlertCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 
 export default function BulkProductEditor() {
     const [products, setProducts] = useState([]);
@@ -154,16 +154,13 @@ export default function BulkProductEditor() {
                                 >
                                     <td className="px-4 py-2">
                                         <div className="w-10 h-10 relative bg-gray-100 rounded border border-gray-200 overflow-hidden">
-                                            {product.images && product.images[0] ? (
-                                                <Image
-                                                    src={product.images[0].url}
-                                                    alt=""
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex items-center justify-center h-full text-xs text-gray-400">N/A</div>
-                                            )}
+                                            <SafeImage
+                                                src={product.images?.[0]?.url || product.images?.[0] || '/placeholder.svg'}
+                                                alt=""
+                                                fill
+                                                className="object-cover"
+                                                fallbackText={product.name}
+                                            />
                                         </div>
                                     </td>
                                     <td className="px-4 py-2">

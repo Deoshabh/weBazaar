@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 import { categoryAPI, productAPI } from '@/utils/api';
 import { FiGrid } from 'react-icons/fi';
 
@@ -82,21 +82,14 @@ export default function AllCategoriesPage() {
             >
               {/* Category Image */}
               <div className="relative aspect-[4/3] bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden">
-                {category.image?.url ? (
-                  <Image
-                    src={category.image.url}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-white/80 flex items-center justify-center backdrop-blur-sm">
-                      <span className="text-3xl font-bold text-brand-brown">{category.name.charAt(0)}</span>
-                    </div>
-                  </div>
-                )}
+                <SafeImage
+                  src={category.image?.url || 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='}
+                  alt={category.name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  fallbackText={category.name}
+                />
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>

@@ -139,6 +139,9 @@ export default function ProductCard({ product, priority = false }) {
 
   const isProductInWishlist = isInWishlist(product._id);
 
+  const [primarySrc, setPrimarySrc] = useState(primaryImage);
+  const [secondarySrc, setSecondarySrc] = useState(secondaryImage);
+
   return (
     <Link href={`/products/${product.slug}`}>
       <div
@@ -153,7 +156,7 @@ export default function ProductCard({ product, priority = false }) {
         >
           {/* Primary image */}
           <Image
-            src={primaryImage}
+            src={primarySrc}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -163,12 +166,13 @@ export default function ProductCard({ product, priority = false }) {
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
             priority={priority}
+            onError={() => setPrimarySrc(getProductFallbackImage(product))}
           />
 
           {/* Secondary image — crossfade on hover */}
           {secondaryImage && (
             <Image
-              src={secondaryImage}
+              src={secondarySrc || secondaryImage}
               alt={`${product.name} - alternate view`}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -177,6 +181,7 @@ export default function ProductCard({ product, priority = false }) {
               }`}
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
+              onError={() => setSecondarySrc(getProductFallbackImage(product))}
             />
           )}
 
