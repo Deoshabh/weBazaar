@@ -25,9 +25,7 @@ export default function ProductCard({ product, priority = false }) {
   const [imgIndex, setImgIndex] = useState(0);
 
   const themeProducts = settings?.theme?.products || {};
-  const showSaleBadge = themeProducts.showSaleBadge !== false;
   const showRating = themeProducts.showRating !== false;
-  const showInstallment = themeProducts.showInstallmentText !== false;
 
   const rawAverageRating =
     product?.averageRating ?? product?.ratings?.average ?? product?.rating ?? 0;
@@ -160,7 +158,7 @@ export default function ProductCard({ product, priority = false }) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className={`object-cover transition-opacity duration-slow ${
+            className={`object-contain transition-opacity duration-slow ${
               imgIndex === 0 ? 'opacity-100' : 'opacity-0'
             }`}
             placeholder="blur"
@@ -176,7 +174,7 @@ export default function ProductCard({ product, priority = false }) {
               alt={`${product.name} - alternate view`}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={`object-cover transition-opacity duration-slow absolute inset-0 ${
+              className={`object-contain transition-opacity duration-slow absolute inset-0 ${
                 imgIndex === 1 ? 'opacity-100' : 'opacity-0'
               }`}
               placeholder="blur"
@@ -189,9 +187,6 @@ export default function ProductCard({ product, priority = false }) {
           <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex flex-col gap-1.5">
             {!product.inStock && (
               <Badge variant="error" size="sm">OUT OF STOCK</Badge>
-            )}
-            {showSaleBadge && isOnSale && product.inStock && (
-              <Badge variant="gold" size="sm">SALE</Badge>
             )}
             {product.isNew && product.inStock && (
               <Badge variant="info" size="sm">NEW</Badge>
@@ -304,11 +299,6 @@ export default function ProductCard({ product, priority = false }) {
                   </span>
                   <Badge variant="error" size="sm">{discountPercent}% OFF</Badge>
                 </div>
-                {showInstallment && (
-                  <p className="text-caption text-caramel normal-case tracking-normal mt-1">
-                    Pay in 3 interest-free installments
-                  </p>
-                )}
               </div>
             ) : (
               <div className="flex items-center justify-between">
