@@ -291,13 +291,6 @@ export default function ProductCard({ product, priority = false }) {
             </div>
           )}
 
-          {/* Description — desktop only */}
-          {product.description && (
-            <p className="hidden sm:block text-body-sm text-walnut mb-2 line-clamp-1">
-              {product.description}
-            </p>
-          )}
-
           {/* Price */}
           <div className="mt-auto">
             {isOnSale ? (

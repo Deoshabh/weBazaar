@@ -79,7 +79,7 @@ async function initializeBucket() {
       log.info("Storage bucket created", { bucket: MINIO_BUCKET });
     }
 
-    // Public read policy — restricted to product-media/ prefix only
+    // Public read policy — covers all paths in the bucket
     const policy = {
       Version: "2012-10-17",
       Statement: [
@@ -87,7 +87,9 @@ async function initializeBucket() {
           Effect: "Allow",
           Principal: { AWS: ["*"] },
           Action: ["s3:GetObject"],
-          Resource: [`arn:aws:s3:::${MINIO_BUCKET}/product-media/*`],
+          Resource: [
+            `arn:aws:s3:::${MINIO_BUCKET}/*`,
+          ],
         },
       ],
     };
