@@ -190,6 +190,7 @@ exports.createProduct = async (req, res) => {
       shippingAndReturns,
       category,
       price,
+      basePrice,
       comparePrice,
       gstPercentage,
       averageDeliveryCost,
@@ -342,6 +343,7 @@ exports.createProduct = async (req, res) => {
       shippingAndReturns: shippingAndReturns || "",
       category,
       price,
+      basePrice: basePrice || null,
       comparePrice,
       gstPercentage: gstPercentage || 0,
       averageDeliveryCost: averageDeliveryCost || 0,
@@ -404,6 +406,7 @@ exports.updateProduct = async (req, res) => {
       description,
       category,
       price,
+      basePrice,
       comparePrice,
       brand,
       sku,
@@ -446,6 +449,7 @@ exports.updateProduct = async (req, res) => {
     if (description) product.description = description;
     if (category) product.category = category;
     if (price) product.price = price;
+    if (basePrice !== undefined) product.basePrice = basePrice;
     if (comparePrice !== undefined) product.comparePrice = comparePrice;
     if (brand !== undefined) product.brand = brand;
     if (sku !== undefined) product.sku = sku;

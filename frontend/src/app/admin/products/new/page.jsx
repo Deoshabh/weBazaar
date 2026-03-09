@@ -112,9 +112,9 @@ function ProductFormContent() {
         name: product.name || '',
         slug: product.slug || '',
         description: product.description || '',
-        price: product.price || '',
+        price: product.basePrice || product.price || '',
         gstPercentage: product.gstPercentage || '',
-        averageDeliveryCost: product.averageDeliveryCost || '',
+        averageDeliveryCost: product.averageDeliveryCost || '',,
         comparePrice: product.comparePrice || '',
         category: product.category || '',
         brand: product.brand || '',
@@ -428,14 +428,20 @@ function ProductFormContent() {
       // Calculate total stock from sizeStocks
       const totalStock = formData.sizes.reduce((sum, size) => sum + (formData.sizeStocks[size] || 0), 0);
 
+      const basePrice = Number(formData.price);
+      const gstAmount = basePrice * (Number(formData.gstPercentage) || 0) / 100;
+      const deliveryCost = Number(formData.averageDeliveryCost) || 0;
+      const finalPrice = Math.round((basePrice + gstAmount + deliveryCost) * 100) / 100;
+
       const productData = {
         name: formData.name,
         slug: formData.slug,
         description: formData.description,
         category: formData.category,
-        price: Number(formData.price),
+        price: finalPrice,
+        basePrice,
         gstPercentage: Number(formData.gstPercentage) || 0,
-        averageDeliveryCost: Number(formData.averageDeliveryCost) || 0,
+        averageDeliveryCost: deliveryCost,
         images: allImages,
         images360: allImages360,
         hotspots360,

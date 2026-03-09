@@ -54,6 +54,10 @@ const productSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    basePrice: {
+      type: Number,
+      min: 0,
+    },
     gstPercentage: {
       type: Number,
       default: 0,
