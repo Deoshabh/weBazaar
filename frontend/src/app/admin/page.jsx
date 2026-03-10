@@ -237,8 +237,8 @@ export default function AdminDashboard() {
     try {
       const [statsRes, ordersRes, productsRes] = await Promise.allSettled([
         adminAPI.getAdminStats(),
-        adminAPI.getOrders({ limit: 8, sort: '-createdAt' }),
-        adminAPI.getProducts({ limit: 20, sort: 'stock' }),
+        adminAPI.getAllOrders({ limit: 8, sort: '-createdAt' }),
+        adminAPI.getAllProducts({ limit: 20, sort: 'stock' }),
       ]);
       if (statsRes.status === 'fulfilled') {
         setStats(statsRes.value.data);
