@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FiArrowLeft, FiMail, FiPhone } from 'react-icons/fi';
+import { FiArrowLeft, FiMail, FiChevronLeft } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from '@/components/auth/EmailAuth';
 import PhoneAuth from '@/components/auth/PhoneAuth';
@@ -16,7 +16,7 @@ export default function FirebaseLoginPage() {
   const router = useRouter();
   const { updateUser, isAuthenticated, loading, syncWithBackend, loginInProgressRef } = useAuth();
   const { getToken } = useRecaptcha();
-  const [authMethod, setAuthMethod] = useState('email'); // 'email' or 'phone'
+  const [authMethod, setAuthMethod] = useState('phone'); // 'phone' or 'email'
   const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
@@ -160,40 +160,21 @@ export default function FirebaseLoginPage() {
 
           {/* Main Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            {/* Auth Method Tabs */}
-            <div className="grid grid-cols-2 border-b border-primary-200">
-              <button
-                onClick={() => setAuthMethod('email')}
-                className={`
-                  py-4 px-6 font-medium text-sm transition-all flex items-center justify-center gap-2
-                  ${authMethod === 'email'
-                    ? 'bg-brand-brown text-white'
-                    : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
-                  }
-                `}
-              >
-                <FiMail className="w-4 h-4" />
-                Email
-              </button>
-              <button
-                onClick={() => setAuthMethod('phone')}
-                className={`
-                  py-4 px-6 font-medium text-sm transition-all flex items-center justify-center gap-2
-                  ${authMethod === 'phone'
-                    ? 'bg-brand-brown text-white'
-                    : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
-                  }
-                `}
-              >
-                <FiPhone className="w-4 h-4" />
-                Phone
-              </button>
-            </div>
-
             {/* Auth Components */}
             <div className="p-8">
               {authMethod === 'email' ? (
-                <EmailAuth onSuccess={handleFirebaseSuccess} mode="login" />
+                <>
+                  {/* Back to Phone button */}
+                  <button
+                    onClick={() => setAuthMethod('phone')}
+                    aria-label="Return to phone number login"
+                    className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-brand-brown mb-6"
+                  >
+                    <FiChevronLeft className="w-4 h-4" />
+                    Back to Phone Login
+                  </button>
+                  <EmailAuth onSuccess={handleFirebaseSuccess} mode="login" />
+                </>
               ) : (
                 <PhoneAuth onSuccess={handleFirebaseSuccess} />
               )}
@@ -207,6 +188,30 @@ export default function FirebaseLoginPage() {
                   <span className="px-2 bg-white text-primary-500">OR</span>
                 </div>
               </div>
+
+              {/* Continue with Email button (only shown when phone is active) */}
+              {authMethod === 'phone' && (
+                <>
+                  <button
+                    onClick={() => setAuthMethod('email')}
+                    aria-label="Switch to email login"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-primary-200 rounded-lg hover:bg-primary-50 hover:border-primary-300 transition-all mb-4"
+                  >
+                    <FiMail className="w-5 h-5 text-primary-600" />
+                    <span className="font-medium text-primary-900">Continue with Email</span>
+                  </button>
+
+                  {/* Divider */}
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-primary-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="px-2 bg-white text-primary-500">OR</span>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Google Sign-In Button */}
               <button
